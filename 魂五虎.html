@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魂五虎技能程序</title>
+    <!-- SheetJS库用于读取Excel文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #fdbb2d;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #fdbb2d;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            background: #fdbb2d;
+            color: #1a2a6c;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            min-width: 120px;
+        }
+        
+        button:hover {
+            background: #ffcc44;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            min-height: 150px;
+        }
+        
+        .skill-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 80px;
+        }
+        
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .skill-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .skill-type {
+            font-size: 0.8rem;
+            color: #fdbb2d;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .skill-description {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 0 0 10px 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            z-index: 10;
+            transition: all 0.3s ease;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .skill-card.active .skill-description {
+            top: 0;
+        }
+        
+        .delete-confirm {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(200, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .delete-confirm p {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .delete-confirm-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .delete-confirm-buttons button {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            min-width: 60px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #aaa;
+            font-size: 1.2rem;
+            grid-column: 1 / -1;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: rgba(30, 30, 40, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #fdbb2d;
+            padding-bottom: 10px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #fdbb2d;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .skill-category {
+            margin-bottom: 25px;
+        }
+        
+        .category-title {
+            font-size: 1.2rem;
+            color: #fdbb2d;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .skill-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .skill-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .skill-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .skill-item-name {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .skill-item-desc {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #ccc;
+            margin-bottom: 10px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .skill-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .skill-item-actions button {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            min-width: auto;
+        }
+        
+        .add-skill-form {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #fdbb2d;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        /* 文件上传按钮样式 */
+        .file-upload {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .file-upload label {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: inline-block;
+        }
+        
+        .file-upload label:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            color: #fdbb2d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .skills-container {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .skill-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>魂五虎技能程序</h1>
+            <div class="subtitle">点击按钮随机获取技能，点击技能查看描述，双击删除</div>
+        </header>
+        
+        <div class="controls">
+            <button id="startBtn">游戏开始</button>
+            <button id="killBtn">杀</button>
+            <button id="dodgeBtn">闪</button>
+            <button id="peachBtn">桃</button>
+            <button id="wineBtn">酒</button>
+            <button id="resetBtn">重置</button>
+            <button id="addSkillBtn">增加技能</button>
+        </div>
+        
+        <!-- Excel文件上传区域 -->
+        <div class="file-upload">
+            <label for="excelFile">导入Excel技能文件</label>
+            <input type="file" id="excelFile" accept=".xlsx,.xls">
+            <div id="fileInfo" class="file-info">未选择文件</div>
+        </div>
+        
+        <div class="skills-container" id="skillsContainer">
+            <div class="empty-state">点击上方按钮获取技能</div>
+        </div>
+        
+        <footer>
+            魂五虎技能程序 &copy; 2023 - 三国杀OL
+        </footer>
+    </div>
+
+    <!-- 技能管理模态框 -->
+    <div class="modal" id="skillModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">技能管理</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            
+            <div class="skill-category">
+                <h3 class="category-title">初始技能</h3>
+                <div class="skill-list" id="initialSkillsList">
+                    <!-- 初始技能列表 -->
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <h3 class="category-title">杀技能</h3>
+                <div class="skill-list" id="killSkillsList">
+                    <!-- 杀技能列表 -->
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <h3 class="category-title">闪技能</h3>
+                <div class="skill-list" id="dodgeSkillsList">
+                    <!-- 闪技能列表 -->
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <h3 class="category-title">桃技能</h3>
+                <div class="skill-list" id="peachSkillsList">
+                    <!-- 桃技能列表 -->
+                </div>
+            </div>
+            
+            <div class="skill-category">
+                <h3 class="category-title">酒技能</h3>
+                <div class="skill-list" id="wineSkillsList">
+                    <!-- 酒技能列表 -->
+                </div>
+            </div>
+            
+            <div class="add-skill-form">
+                <h3 class="category-title">添加新技能</h3>
+                <div class="form-group">
+                    <label for="skillType">技能类型</label>
+                    <select id="skillType">
+                        <option value="initial">初始技能</option>
+                        <option value="kill">杀技能</option>
+                        <option value="dodge">闪技能</option>
+                        <option value="peach">桃技能</option>
+                        <option value="wine">酒技能</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="skillName">技能名称</label>
+                    <input type="text" id="skillName" placeholder="输入技能名称">
+                </div>
+                <div class="form-group">
+                    <label for="skillDescription">技能描述</label>
+                    <textarea id="skillDescription" placeholder="输入技能描述"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button id="saveSkillBtn">保存技能</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 从表格数据中提取技能信息
+        const skillData = {
+            initial: [
+                { name: "弃袍（极马）", description: "当你使用【杀】指定一个目标后，你可以令其选择一项：1.弃置装备区所有牌；2.本回合非锁定技失效且不能响应此【杀】。" },
+                { name: "追袭（极马）", description: "结束阶段，若所有其他角色均处于你的攻击范围内，你可以视为使用一张【杀】。你计算与装备区内没有坐骑牌的角色距离为1。" },
+                { name: "宝界铁骑", description: "当你使用【杀】指定一个目标后，你可以令其本回合非锁定技失效，然后你判定，若为红色则此【杀】不可被响应，若为黑色则你模两张牌。" },
+                { name: "宝谋铁骑", description: "当你使用【杀】指定目标后，你可以令其本回合非锁定技失效、不能响应此【杀】并与你\"谋弈\":直取敌营：你获得其一张牌；扰阵疲敌：你模两张牌。若你\"谋弈\"成功，你本回合使用【杀】次数+1,你可以弃置一张手牌并获得一张【杀】。" },
+                { name: "新誓仇", description: "出牌阶段每种颜色限一次，你可以将一张牌当无视次数的【杀】使用(两次须指定同一目标),若为红色/黑色，目标需弃置一张装备牌/黑色手牌才能响应。" },
+                { name: "狩骊", description: "游戏开始时，从下家开始所有角色随机使用牌堆中一张坐骑牌。你可以获得一名角色装备区的进攻坐骑牌当【杀】(无视次数)、防御坐骑牌当【闪】使用或打出，当你以此法获得牌前，若其不为你则其本回合非锁定技失效，本回合你与其受到的伤害+1且视为雷电伤害。" },
+                { name: "追命（转马）", description: "当你使用【杀】指定唯一目标后，你可以声明一种颜色并令其可以弃置任意张牌，然后你选择其一张牌并展示之，若为你声明的颜色，此【杀】不计次数、不可被响应且伤害+1。" },
+                { name: "宝谋烈弓", description: "若你没有装备着武器牌，你的【杀】只能当普通【杀】使用。你使用牌时或成为其他角色使用牌的目标后记录花色。当你使用【杀】指定唯一目标后，你可以亮出并获得牌堆顶X张牌(X为记录花色数-1),每有一张记录花色牌，此【杀】伤害+1,目标角色不能使用你记录过的花色的牌响应此【杀】,然后你清除所有记录。" },
+                { name: "斩决（神黄）", description: "出牌阶段开始时，你可以选择一项：1.摸体力值数张牌，本阶段使用的下张【杀】无距离限制且不能被响应；2.摸已损失体力值数张牌，本阶段下次造成伤害后，回复等量的体力。" },
+                { name: "定军（战黄)", description: "战场技，当你的士气变化时，你模一张牌；有角色使用【杀】造成伤害时，你加1点士气，然后若你的士气达到了游戏人数，牌局切换至\"定军山战场\":当一名角色每回合首次使用【杀】时，你可以减2点士气，令其于结算中获得\"烈弓\"。" },
+                { name: "力斩（战黄）", description: "出牌阶段，你可以将至少两张【杀】当造成等量伤害(至多5点)的【杀】使用，目标角色每使用一张【闪】只能抵消1点伤害，然后若此【杀】对其造成伤害，你可以视为对另一名角色使用一张目标唯一的伤害牌。" },
+                { name: "咆哮", description: "锁定技，你使用【杀】无次数限制；当你使用的【杀】被其他角色使用【闪】抵消后，你本回合下一次使用【杀】造成伤害时，此伤害+1。" },
+                { name: "巡使（神张）", description: "锁定技，你的多目标锦囊牌均视为无色的【杀】。你使用无色牌无距离和次数限制且可以多指定任意个目标，然后本局游戏\"神裁\"的限制次数+1（至多为5）。" },
+                { name: "神裁（神张）", description: "你可以将一张无色牌当【杀】使用或打出。出牌阶段限X+1次，你可以令一名其他角色进行判定，若结果不满足以下条件，你令其获得1枚\"死\"标记并根据判定结果描述中包含的内容获得对应标记各1枚：\"体力\"~\"笞\"；\"武器\"~\"杖\"；\"打出\"~\"徒\"；\"距离\"~\"流\"。若如此做，你获得生效的判定牌。" },
+                { name: "暴喝（转张）", description: "出牌阶段限一次，你可以令一名其他角色进行判定且你获得判定牌：体力—\"笞\"； 武器—\"杖\"； 打出—\"徒\"； 距离—\"流\"； 否则其获得1枚\"死\"，然后你获得其区域内一张牌。有\"死\"的角色：手牌上限减少\"死\"数；回合结束时，若其\"死\"数大于存活角色数，其死亡。" },
+                { name: "识略（宝谋赵）", description: "当你发动\"龙胆\"使用或打出一张【杀】或【闪】时，你可以与对方\"谋弈\":偃旗息鼓：获得一张非基本牌。胆壮心雄：\"龙胆\"的X+1。" },
+                { name: "宝龙魂", description: "你可以将至多两张同花色的牌按以下规则使用或打出：♥当【桃】；♦当火【杀】；♣当【闪】；♠当【无懈可击】。若你以此法使用了两张红色牌，则此牌回复值或伤害值+1，且你摸一张牌。若你以此法使用或打出了两张黑色牌，则你获得当前回合角色一张牌。" },
+                { name: "龙临（合赵）", description: "其他角色于其出牌阶段首次使用【杀】指定目标后，你可以弃置一张牌并令此【杀】无效，然后其可以视为对你使用一张【决斗】,当你以此法造成伤害后，其此阶段不能再使用手牌。" },
+                { name: "竭战（幻赵）", description: "其他角色的出牌阶段开始时，若其在你攻击范围内，你可以摸一张牌，令其视为对你使用一张【杀】。" },
+                { name: "宝界武圣", description: "回合开始时，你获得一张红色牌；你可以将一张红色牌当【杀】使用或打出；你使用红色【杀】造成的伤害+1。" },
+                { name: "宝界拖刀", description: "锁定技，当你使用或打出一张【闪】后，你使用的下一张【杀】造成的伤害+1" },
+                { name: "武神（神关）", description: "锁定技，你的♥手牌均只能当【杀】使用或打出；你使用♥【杀】无距离和次数限制、不计入次数限制且多选择所有有\"梦魇\"的角色为目标；你每阶段使用的第一张【杀】不能被响应。" },
+                { name: "宝谋威临", description: "每回合限一次，你可以将一张牌当任意一种【杀】或【酒】使用，此牌目标角色与此牌颜色相同的手牌视为【杀】直到回合结束。累计使用打出7张牌后可以获得一张【水淹七军】。" },
+                { name: "宝谋夺首", description: "锁定技，每回合你：使用的首张红色牌无距离限制；使用的首张基本牌不计入次数限制；使用【杀】指定目标后摸2张牌，首次造成伤害后获得受伤者一张牌。" },
+                { name: "念恩（承关）", description: "你可以将一张牌当任意基本牌使用或打出，然后若你以此法转化后的牌不为红色普通【杀】，则直到此回合结束，你视为拥有\"马术\"且不能发动本技能。" },
+                { name: "龙超绝", description: "你可以将一张红色牌当【杀】使用或打出，你的♦【杀】无距离限制，♥【杀】可以额外指定一个目标。以此法使用的【杀】造成伤害时，你可以令受伤角色弃置装备区所有牌，然后你选择一项执行X次（X为其因此失去的装备数）：1.弃置其一张手牌；2.此伤害+1。" },
+                { name: "九鼎谋义绝", description: "锁定技，准备阶段，其他角色依次选择是否交给你一张牌，然后以此法交给你牌的角色本回合首次受到你使用【杀】造成的伤害时，你防止此伤害。" },
+                { name: "九鼎谋武圣", description: "你可以将一张手牌当任意一种【杀】使用或打出。出牌阶段开始时，你可以令一名其他角色展示所有手牌：本阶段你对其使用的前X张【杀】无次数距离限制且结算后你摸一张牌（X为其展示的红色手牌数）。" },
+                { name: "手杀谋武圣", description: "你可以将一张手牌当任意一种【杀】使用或打出；出牌阶段开始时，你可以选择一名主公以外的其他角色并获得以下效果直至此阶段结束：1.你对其使用【杀】无距离无次数限制；2.你使用【杀】指定其为目标后，你摸一张牌；3.你对其使用5张【杀】后，其不再成为你使用【杀】指定的目标。" },
+                { name: "翊汉（极关）", description: "出牌阶段限一次，你可以展示一名其他角色的一张手牌，然后令其选择一项：1.将此牌交给你；2.令你视为对其使用一张无次数限制的【杀】。" },
+                { name: "除恶（侠关）", description: "当你使用【杀】指定其他角色为唯一目标时，你可以失去1点体力并令目标+X。当你扣减体力后，你摸一张牌并获得1枚\"勇\",然后当前回合结束时你可以弃X枚\"勇\"并视为使用一张伤害+1且目标+X的【杀】(X为你的体力值)。" },
+                { name: "忠义（侠关）", description: "锁定技，你使用【杀】无距离限制。当你使用【杀】后，若此【杀】造成伤害，你选择一项：1.摸等量的牌；2.回复等量的体力。背水：你失去X点体力(X为你本局以此法背水的次数)。" },
+                { name: "撼国（魔关）", description: "每轮开始时，你可以扣置一名上轮未以此法选择过的其他角色所有牌直到本轮结束，本轮内：你对其使用的【杀】对其造成伤害后其死亡；其可以发动无势力限制的\"护驾\"且响应的角色获得你一张牌。" }
+            ],
+            kill: [
+                { name: "弃袍（极马）", description: "当你使用【杀】指定一个目标后，你可以令其选择一项：1.弃置装备区所有牌；2.本回合非锁定技失效且不能响应此【杀】。" },
+                { name: "追袭（极马）", description: "结束阶段，若所有其他角色均处于你的攻击范围内，你可以视为使用一张【杀】。你计算与装备区内没有坐骑牌的角色距离为1。" },
+                { name: "宝界铁骑", description: "当你使用【杀】指定一个目标后，你可以令其本回合非锁定技失效，然后你判定，若为红色则此【杀】不可被响应，若为黑色则你模两张牌。" },
+                { name: "宝谋铁骑", description: "当你使用【杀】指定目标后，你可以令其本回合非锁定技失效、不能响应此【杀】并与你\"谋弈\":直取敌营：你获得其一张牌；扰阵疲敌：你模两张牌。若你\"谋弈\"成功，你本回合使用【杀】次数+1,你可以弃置一张手牌并获得一张【杀】。" },
+                { name: "新誓仇", description: "出牌阶段每种颜色限一次，你可以将一张牌当无视次数的【杀】使用(两次须指定同一目标),若为红色/黑色，目标需弃置一张装备牌/黑色手牌才能响应。" },
+                { name: "狩骊", description: "游戏开始时，从下家开始所有角色随机使用牌堆中一张坐骑牌。你可以获得一名角色装备区的进攻坐骑牌当【杀】(无视次数)、防御坐骑牌当【闪】使用或打出，当你以此法获得牌前，若其不为你则其本回合非锁定技失效，本回合你与其受到的伤害+1且视为雷电伤害。" },
+                { name: "追命（转马）", description: "当你使用【杀】指定唯一目标后，你可以声明一种颜色并令其可以弃置任意张牌，然后你选择其一张牌并展示之，若为你声明的颜色，此【杀】不计次数、不可被响应且伤害+1。" },
+                { name: "宝谋烈弓", description: "若你没有装备着武器牌，你的【杀】只能当普通【杀】使用。你使用牌时或成为其他角色使用牌的目标后记录花色。当你使用【杀】指定唯一目标后，你可以亮出并获得牌堆顶X张牌(X为记录花色数-1),每有一张记录花色牌，此【杀】伤害+1,目标角色不能使用你记录过的花色的牌响应此【杀】,然后你清除所有记录。" },
+                { name: "斩决（神黄）", description: "出牌阶段开始时，你可以选择一项：1.摸体力值数张牌，本阶段使用的下张【杀】无距离限制且不能被响应；2.摸已损失体力值数张牌，本阶段下次造成伤害后，回复等量的体力。" },
+                { name: "定军（战黄)", description: "战场技，当你的士气变化时，你模一张牌；有角色使用【杀】造成伤害时，你加1点士气，然后若你的士气达到了游戏人数，牌局切换至\"定军山战场\":当一名角色每回合首次使用【杀】时，你可以减2点士气，令其于结算中获得\"烈弓\"。" },
+                { name: "力斩（战黄）", description: "出牌阶段，你可以将至少两张【杀】当造成等量伤害(至多5点)的【杀】使用，目标角色每使用一张【闪】只能抵消1点伤害，然后若此【杀】对其造成伤害，你可以视为对另一名角色使用一张目标唯一的伤害牌。" },
+                { name: "咆哮", description: "锁定技，你使用【杀】无次数限制；当你使用的【杀】被其他角色使用【闪】抵消后，你本回合下一次使用【杀】造成伤害时，此伤害+1。" },
+                { name: "巡使（神张）", description: "锁定技，你的多目标锦囊牌均视为无色的【杀】。你使用无色牌无距离和次数限制且可以多指定任意个目标，然后本局游戏\"神裁\"的限制次数+1（至多为5）。" },
+                { name: "神裁（神张）", description: "你可以将一张无色牌当【杀】使用或打出。出牌阶段限X+1次，你可以令一名其他角色进行判定，若结果不满足以下条件，你令其获得1枚\"死\"标记并根据判定结果描述中包含的内容获得对应标记各1枚：\"体力\"~\"笞\"；\"武器\"~\"杖\"；\"打出\"~\"徒\"；\"距离\"~\"流\"。若如此做，你获得生效的判定牌。" },
+                { name: "暴喝（转张）", description: "出牌阶段限一次，你可以令一名其他角色进行判定且你获得判定牌：体力—\"笞\"； 武器—\"杖\"； 打出—\"徒\"； 距离—\"流\"； 否则其获得1枚\"死\"，然后你获得其区域内一张牌。有\"死\"的角色：手牌上限减少\"死\"数；回合结束时，若其\"死\"数大于存活角色数，其死亡。" }
+            ],
+            dodge: [
+                { name: "狩骊", description: "游戏开始时，从下家开始所有角色随机使用牌堆中一张坐骑牌。你可以获得一名角色装备区的进攻坐骑牌当【杀】(无视次数)、防御坐骑牌当【闪】使用或打出，当你以此法获得牌前，若其不为你则其本回合非锁定技失效，本回合你与其受到的伤害+1且视为雷电伤害。" },
+                { name: "力斩（战黄）", description: "出牌阶段，你可以将至少两张【杀】当造成等量伤害(至多5点)的【杀】使用，目标角色每使用一张【闪】只能抵消1点伤害，然后若此【杀】对其造成伤害，你可以视为对另一名角色使用一张目标唯一的伤害牌。" },
+                { name: "咆哮", description: "锁定技，你使用【杀】无次数限制；当你使用的【杀】被其他角色使用【闪】抵消后，你本回合下一次使用【杀】造成伤害时，此伤害+1。" },
+                { name: "识略（宝谋赵）", description: "当你发动\"龙胆\"使用或打出一张【杀】或【闪】时，你可以与对方\"谋弈\":偃旗息鼓：获得一张非基本牌。胆壮心雄：\"龙胆\"的X+1。" },
+                { name: "宝龙魂", description: "你可以将至多两张同花色的牌按以下规则使用或打出：♥当【桃】；♦当火【杀】；♣当【闪】；♠当【无懈可击】。若你以此法使用了两张红色牌，则此牌回复值或伤害值+1，且你摸一张牌。若你以此法使用或打出了两张黑色牌，则你获得当前回合角色一张牌。" },
+                { name: "宝界拖刀", description: "锁定技，当你使用或打出一张【闪】后，你使用的下一张【杀】造成的伤害+1" }
+            ],
+            peach: [
+                { name: "宝龙魂", description: "你可以将至多两张同花色的牌按以下规则使用或打出：♥当【桃】；♦当火【杀】；♣当【闪】；♠当【无懈可击】。若你以此法使用了两张红色牌，则此牌回复值或伤害值+1，且你摸一张牌。若你以此法使用或打出了两张黑色牌，则你获得当前回合角色一张牌。" }
+            ],
+            wine: [
+                { name: "宝谋威临", description: "每回合限一次，你可以将一张牌当任意一种【杀】或【酒】使用，此牌目标角色与此牌颜色相同的手牌视为【杀】直到回合结束。累计使用打出7张牌后可以获得一张【水淹七军】。" }
+            ]
+        };
+
+        // 从localStorage加载技能数据，如果没有则使用默认数据
+        function loadSkillData() {
+            const savedData = localStorage.getItem('soulFiveTigerSkills');
+            if (savedData) {
+                return JSON.parse(savedData);
+            }
+            return skillData;
+        }
+
+        // 保存技能数据到localStorage
+        function saveSkillData(data) {
+            localStorage.setItem('soulFiveTigerSkills', JSON.stringify(data));
+        }
+
+        // 当前使用的技能数据
+        let currentSkillData = loadSkillData();
+
+        // 游戏状态
+        let gameStarted = false;
+        let currentSkills = [];
+        let clickTimers = {};
+
+        // DOM元素
+        const startBtn = document.getElementById('startBtn');
+        const killBtn = document.getElementById('killBtn');
+        const dodgeBtn = document.getElementById('dodgeBtn');
+        const peachBtn = document.getElementById('peachBtn');
+        const wineBtn = document.getElementById('wineBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const addSkillBtn = document.getElementById('addSkillBtn');
+        const skillsContainer = document.getElementById('skillsContainer');
+        const skillModal = document.getElementById('skillModal');
+        const closeModal = document.getElementById('closeModal');
+        const saveSkillBtn = document.getElementById('saveSkillBtn');
+
+        // 获取随机技能
+        function getRandomSkill(type) {
+            const skills = currentSkillData[type];
+            if (skills && skills.length > 0) {
+                const randomIndex = Math.floor(Math.random() * skills.length);
+                return skills[randomIndex];
+            }
+            return null;
+        }
+
+        // 添加技能到展示区
+        function addSkillToDisplay(skill, type) {
+            // 检查是否已达到最大技能数
+            if (currentSkills.length >= 5) {
+                alert("最多只能展示5个技能！");
+                return;
+            }
+            
+            // 检查是否已存在相同技能
+            if (currentSkills.some(s => s.name === skill.name && s.type === type)) {
+                alert("该技能已存在！");
+                return;
+            }
+            
+            // 添加技能到当前技能列表
+            const skillWithType = { ...skill, type };
+            currentSkills.push(skillWithType);
+            
+            // 更新显示
+            updateSkillsDisplay();
+        }
+
+        // 更新技能显示
+        function updateSkillsDisplay() {
+            skillsContainer.innerHTML = '';
+            
+            if (currentSkills.length === 0) {
+                skillsContainer.innerHTML = '<div class="empty-state">点击上方按钮获取技能</div>';
+                return;
+            }
+            
+            currentSkills.forEach(skill => {
+                const skillCard = document.createElement('div');
+                skillCard.className = 'skill-card';
+                skillCard.dataset.name = skill.name;
+                skillCard.dataset.type = skill.type;
+                
+                const typeText = {
+                    'initial': '初始',
+                    'kill': '杀',
+                    'dodge': '闪',
+                    'peach': '桃',
+                    'wine': '酒'
+                };
+                
+                skillCard.innerHTML = `
+                    <div class="skill-name">${skill.name}</div>
+                    <div class="skill-type">${typeText[skill.type]}</div>
+                    <div class="skill-description">${skill.description}</div>
+                `;
+                
+                // 点击事件 - 显示/隐藏描述
+                skillCard.addEventListener('click', function(e) {
+                    // 如果已经显示了删除确认，则不处理点击事件
+                    if (this.querySelector('.delete-confirm')) {
+                        return;
+                    }
+                    
+                    const key = skill.name + skill.type;
+                    
+                    // 如果已经有计时器，说明是双击
+                    if (clickTimers[key]) {
+                        clearTimeout(clickTimers[key]);
+                        delete clickTimers[key];
+                        showDeleteConfirm(this, skill.name, skill.type);
+                    } else {
+                        // 第一次点击，显示描述
+                        this.classList.toggle('active');
+                        
+                        // 设置计时器，如果一定时间内没有再次点击，则清除计时器
+                        clickTimers[key] = setTimeout(() => {
+                            delete clickTimers[key];
+                        }, 500);
+                    }
+                });
+                
+                skillsContainer.appendChild(skillCard);
+            });
+        }
+
+        // 显示删除确认
+        function showDeleteConfirm(card, name, type) {
+            // 先隐藏描述
+            card.classList.remove('active');
+            
+            const deleteConfirm = document.createElement('div');
+            deleteConfirm.className = 'delete-confirm';
+            deleteConfirm.innerHTML = `
+                <p>是否删除本技能？</p>
+                <div class="delete-confirm-buttons">
+                    <button class="confirm-delete">确认</button>
+                    <button class="cancel-delete">取消</button>
+                </div>
+            `;
+            
+            card.appendChild(deleteConfirm);
+            
+            // 确认删除
+            deleteConfirm.querySelector('.confirm-delete').addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeSkill(name, type);
+            });
+            
+            // 取消删除
+            deleteConfirm.querySelector('.cancel-delete').addEventListener('click', function(e) {
+                e.stopPropagation();
+                deleteConfirm.remove();
+            });
+        }
+
+        // 移除技能
+        function removeSkill(name, type) {
+            currentSkills = currentSkills.filter(skill => !(skill.name === name && skill.type === type));
+            delete clickTimers[name + type];
+            updateSkillsDisplay();
+        }
+
+        // 重置所有技能
+        function resetSkills() {
+            currentSkills = [];
+            clickTimers = {};
+            gameStarted = false;
+            startBtn.disabled = false;
+            updateSkillsDisplay();
+        }
+
+        // 打开技能管理模态框
+        function openSkillModal() {
+            // 更新技能列表显示
+            updateSkillLists();
+            skillModal.style.display = 'flex';
+        }
+
+        // 关闭技能管理模态框
+        function closeSkillModal() {
+            skillModal.style.display = 'none';
+        }
+
+        // 更新技能列表显示
+        function updateSkillLists() {
+            const types = ['initial', 'kill', 'dodge', 'peach', 'wine'];
+            const typeNames = {
+                'initial': '初始技能',
+                'kill': '杀技能',
+                'dodge': '闪技能',
+                'peach': '桃技能',
+                'wine': '酒技能'
+            };
+            
+            types.forEach(type => {
+                const listElement = document.getElementById(`${type}SkillsList`);
+                listElement.innerHTML = '';
+                
+                if (currentSkillData[type] && currentSkillData[type].length > 0) {
+                    currentSkillData[type].forEach((skill, index) => {
+                        const skillItem = document.createElement('div');
+                        skillItem.className = 'skill-item';
+                        
+                        skillItem.innerHTML = `
+                            <div class="skill-item-header">
+                                <div class="skill-item-name">${skill.name}</div>
+                                <div class="skill-item-actions">
+                                    <button class="delete-skill" data-type="${type}" data-index="${index}">删除</button>
+                                </div>
+                            </div>
+                            <div class="skill-item-desc">${skill.description}</div>
+                        `;
+                        
+                        listElement.appendChild(skillItem);
+                    });
+                } else {
+                    listElement.innerHTML = '<div style="color: #aaa; text-align: center; padding: 10px;">暂无技能</div>';
+                }
+            });
+            
+            // 添加删除按钮事件
+            document.querySelectorAll('.delete-skill').forEach(button => {
+                button.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const index = parseInt(this.dataset.index);
+                    
+                    if (confirm(`确定要删除技能 "${currentSkillData[type][index].name}" 吗？`)) {
+                        currentSkillData[type].splice(index, 1);
+                        saveSkillData(currentSkillData);
+                        updateSkillLists();
+                    }
+                });
+            });
+        }
+
+        // 保存新技能
+        function saveNewSkill() {
+            const type = document.getElementById('skillType').value;
+            const name = document.getElementById('skillName').value.trim();
+            const description = document.getElementById('skillDescription').value.trim();
+            
+            if (!name) {
+                alert('请输入技能名称！');
+                return;
+            }
+            
+            if (!description) {
+                alert('请输入技能描述！');
+                return;
+            }
+            
+            // 检查是否已存在同名技能
+            if (currentSkillData[type].some(skill => skill.name === name)) {
+                alert('该技能名称已存在！');
+                return;
+            }
+            
+            // 添加新技能
+            currentSkillData[type].push({ name, description });
+            saveSkillData(currentSkillData);
+            
+            // 更新显示
+            updateSkillLists();
+            
+            // 清空表单
+            document.getElementById('skillName').value = '';
+            document.getElementById('skillDescription').value = '';
+            
+            alert('技能添加成功！');
+        }
+        
+        // 从Excel文件导入技能
+        function importSkillsFromExcel(file) {
+            const fileInfo = document.getElementById('fileInfo');
+            fileInfo.textContent = `正在处理文件: ${file.name}...`;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // 获取第一个工作表
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // 将工作表转换为JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    // 检查数据格式是否正确（至少需要标题行和一行数据）
+                    if (jsonData.length < 2) {
+                        alert('Excel文件格式不正确，没有找到足够的数据行！');
+                        fileInfo.textContent = '文件处理失败';
+                        return;
+                    }
+                    
+                    // 标准化标题行，去除空格和特殊字符，转换为小写
+                    const headers = jsonData[0].map(header => 
+                        String(header).trim().replace(/\s+/g, '').toLowerCase()
+                    );
+                    
+                    // 原始标题行，用于显示调试信息
+                    const originalHeaders = jsonData[0];
+                    console.log('原始标题行:', originalHeaders);
+                    console.log('标准化后标题行:', headers);
+                    
+                    let importedCount = 0;
+                    
+                    // 改进的列映射，增加多种可能的列名变体
+                    const columnMappings = {
+                        'initial': {
+                            namePatterns: ['初始技能', '初始', 'initial'],
+                            descPatterns: ['技能描述', '描述', 'initialdesc']
+                        },
+                        'kill': {
+                            namePatterns: ['杀技能', '杀', 'kill'],
+                            descPatterns: ['杀描述', 'killdesc']
+                        },
+                        'dodge': {
+                            namePatterns: ['闪技能', '闪', 'dodge'],
+                            descPatterns: ['闪描述', 'dodgedesc']
+                        },
+                        'peach': {
+                            namePatterns: ['桃技能', '桃', 'peach'],
+                            descPatterns: ['桃描述', 'peachdesc']
+                        },
+                        'wine': {
+                            namePatterns: ['酒技能', '酒', 'wine'],
+                            descPatterns: ['酒描述', 'winedesc']
+                        }
+                    };
+                    
+                    // 查找列索引的辅助函数
+                    function findColumnIndex(patterns) {
+                        for (let i = 0; i < headers.length; i++) {
+                            const header = headers[i];
+                            for (const pattern of patterns) {
+                                if (header.includes(pattern.toLowerCase())) {
+                                    return i;
+                                }
+                            }
+                        }
+                        return -1;
+                    }
+                    
+                    // 先找到每类技能的列索引
+                    const columnIndexes = {};
+                    for (const [skillType, patterns] of Object.entries(columnMappings)) {
+                        const nameIndex = findColumnIndex(patterns.namePatterns);
+                        const descIndex = findColumnIndex(patterns.descPatterns);
+                        
+                        if (nameIndex !== -1 && descIndex !== -1) {
+                            columnIndexes[skillType] = { nameIndex, descIndex };
+                            console.log(`找到${skillType}列: 名称列${nameIndex}, 描述列${descIndex}`);
+                        } else {
+                            console.log(`未找到${skillType}的所有必要列`);
+                        }
+                    }
+                    
+                    // 遍历数据行（从第二行开始）
+                    for (let i = 1; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        
+                        // 处理每类技能
+                        for (const [skillType, indexes] of Object.entries(columnIndexes)) {
+                            const { nameIndex, descIndex } = indexes;
+                            
+                            // 获取技能名称和描述，确保转换为字符串
+                            let name = row[nameIndex];
+                            let description = row[descIndex];
+                            
+                            // 转换为字符串并去除首尾空格
+                            if (name !== undefined && name !== null) {
+                                name = String(name).trim();
+                            }
+                            if (description !== undefined && description !== null) {
+                                description = String(description).trim();
+                            }
+                            
+                            // 确保名称和描述都不为空
+                            if (name && description && name.length > 0 && description.length > 0) {
+                                // 检查是否已存在同名技能
+                                if (!currentSkillData[skillType].some(skill => 
+                                    skill.name.trim() === name
+                                )) {
+                                    currentSkillData[skillType].push({ 
+                                        name: name, 
+                                        description: description 
+                                    });
+                                    importedCount++;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 显示导入结果
+                    if (importedCount > 0) {
+                        // 保存导入的技能数据
+                        saveSkillData(currentSkillData);
+                        
+                        fileInfo.textContent = `成功导入 ${importedCount} 个技能`;
+                        alert(`成功导入 ${importedCount} 个技能！`);
+                        
+                        // 如果当前打开了技能管理模态框，则更新显示
+                        if (skillModal.style.display === 'flex') {
+                            updateSkillLists();
+                        }
+                    } else {
+                        // 导入失败但不是因为错误，可能是没有找到匹配的列或没有新数据
+                        let errorMsg = '未导入任何技能。可能的原因：';
+                        const missingTypes = [];
+                        
+                        for (const skillType of Object.keys(columnMappings)) {
+                            if (!columnIndexes[skillType]) {
+                                missingTypes.push(skillType);
+                            }
+                        }
+                        
+                        if (missingTypes.length > 0) {
+                            errorMsg += ` 未找到${missingTypes.join('、')}的列；`;
+                        }
+                        
+                        errorMsg += ' 或文件中没有新的技能数据。';
+                        
+                        console.log(errorMsg);
+                        fileInfo.textContent = `处理完成，但未导入任何技能。`;
+                        
+                        // 显示调试信息，帮助用户了解问题
+                        alert(`导入完成但未找到有效数据。请检查Excel文件格式。\n\n原始标题行: ${originalHeaders.join(', ')}`);
+                    }
+                    
+                } catch (error) {
+                    console.error('导入Excel文件失败:', error);
+                    alert(`导入Excel文件失败: ${error.message}\n请检查文件格式是否正确！`);
+                    fileInfo.textContent = '文件处理失败';
+                    
+                    // 如果有原始标题行信息，也在控制台输出
+                    if (typeof originalHeaders !== 'undefined') {
+                        console.log('文件的原始标题行:', originalHeaders);
+                    }
+                }
+            };
+            
+            reader.onerror = function() {
+                alert('读取文件失败！');
+                fileInfo.textContent = '文件读取失败';
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 事件监听
+        startBtn.addEventListener('click', function() {
+            if (!gameStarted) {
+                const skill = getRandomSkill('initial');
+                if (skill) {
+                    addSkillToDisplay(skill, 'initial');
+                    gameStarted = true;
+                    this.disabled = true;
+                }
+            }
+        });
+        
+        // Excel文件上传事件
+        document.getElementById('excelFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    importSkillsFromExcel(file);
+                } else {
+                    alert('请上传Excel格式的文件（.xlsx或.xls）！');
+                    document.getElementById('fileInfo').textContent = '文件格式不正确';
+                    this.value = '';
+                }
+            }
+        });
+
+        killBtn.addEventListener('click', function() {
+            const skill = getRandomSkill('kill');
+            if (skill) {
+                addSkillToDisplay(skill, 'kill');
+            }
+        });
+
+        dodgeBtn.addEventListener('click', function() {
+            const skill = getRandomSkill('dodge');
+            if (skill) {
+                addSkillToDisplay(skill, 'dodge');
+            }
+        });
+
+        peachBtn.addEventListener('click', function() {
+            const skill = getRandomSkill('peach');
+            if (skill) {
+                addSkillToDisplay(skill, 'peach');
+            }
+        });
+
+        wineBtn.addEventListener('click', function() {
+            const skill = getRandomSkill('wine');
+            if (skill) {
+                addSkillToDisplay(skill, 'wine');
+            }
+        });
+
+        resetBtn.addEventListener('click', resetSkills);
+        addSkillBtn.addEventListener('click', openSkillModal);
+        closeModal.addEventListener('click', closeSkillModal);
+        saveSkillBtn.addEventListener('click', saveNewSkill);
+
+        // 初始化显示
+        updateSkillsDisplay();
+    </script>
+</body>
+</html>

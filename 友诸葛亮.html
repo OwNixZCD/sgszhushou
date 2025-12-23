@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>友诸葛亮 - 卧龙演策</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a3c7c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffcc00;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+            font-size: 24px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ccc;
+            font-size: 14px;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff9a00, #ff6a00);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 106, 0, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 106, 0, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #4a6fa5, #2a4d7c);
+            box-shadow: 0 5px 15px rgba(42, 77, 124, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 8px 20px rgba(42, 77, 124, 0.6);
+        }
+        
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .option-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        
+        .option {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option.active {
+            background: rgba(255, 204, 0, 0.3);
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+        
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .card {
+            width: 80px;
+            height: 100px;
+            background: white;
+            border-radius: 8px;
+            margin: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #333;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .card.selected {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card.red {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: #a00;
+        }
+        
+        .card.black {
+            background: linear-gradient(135deg, #4a4a4a, #6a6a6a);
+            color: #fff;
+        }
+        
+        .card.basic {
+            background: linear-gradient(135deg, #4cd964, #5cd97e);
+            color: #fff;
+        }
+        
+        .card.tactic {
+            background: linear-gradient(135deg, #5ac8fa, #7ac8fa);
+            color: #fff;
+        }
+        
+        .card.equip {
+            background: linear-gradient(135deg, #ff9500, #ffad33);
+            color: #fff;
+        }
+        
+        .card.green {
+            background: linear-gradient(135deg, #4cd964, #5cd97e);
+            color: #fff;
+        }
+        
+        .card.white {
+            background: white;
+            color: #333;
+        }
+        
+        .card.current {
+            box-shadow: 0 0 0 3px #ffcc00;
+        }
+        
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        
+        .result-item {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .friend-options {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        
+        .friend-option {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .friend-option.active {
+            background: rgba(0, 200, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+        }
+        
+        .reset-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ff3b30;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .confirm-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .confirm-btn {
+            flex: 1;
+            margin: 0 5px;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .confirm-btn.yes {
+            background: linear-gradient(135deg, #4cd964, #5cd97e);
+        }
+        
+        .confirm-btn.no {
+            background: linear-gradient(135deg, #ff3b30, #ff5e5e);
+        }
+        
+        .confirm-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+        
+        .selection-options {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        
+        .selection-option {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .selection-option.active {
+            background: rgba(255, 204, 0, 0.5);
+        }
+        
+        .current-card {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 18px;
+            min-height: 30px;
+        }
+        
+        .progress {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .friend-selection {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        
+        .friend-selection-title {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #ffcc00;
+        }
+        
+        .reset-confirm {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .reset-confirm-title {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #ff6b6b;
+        }
+        
+        .warning {
+            color: #ff6b6b;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .version-selection {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        
+        .version-selection-title {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>友诸葛亮</h1>
+        <div class="subtitle">不执行则检索一张锦囊牌</div>
+        
+        <button id="mainBtn" class="btn">执行卧龙演策</button>
+        
+        <div class="friend-options">
+            <div id="resetOption" class="friend-option">
+                重置游戏
+            </div>
+        </div>
+        
+        <div id="friendSelectionSection" class="hidden">
+            <div class="friend-selection">
+                <div class="friend-selection-title">选择友军（仅首次选择）</div>
+                <div class="option-container">
+                    <div id="selectPangtong" class="option">友庞统</div>
+                    <div id="selectXushu" class="option">友徐庶</div>
+                    <div id="selectNone" class="option">无友军</div>
+                    <div id="selectBoth" class="option">两者皆有</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="versionSelectionSection" class="hidden">
+            <div class="version-selection">
+                <div class="version-selection-title">是否为初版？</div>
+                <div class="option-container">
+                    <div id="selectInitialVersion" class="option">是（初版）</div>
+                    <div id="selectRevisedVersion" class="option">否（修订版）</div>
+                </div>
+                <div class="subtitle">修订版规则：展示牌数小于4时，全对不增加方遒次数</div>
+            </div>
+        </div>
+        
+        <div id="resetConfirmSection" class="hidden">
+            <div class="reset-confirm">
+                <div class="reset-confirm-title">确认重置游戏？</div>
+                <div class="subtitle">这将清除所有进度和友军选择</div>
+                <div class="confirm-buttons">
+                    <div id="confirmReset" class="confirm-btn yes">确认重置</div>
+                    <div id="cancelReset" class="confirm-btn no">取消</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="selectionSection" class="hidden">
+            <div class="option-container">
+                <div id="colorOption" class="option">颜色</div>
+                <div id="typeOption" class="option">类型</div>
+            </div>
+            
+            <div id="colorSection" class="hidden">
+                <div class="card-container" id="colorCards"></div>
+                <div class="selection-options">
+                    <div class="selection-option" data-value="red">红色</div>
+                    <div class="selection-option" data-value="black">黑色</div>
+                </div>
+                <div class="warning" id="colorWarning">请先选择颜色选项，然后为所有卡片选择颜色</div>
+            </div>
+            
+            <div id="typeSection" class="hidden">
+                <div class="card-container" id="typeCards"></div>
+                <div class="selection-options">
+                    <div class="selection-option" data-value="basic">基本</div>
+                    <div class="selection-option" data-value="tactic">锦囊</div>
+                    <div class="selection-option" data-value="equip">装备</div>
+                </div>
+                <div class="warning" id="typeWarning">请先选择类型选项，然后为所有卡片选择类型</div>
+            </div>
+            
+            <button id="confirmSelection" class="btn btn-secondary" disabled>演策准备完毕</button>
+        </div>
+        
+        <div id="executionSection" class="hidden">
+            <div class="status">
+                方遒剩余次数: <span id="fangqiuCount">1</span>
+            </div>
+            
+            <div id="fangqiuPrompt" class="hidden">
+                <div class="subtitle">是否发动【方遒】？</div>
+                <div class="confirm-buttons">
+                    <div id="useFangqiu" class="confirm-btn yes">是</div>
+                    <div id="skipFangqiu" class="confirm-btn no">否</div>
+                </div>
+            </div>
+            
+            <div id="cardDisplaySection" class="hidden">
+                <div class="progress" id="progressText">进度: 0/0</div>
+                <div class="card-container" id="displayCards"></div>
+                
+                <div id="normalExecution" class="hidden">
+                    <button id="showNextCard" class="btn">展示</button>
+                    
+                    <div class="confirm-buttons">
+                        <div id="confirmCorrect" class="confirm-btn yes">√</div>
+                        <div id="confirmWrong" class="confirm-btn no">×</div>
+                    </div>
+                </div>
+                
+                <div id="fangqiuExecution" class="hidden">
+                    <div class="subtitle">方遒状态下请直接判断正误</div>
+                    <div class="confirm-buttons">
+                        <div id="fangqiuConfirmCorrect" class="confirm-btn yes">√</div>
+                        <div id="fangqiuConfirmWrong" class="confirm-btn no">×</div>
+                    </div>
+                </div>
+                
+                <button id="checkResult" class="btn" disabled>检测演策结果</button>
+            </div>
+        </div>
+        
+        <div id="resultSection" class="hidden">
+            <div class="result-container" id="resultContent"></div>
+            <button id="returnToMain" class="btn">返回</button>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            currentStep: 'main', // main, friendSelection, versionSelection, selection, execution, result
+            selectedOption: null, // 'color' or 'type'
+            cardCount: 3,
+            selectedCards: [],
+            displayCards: [],
+            correctAnswers: [],
+            fangqiuCount: 1,
+            friendPangtong: false,
+            friendXushu: false,
+            friendSelected: false, // 是否已经选择过友军
+            versionSelected: false, // 是否已经选择过版本
+            isInitialVersion: true, // 是否为初版
+            useFangqiu: false,
+            nextCardCountChange: 0,
+            currentSelectionValue: null,
+            currentCardIndex: -1, // 当前展示的卡片索引
+            confirmedCards: 0 // 已确认的卡片数量
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 主按钮点击事件
+            document.getElementById('mainBtn').addEventListener('click', function() {
+                if (!gameState.friendSelected) {
+                    // 首次执行，需要选择友军
+                    startFriendSelection();
+                } else if (!gameState.versionSelected) {
+                    // 已经选择过友军，但未选择版本
+                    startVersionSelection();
+                } else {
+                    // 已经选择过友军和版本，直接开始选择
+                    startSelection();
+                }
+            });
+            
+            // 重置按钮点击事件
+            document.getElementById('resetOption').addEventListener('click', function() {
+                showResetConfirm();
+            });
+            
+            // 重置确认事件
+            document.getElementById('confirmReset').addEventListener('click', function() {
+                resetGame();
+            });
+            
+            document.getElementById('cancelReset').addEventListener('click', function() {
+                hideResetConfirm();
+            });
+            
+            // 友军选择事件
+            document.getElementById('selectPangtong').addEventListener('click', function() {
+                selectFriend('pangtong');
+            });
+            
+            document.getElementById('selectXushu').addEventListener('click', function() {
+                selectFriend('xushu');
+            });
+            
+            document.getElementById('selectNone').addEventListener('click', function() {
+                selectFriend('none');
+            });
+            
+            document.getElementById('selectBoth').addEventListener('click', function() {
+                selectFriend('both');
+            });
+            
+            // 版本选择事件
+            document.getElementById('selectInitialVersion').addEventListener('click', function() {
+                selectVersion(true);
+            });
+            
+            document.getElementById('selectRevisedVersion').addEventListener('click', function() {
+                selectVersion(false);
+            });
+            
+            // 选项点击事件
+            document.getElementById('colorOption').addEventListener('click', function() {
+                selectOption('color');
+            });
+            
+            document.getElementById('typeOption').addEventListener('click', function() {
+                selectOption('type');
+            });
+            
+            // 选择选项点击事件
+            document.querySelectorAll('.selection-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // 清除其他选项的激活状态
+                    this.parentElement.querySelectorAll('.selection-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // 激活当前选项
+                    this.classList.add('active');
+                    
+                    // 保存当前选择的值
+                    gameState.currentSelectionValue = this.dataset.value;
+                    
+                    // 更新确认按钮状态
+                    updateConfirmButtonState();
+                });
+            });
+            
+            // 确认选择按钮
+            document.getElementById('confirmSelection').addEventListener('click', function() {
+                prepareExecution();
+            });
+            
+            // 方遒选择
+            document.getElementById('useFangqiu').addEventListener('click', function() {
+                if (gameState.fangqiuCount > 0) {
+                    gameState.useFangqiu = true;
+                    gameState.fangqiuCount--;
+                    startExecution();
+                }
+            });
+            
+            document.getElementById('skipFangqiu').addEventListener('click', function() {
+                gameState.useFangqiu = false;
+                startExecution();
+            });
+            
+            // 展示按钮点击事件
+            document.getElementById('showNextCard').addEventListener('click', function() {
+                showNextCard();
+            });
+            
+            // 正常模式确认正确/错误按钮
+            document.getElementById('confirmCorrect').addEventListener('click', function() {
+                confirmCurrentCard(true);
+            });
+            
+            document.getElementById('confirmWrong').addEventListener('click', function() {
+                confirmCurrentCard(false);
+            });
+            
+            // 方遒模式确认正确/错误按钮
+            document.getElementById('fangqiuConfirmCorrect').addEventListener('click', function() {
+                fangqiuConfirmCurrentCard(true);
+            });
+            
+            document.getElementById('fangqiuConfirmWrong').addEventListener('click', function() {
+                fangqiuConfirmCurrentCard(false);
+            });
+            
+            // 检测结果按钮
+            document.getElementById('checkResult').addEventListener('click', function() {
+                checkResults();
+            });
+            
+            // 返回按钮
+            document.getElementById('returnToMain').addEventListener('click', function() {
+                resetToMain();
+            });
+        });
+
+        // 显示重置确认
+        function showResetConfirm() {
+            document.getElementById('resetConfirmSection').classList.remove('hidden');
+        }
+
+        // 隐藏重置确认
+        function hideResetConfirm() {
+            document.getElementById('resetConfirmSection').classList.add('hidden');
+        }
+
+        // 开始友军选择
+        function startFriendSelection() {
+            gameState.currentStep = 'friendSelection';
+            document.getElementById('friendSelectionSection').classList.remove('hidden');
+            document.getElementById('mainBtn').classList.add('hidden');
+        }
+
+        // 选择友军
+        function selectFriend(friend) {
+            gameState.friendSelected = true;
+            
+            if (friend === 'pangtong') {
+                gameState.friendPangtong = true;
+                gameState.friendXushu = false;
+                gameState.cardCount = 4;
+            } else if (friend === 'xushu') {
+                gameState.friendPangtong = false;
+                gameState.friendXushu = true;
+            } else if (friend === 'both') {
+                gameState.friendPangtong = true;
+                gameState.friendXushu = true;
+                gameState.cardCount = 4;
+            } else {
+                gameState.friendPangtong = false;
+                gameState.friendXushu = false;
+            }
+            
+            document.getElementById('friendSelectionSection').classList.add('hidden');
+            startVersionSelection();
+        }
+
+        // 开始版本选择
+        function startVersionSelection() {
+            gameState.currentStep = 'versionSelection';
+            document.getElementById('versionSelectionSection').classList.remove('hidden');
+            document.getElementById('mainBtn').classList.add('hidden');
+        }
+
+        // 选择版本
+        function selectVersion(isInitialVersion) {
+            gameState.versionSelected = true;
+            gameState.isInitialVersion = isInitialVersion;
+            
+            document.getElementById('versionSelectionSection').classList.add('hidden');
+            startSelection();
+        }
+
+        // 开始选择
+        function startSelection() {
+            gameState.currentStep = 'selection';
+            document.getElementById('selectionSection').classList.remove('hidden');
+            document.getElementById('mainBtn').classList.add('hidden');
+            
+            // 应用上次的结果
+            gameState.cardCount = Math.min(7, Math.max(1, gameState.cardCount + gameState.nextCardCountChange));
+            gameState.nextCardCountChange = 0;
+            
+            // 重置选择
+            gameState.selectedOption = null;
+            gameState.selectedCards = [];
+            gameState.currentSelectionValue = null;
+            document.getElementById('colorOption').classList.remove('active');
+            document.getElementById('typeOption').classList.remove('active');
+            document.getElementById('colorSection').classList.add('hidden');
+            document.getElementById('typeSection').classList.add('hidden');
+            
+            // 重置选择选项
+            document.querySelectorAll('.selection-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            // 禁用确认按钮
+            document.getElementById('confirmSelection').disabled = true;
+        }
+
+        // 选择选项
+        function selectOption(option) {
+            gameState.selectedOption = option;
+            
+            // 更新选项UI
+            document.getElementById('colorOption').classList.toggle('active', option === 'color');
+            document.getElementById('typeOption').classList.toggle('active', option === 'type');
+            
+            // 显示对应的卡片选择区域
+            if (option === 'color') {
+                document.getElementById('colorSection').classList.remove('hidden');
+                document.getElementById('typeSection').classList.add('hidden');
+                createColorCards();
+            } else {
+                document.getElementById('typeSection').classList.remove('hidden');
+                document.getElementById('colorSection').classList.add('hidden');
+                createTypeCards();
+            }
+            
+            // 更新确认按钮状态
+            updateConfirmButtonState();
+        }
+
+        // 创建颜色卡片
+        function createColorCards() {
+            const container = document.getElementById('colorCards');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < gameState.cardCount; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.textContent = '?';
+                card.dataset.index = i;
+                
+                card.addEventListener('click', function() {
+                    if (!gameState.currentSelectionValue) {
+                        alert('请先选择一个颜色选项！');
+                        return;
+                    }
+                    
+                    const index = parseInt(this.dataset.index);
+                    if (gameState.selectedCards[index]) {
+                        // 已经选择过，清除选择
+                        gameState.selectedCards[index] = null;
+                        this.classList.remove('selected', 'red', 'black');
+                        this.textContent = '?';
+                    } else {
+                        // 设置选择
+                        gameState.selectedCards[index] = gameState.currentSelectionValue;
+                        this.classList.add('selected', gameState.currentSelectionValue);
+                        this.textContent = gameState.currentSelectionValue === 'red' ? '红色' : '黑色';
+                    }
+                    
+                    // 更新确认按钮状态
+                    updateConfirmButtonState();
+                });
+                
+                container.appendChild(card);
+                gameState.selectedCards[i] = null;
+            }
+        }
+
+        // 创建类型卡片
+        function createTypeCards() {
+            const container = document.getElementById('typeCards');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < gameState.cardCount; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.textContent = '?';
+                card.dataset.index = i;
+                
+                card.addEventListener('click', function() {
+                    if (!gameState.currentSelectionValue) {
+                        alert('请先选择一个类型选项！');
+                        return;
+                    }
+                    
+                    const index = parseInt(this.dataset.index);
+                    if (gameState.selectedCards[index]) {
+                        // 已经选择过，清除选择
+                        gameState.selectedCards[index] = null;
+                        this.classList.remove('selected', 'basic', 'tactic', 'equip');
+                        this.textContent = '?';
+                    } else {
+                        // 设置选择
+                        gameState.selectedCards[index] = gameState.currentSelectionValue;
+                        this.classList.add('selected', gameState.currentSelectionValue);
+                        
+                        if (gameState.currentSelectionValue === 'basic') {
+                            this.textContent = '基本';
+                        } else if (gameState.currentSelectionValue === 'tactic') {
+                            this.textContent = '锦囊';
+                        } else if (gameState.currentSelectionValue === 'equip') {
+                            this.textContent = '装备';
+                        }
+                    }
+                    
+                    // 更新确认按钮状态
+                    updateConfirmButtonState();
+                });
+                
+                container.appendChild(card);
+                gameState.selectedCards[i] = null;
+            }
+        }
+
+        // 更新确认按钮状态
+        function updateConfirmButtonState() {
+            const confirmBtn = document.getElementById('confirmSelection');
+            
+            // 检查是否选择了选项类型
+            const hasSelectedOption = gameState.selectedOption !== null;
+            
+            // 检查是否所有卡片都已选择
+            const allSelected = gameState.selectedCards.every(card => card !== null);
+            
+            // 启用或禁用确认按钮
+            confirmBtn.disabled = !(hasSelectedOption && allSelected);
+        }
+
+        // 准备执行
+        function prepareExecution() {
+            // 检查是否选择了选项类型
+            if (!gameState.selectedOption) {
+                alert('请先选择颜色或类型选项！');
+                return;
+            }
+            
+            // 检查是否所有卡片都已选择
+            const allSelected = gameState.selectedCards.every(card => card !== null);
+            if (!allSelected) {
+                alert('请为所有卡片选择内容！');
+                return;
+            }
+            
+            gameState.currentStep = 'execution';
+            document.getElementById('selectionSection').classList.add('hidden');
+            document.getElementById('executionSection').classList.remove('hidden');
+            
+            // 创建显示卡片
+            gameState.displayCards = gameState.selectedCards.map(type => ({
+                type: type,
+                checked: false,
+                userChoice: null,
+                revealed: false
+            }));
+            
+            // 重置展示状态
+            gameState.currentCardIndex = -1;
+            gameState.confirmedCards = 0;
+            
+            // 显示方遒提示（如果有次数）
+            if (gameState.fangqiuCount > 0) {
+                document.getElementById('fangqiuPrompt').classList.remove('hidden');
+                document.getElementById('cardDisplaySection').classList.add('hidden');
+            } else {
+                document.getElementById('fangqiuPrompt').classList.add('hidden');
+                startExecution();
+            }
+            
+            // 更新方遒次数显示
+            document.getElementById('fangqiuCount').textContent = gameState.fangqiuCount;
+        }
+
+        // 开始执行
+        function startExecution() {
+            document.getElementById('fangqiuPrompt').classList.add('hidden');
+            document.getElementById('cardDisplaySection').classList.remove('hidden');
+            
+            // 重置检查状态
+            gameState.displayCards.forEach(card => {
+                card.checked = false;
+                card.userChoice = null;
+                card.revealed = false;
+            });
+            
+            // 重置展示索引
+            gameState.currentCardIndex = -1;
+            gameState.confirmedCards = 0;
+            
+            // 根据是否使用方遒显示不同的执行界面
+            if (gameState.useFangqiu) {
+                // 方遒模式：直接展示所有卡片，直接判断
+                document.getElementById('normalExecution').classList.add('hidden');
+                document.getElementById('fangqiuExecution').classList.remove('hidden');
+                gameState.displayCards.forEach(card => {
+                    card.revealed = true;
+                });
+                // 方遒模式下从第一个卡片开始
+                gameState.currentCardIndex = 0;
+            } else {
+                // 正常模式：需要点击展示
+                document.getElementById('normalExecution').classList.remove('hidden');
+                document.getElementById('fangqiuExecution').classList.add('hidden');
+            }
+            
+            // 更新显示
+            updateDisplayCards();
+            
+            // 更新进度
+            updateProgress();
+            
+            // 更新按钮状态
+            updateButtonStates();
+        }
+
+        // 更新显示卡片
+        function updateDisplayCards() {
+            const container = document.getElementById('displayCards');
+            container.innerHTML = '';
+            
+            gameState.displayCards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                
+                // 设置卡片基本样式
+                if (card.checked) {
+                    // 已检查的卡片显示绿色或红色
+                    cardElement.className = `card ${card.userChoice ? 'green' : 'red'}`;
+                } else {
+                    // 未检查的卡片
+                    cardElement.className = 'card white';
+                }
+                
+                // 如果卡片已展示或使用了方遒，显示内容
+                if (card.revealed || gameState.useFangqiu) {
+                    if (card.type === 'red') cardElement.textContent = '红色';
+                    else if (card.type === 'black') cardElement.textContent = '黑色';
+                    else if (card.type === 'basic') cardElement.textContent = '基本';
+                    else if (card.type === 'tactic') cardElement.textContent = '锦囊';
+                    else if (card.type === 'equip') cardElement.textContent = '装备';
+                } else {
+                    // 未展示的卡片显示?
+                    cardElement.textContent = '?';
+                }
+                
+                // 标记当前卡片
+                if (index === gameState.currentCardIndex) {
+                    cardElement.classList.add('current');
+                }
+                
+                container.appendChild(cardElement);
+            });
+            
+            // 更新按钮状态
+            updateButtonStates();
+            
+            // 更新方遒次数显示
+            document.getElementById('fangqiuCount').textContent = gameState.fangqiuCount;
+        }
+
+        // 更新按钮状态
+        function updateButtonStates() {
+            const showBtn = document.getElementById('showNextCard');
+            const confirmCorrectBtn = document.getElementById('confirmCorrect');
+            const confirmWrongBtn = document.getElementById('confirmWrong');
+            const fangqiuConfirmCorrectBtn = document.getElementById('fangqiuConfirmCorrect');
+            const fangqiuConfirmWrongBtn = document.getElementById('fangqiuConfirmWrong');
+            const checkResultBtn = document.getElementById('checkResult');
+            
+            // 如果所有卡片都已确认，启用检测结果按钮
+            if (gameState.confirmedCards === gameState.displayCards.length) {
+                checkResultBtn.disabled = false;
+            } else {
+                checkResultBtn.disabled = true;
+            }
+            
+            if (gameState.useFangqiu) {
+                // 方遒模式按钮状态
+                const currentCard = gameState.displayCards[gameState.currentCardIndex];
+                if (currentCard && !currentCard.checked) {
+                    fangqiuConfirmCorrectBtn.disabled = false;
+                    fangqiuConfirmWrongBtn.disabled = false;
+                    
+                    // 友徐庶效果：第一个卡片不能选择错误
+                    if (gameState.friendXushu && gameState.currentCardIndex === 0) {
+                        fangqiuConfirmWrongBtn.disabled = true;
+                    }
+                } else {
+                    fangqiuConfirmCorrectBtn.disabled = true;
+                    fangqiuConfirmWrongBtn.disabled = true;
+                }
+            } else {
+                // 正常模式按钮状态
+                if (gameState.currentCardIndex >= 0 && !gameState.displayCards[gameState.currentCardIndex].checked) {
+                    showBtn.disabled = true;
+                    confirmCorrectBtn.disabled = false;
+                    confirmWrongBtn.disabled = false;
+                    
+                    // 友徐庶效果：第一个卡片不能选择错误
+                    if (gameState.friendXushu && gameState.currentCardIndex === 0) {
+                        confirmWrongBtn.disabled = true;
+                    }
+                } else {
+                    showBtn.disabled = (gameState.currentCardIndex >= gameState.displayCards.length - 1);
+                    confirmCorrectBtn.disabled = true;
+                    confirmWrongBtn.disabled = true;
+                }
+            }
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const progressText = document.getElementById('progressText');
+            progressText.textContent = `进度: ${gameState.confirmedCards}/${gameState.displayCards.length}`;
+        }
+
+        // 展示下一张卡片
+        function showNextCard() {
+            if (gameState.currentCardIndex < gameState.displayCards.length - 1) {
+                gameState.currentCardIndex++;
+                gameState.displayCards[gameState.currentCardIndex].revealed = true;
+                updateDisplayCards();
+                updateProgress();
+            }
+        }
+
+        // 正常模式确认当前卡片
+        function confirmCurrentCard(isCorrect) {
+            if (gameState.currentCardIndex < 0) {
+                alert('请先点击"展示"按钮展示卡片！');
+                return;
+            }
+            
+            const currentCard = gameState.displayCards[gameState.currentCardIndex];
+            
+            // 检查卡片是否已经被确认过
+            if (currentCard.checked) {
+                alert('这张卡片已经被确认过了！');
+                return;
+            }
+            
+            // 友徐庶效果：第一个卡片只能选择正确
+            if (gameState.friendXushu && gameState.currentCardIndex === 0 && !isCorrect) {
+                alert("友徐庶效果：第一个卡片不能选择错误！");
+                return;
+            }
+            
+            // 确认当前卡片
+            currentCard.checked = true;
+            currentCard.userChoice = isCorrect;
+            gameState.confirmedCards++;
+            
+            // 更新显示
+            updateDisplayCards();
+            updateProgress();
+        }
+
+        // 方遒模式确认当前卡片
+        function fangqiuConfirmCurrentCard(isCorrect) {
+            const currentCard = gameState.displayCards[gameState.currentCardIndex];
+            
+            // 检查卡片是否已经被确认过
+            if (currentCard.checked) {
+                alert('这张卡片已经被确认过了！');
+                return;
+            }
+            
+            // 友徐庶效果：第一个卡片只能选择正确
+            if (gameState.friendXushu && gameState.currentCardIndex === 0 && !isCorrect) {
+                alert("友徐庶效果：第一个卡片不能选择错误！");
+                return;
+            }
+            
+            // 确认当前卡片
+            currentCard.checked = true;
+            currentCard.userChoice = isCorrect;
+            gameState.confirmedCards++;
+            
+            // 移动到下一个卡片
+            if (gameState.currentCardIndex < gameState.displayCards.length - 1) {
+                gameState.currentCardIndex++;
+            }
+            
+            // 更新显示
+            updateDisplayCards();
+            updateProgress();
+        }
+
+        // 检查结果
+        function checkResults() {
+            gameState.currentStep = 'result';
+            document.getElementById('executionSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+            
+            // 计算正确数量
+            const correctCount = gameState.displayCards.filter(card => card.userChoice).length;
+            const totalCount = gameState.displayCards.length;
+            
+            // 生成结果
+            let results = [];
+            let nextCardCountChange = 0;
+            
+            // 应用方遒效果 - 数字增加1而不是翻倍
+            const addValue = gameState.useFangqiu ? 1 : 0;
+            
+            if (correctCount === 0) {
+                results.push(`失去${1 + addValue}体力`);
+                results.push(`下次展示的方框数减${1 + addValue}`);
+                nextCardCountChange -= (1 + addValue);
+            } else if (correctCount < Math.ceil(totalCount / 2)) {
+                results.push(`弃置${1 + addValue}张牌`);
+            } else if (correctCount >= Math.ceil(totalCount / 2)) {
+                results.push(`获得${1 + addValue}张你本次猜测过的牌`);
+            }
+            
+            if (correctCount === totalCount) {
+                results.push(`摸${2 + addValue}张牌`);
+                results.push(`下次展示的方框数加${1 + addValue}`);
+                nextCardCountChange += (1 + addValue);
+                
+                // 全对时方遒次数+1（不超过1）
+                // 修订版规则：展示牌数小于4时，全对不增加方遒次数
+                if (gameState.fangqiuCount < 1) {
+                    if (gameState.isInitialVersion || totalCount >= 4) {
+                        gameState.fangqiuCount++;
+                        results.push('方遒次数+1');
+                    }
+                }
+            }
+            
+            // 记录下次方框数变化
+            gameState.nextCardCountChange = nextCardCountChange;
+            
+            // 显示结果
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = '';
+            
+            if (results.length === 0) {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.textContent = '没有触发任何效果';
+                resultContent.appendChild(resultItem);
+            } else {
+                results.forEach(result => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    resultItem.textContent = result;
+                    resultContent.appendChild(resultItem);
+                });
+            }
+            
+            // 重置使用方遒状态
+            gameState.useFangqiu = false;
+        }
+
+        // 重置游戏
+        function resetGame() {
+            gameState.cardCount = 3;
+            gameState.friendPangtong = false;
+            gameState.friendXushu = false;
+            gameState.friendSelected = false;
+            gameState.versionSelected = false;
+            gameState.isInitialVersion = true;
+            gameState.fangqiuCount = 1;
+            gameState.nextCardCountChange = 0;
+            
+            // 隐藏重置确认
+            hideResetConfirm();
+            
+            resetToMain();
+        }
+
+        // 返回主界面
+        function resetToMain() {
+            gameState.currentStep = 'main';
+            
+            document.getElementById('friendSelectionSection').classList.add('hidden');
+            document.getElementById('versionSelectionSection').classList.add('hidden');
+            document.getElementById('selectionSection').classList.add('hidden');
+            document.getElementById('executionSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('mainBtn').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
