@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曹金玉</title>
+     <style>
+        /* 给列表容器设置样式，清除所有子li的黑点 */
+        .no-dot {
+            list-style-type: none; /* 核心属性：清除列表标记 */
+            padding-left: 0; /* 可选：清除默认的左内边距，让列表靠左对齐 */
+        }
+    </style>
+</head>
+<body>
+    <h1>曹金玉 · 技能小程序</h1>
+        <hr>
+
+    <!-- 隅泣当前数值展示 -->
+    <ul class="no-dot">
+        <li>每回合的发动次数：<span id="triggerCount">2</span>（上限5）</li>
+        <li>观看牌堆顶牌数：<span id="cardView">3</span>（上限5）</li>
+        <li>给受伤角色牌数：<span id="giveCard">1</span>（上限5）</li>
+        <li>自身获得牌数：<span id="getCard">1</span>（上限5）</li>
+    </ul>
+
+    <!-- 数值选择区（替换为独立按钮） -->
+    <h3>选择要提升的数值类型（点击选中）</h3>
+    <p>
+        <button id="btn_triggerCount" onclick="selectValueType('triggerCount')">每回合的发动次数</button>
+        <button id="btn_cardView" onclick="selectValueType('cardView')">观看牌堆顶牌数</button>
+        <button id="btn_giveCard" onclick="selectValueType('giveCard')">给受伤角色牌数</button>
+        <button id="btn_getCard" onclick="selectValueType('getCard')">自身获得牌数</button>
+    </p>
+    <p><strong>当前选中：</strong><span id="selectedTypeText">每回合发动次数</span></p>
+
+    <!-- 技能触发区 -->
+    <h3>触发技能提升数值</h3>
+    <p>
+        <button onclick="updateYuqi('xianjing_hurt')">娴静（受伤状态，数值+1）</button>
+        <button onclick="updateYuqi('xianjing_healthy')">娴静（未受伤状态，数值+2）</button>
+        <button onclick="updateYuqi('shanshen')">善身（数值+2）</button>
+        <button onclick="resetYuqi()">重置所有数值</button>
+    </p>
+
+    <script>
+        // 初始化数值和选中状态
+        const yuqiValues = {
+            triggerCount: 2, // 发动次数
+            cardView: 3,     // 观牌数
+            giveCard: 1,     // 给牌数
+            getCard: 1       // 拿牌数
+        };
+        const MAX_VALUE = 5; // 所有数值上限
+        let selectedType = 'triggerCount'; // 默认选中第一个数值
+
+        // 选择数值类型（核心：标记选中状态）
+        function selectValueType(type) {
+            // 更新选中类型
+            selectedType = type;
+            // 重置所有按钮样式（纯HTML下用文字提示，无CSS）
+            const btnTexts = {
+                triggerCount: "每回合发动次数",
+                cardView: "观看牌堆顶牌数",
+                giveCard: "给受伤角色牌数上限",
+                getCard: "自身获得牌数上限"
+            };
+            // 显示当前选中的文本
+            document.getElementById('selectedTypeText').textContent = btnTexts[type];
+        }
+
+        // 核心：更新选中的隅泣数值
+        function updateYuqi(skillType) {
+            // 1. 确定不同技能的加成数值
+            let addNum = 0;
+            if (skillType === 'xianjing_hurt') addNum = 1;    // 娴静-受伤：+1
+            if (skillType === 'xianjing_healthy') addNum = 2;// 娴静-未受伤：+2
+            if (skillType === 'shanshen') addNum = 2;         // 善身：+2
+
+            // 2. 计算新数值（不超过上限）
+            yuqiValues[selectedType] = Math.min(yuqiValues[selectedType] + addNum, MAX_VALUE);
+            
+            // 3. 更新页面显示的数值
+            document.getElementById(selectedType).textContent = yuqiValues[selectedType];
+            // 同步更新技能说明里的数值
+            document.getElementById('descCount').textContent = yuqiValues.triggerCount;
+            document.getElementById('descView').textContent = yuqiValues.cardView;
+            document.getElementById('descGive').textContent = yuqiValues.giveCard;
+            document.getElementById('descGet').textContent = yuqiValues.getCard;
+        }
+
+        // 重置所有数值到初始状态
+        function resetYuqi() {
+            // 重置数值
+            yuqiValues.triggerCount = 2;
+            yuqiValues.cardView = 3;
+            yuqiValues.giveCard = 1;
+            yuqiValues.getCard = 1;
+            // 重置选中状态
+            selectedType = 'triggerCount';
+            document.getElementById('selectedTypeText').textContent = "每回合发动次数";
+            
+            // 同步更新页面所有显示
+            document.getElementById('triggerCount').textContent = 2;
+            document.getElementById('cardView').textContent = 3;
+            document.getElementById('giveCard').textContent = 1;
+            document.getElementById('getCard').textContent = 1;
+            document.getElementById('descCount').textContent = 2;
+            document.getElementById('descView').textContent = 3;
+            document.getElementById('descGive').textContent = 1;
+            document.getElementById('descGet').textContent = 1;
+        }
+    </script>
+</body>
+</html>

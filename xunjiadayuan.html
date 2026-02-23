@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>荀家大院</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            height: 95vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8B0000 0%, #B22222 100%);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: clamp(18px, 4vw, 24px);
+            font-weight: bold;
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+        
+        .content {
+            flex: 1;
+            overflow: auto;
+            padding: 15px;
+        }
+        
+        /* 版本选择界面 */
+        .version-selection {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .version-title {
+            font-size: clamp(18px, 5vw, 22px);
+            color: #8B0000;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        
+        .version-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .version-btn {
+            padding: clamp(12px, 3vw, 15px) clamp(20px, 4vw, 30px);
+            background-color: #8B0000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(16px, 4vw, 18px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-height: 50px;
+        }
+        
+        .version-btn:hover, .version-btn:active {
+            background-color: #B22222;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 角色选择界面 */
+        .character-selection {
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .character-title {
+            font-size: clamp(18px, 5vw, 22px);
+            color: #8B0000;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        
+        .character-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .character-btn {
+            padding: clamp(12px, 3vw, 15px) clamp(20px, 4vw, 30px);
+            background-color: #8B0000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(16px, 4vw, 18px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 50px;
+        }
+        
+        .character-btn:hover, .character-btn:active {
+            background-color: #B22222;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 返回按钮 */
+        .back-btn {
+            padding: 8px 15px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            margin-top: 20px;
+        }
+        
+        .back-btn:hover, .back-btn:active {
+            background-color: #888;
+        }
+        
+        /* 技能界面容器 */
+        .skill-container {
+            height: 100%;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        /* 荀攸模式选择 */
+        .xunyou-mode-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        .xunyou-mode-btn {
+            padding: 10px 20px;
+            background-color: #1565c0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .xunyou-mode-btn:hover, .xunyou-mode-btn.active {
+            background-color: #1976d2;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .xunyou-mode-btn.active {
+            background-color: #0d47a1;
+        }
+
+        /* 荀谌样式 */
+        .xunchen-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 12px;
+            background-color: white;
+            border-radius: 5px;
+            border-left: 3px solid #1a237e;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .xunchen-option:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .xunchen-option.disabled {
+            background-color: #e0e0e0;
+            color: #888;
+            border-left-color: #888;
+        }
+        
+        .xunchen-option-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: #1a237e;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        .xunchen-option.disabled .xunchen-option-number {
+            background-color: #888;
+        }
+
+        /* 荀采样式 */
+        .xuncai-skill {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+        
+        .xuncai-skill:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .xuncai-skill-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #8B0000;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .xuncai-skill-description {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .xuncai-options {
+            margin-bottom: 15px;
+        }
+        
+        .xuncai-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 8px;
+            background-color: white;
+            border-radius: 5px;
+            border-left: 3px solid #8B0000;
+            transition: all 0.2s ease;
+        }
+        
+        .xuncai-option:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .xuncai-option-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: #8B0000;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        .xuncai-suits-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .xuncai-suit {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #ddd;
+        }
+        
+        .xuncai-suit.active {
+            border-color: #8B0000;
+            box-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+        }
+        
+        .xuncai-suit.black {
+            color: black;
+        }
+        
+        .xuncai-suit.red {
+            color: #D32F2F;
+        }
+        
+        .xuncai-restore-suits {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .xuncai-action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .xuncai-action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .xuncai-near-death {
+            background-color: #8B0000;
+            color: white;
+        }
+        
+        .xuncai-reset {
+            background-color: #333;
+            color: white;
+        }
+        
+        .xuncai-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .xuncai-action-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 荀粲样式 */
+        .xuncan-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 12px;
+            background-color: white;
+            border-radius: 5px;
+            border-left: 3px solid #4a148c;
+            transition: all 0.2s ease;
+        }
+        
+        .xuncan-option.disabled {
+            background-color: #e0e0e0;
+            color: #888;
+            border-left-color: #888;
+            cursor: not-allowed;
+        }
+        
+        .xuncan-option.interactive {
+            cursor: pointer;
+        }
+        
+        .xuncan-option.interactive:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .xuncan-option-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: #4a148c;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        .xuncan-option.disabled .xuncan-option-number {
+            background-color: #888;
+        }
+        
+        .xuncan-cards-container {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .xuncan-cards-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #4a148c;
+        }
+        
+        .xuncan-pool-info {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #e8e8e8;
+            border-radius: 4px;
+        }
+        
+        .xuncan-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .xuncan-card {
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .xuncan-card:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .xuncan-card.selected {
+            background-color: #4a148c;
+            color: white;
+        }
+        
+        .xuncan-card-input-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .xuncan-card-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 14px;
+        }
+        
+        .xuncan-add-card-btn {
+            padding: 8px 15px;
+            background-color: #4a148c;
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+        
+        .xuncan-draw-card-btn {
+            padding: 10px 15px;
+            background-color: #4a148c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .xuncan-result-container {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+        
+        .xuncan-result-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        .xuncan-action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .xuncan-action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .xuncan-reset {
+            background-color: #333;
+            color: white;
+        }
+        
+        .xuncan-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .xuncan-action-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 荀攸样式 */
+        .xunyou-table-container {
+            flex: 1;
+            overflow: auto;
+            margin-bottom: 15px;
+            min-height: 200px;
+        }
+        
+        .xunyou-card-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            table-layout: fixed;
+        }
+        
+        .xunyou-card-table th, .xunyou-card-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            word-break: break-all;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .xunyou-card-table th {
+            background-color: #1565c0;
+            color: white;
+            font-weight: bold;
+            font-size: clamp(10px, 2.5vw, 14px);
+        }
+        
+        .xunyou-card-table td {
+            height: clamp(40px, 10vw, 70px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            font-size: clamp(10px, 2.5vw, 14px);
+        }
+        
+        .xunyou-card-table td:not(.selected):hover, .xunyou-card-table td:not(.selected):active {
+            background-color: #f0f0f0;
+        }
+        
+        .xunyou-card-table td.selected {
+            background-color: #e3f2fd;
+            cursor: default;
+        }
+        
+        .xunyou-card-table td.disabled {
+            background-color: #e0e0e0;
+            color: #888;
+            cursor: not-allowed;
+        }
+        
+        .xunyou-suit-header {
+            background-color: #1976d2 !important;
+        }
+        
+        .xunyou-type-header {
+            background-color: #1565c0 !important;
+        }
+        
+        .xunyou-card-selector {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            background-color: white;
+            border: 2px solid #1565c0;
+            border-radius: 10px;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .xunyou-selector-header {
+            background-color: #1565c0;
+            color: white;
+            padding: 15px;
+            font-size: clamp(16px, 4vw, 18px);
+            font-weight: bold;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .xunyou-card-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 60vh;
+            flex: 1;
+        }
+        
+        .xunyou-card-option {
+            padding: 12px 8px;
+            background-color: #e3f2fd;
+            border: 1px solid #1565c0;
+            border-radius: 5px;
+            font-size: clamp(14px, 3.5vw, 16px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+        }
+        
+        .xunyou-card-option:hover, .xunyou-card-option:active {
+            background-color: #bbdefb;
+        }
+        
+        .xunyou-card-option.disabled {
+            background-color: #e0e0e0;
+            color: #888;
+            cursor: not-allowed;
+        }
+        
+        .xunyou-selector-footer {
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+        
+        .xunyou-close-selector {
+            padding: 10px 20px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .xunyou-action-buttons {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            flex-shrink: 0;
+        }
+        
+        .xunyou-action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .xunyou-reset {
+            background-color: #333;
+            color: white;
+        }
+        
+        .xunyou-action-btn:hover, .xunyou-action-btn:active {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .xunyou-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            display: none;
+        }
+
+        /* 通用模态框和Toast */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1a237e;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .confirm-btn {
+            background-color: #1a237e;
+            color: white;
+        }
+        
+        .cancel-btn {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            display: none;
+        }
+        
+        /* 横屏优化 */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .container {
+                height: 98vh;
+            }
+            
+            .header {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            .version-selection, .character-selection {
+                justify-content: flex-start;
+                padding-top: 20px;
+            }
+        }
+        
+        /* 竖屏优化 */
+        @media (orientation: portrait) and (max-width: 768px) {
+            .version-buttons, .character-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .character-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .xuncai-skills-container {
+                flex-direction: column;
+            }
+            
+            .xuncai-skill {
+                min-width: 100%;
+            }
+            
+            .xuncai-action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .xuncai-action-btn {
+                width: 100%;
+            }
+            
+            .xuncan-cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .xuncan-action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .xuncan-action-btn {
+                width: 100%;
+            }
+            
+            .xunyou-action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .xunyou-action-btn {
+                width: 100%;
+            }
+        }
+        
+        /* 小屏幕优化 */
+        @media (max-width: 480px) {
+            .container {
+                height: 97vh;
+                border-radius: 10px;
+            }
+            
+            .skill-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .back-btn {
+                align-self: flex-end;
+            }
+            
+            .xunyou-card-table th, .xunyou-card-table td {
+                padding: 5px 3px;
+            }
+            
+            .xunyou-card-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">荀家大院</div>
+        
+        <div class="content">
+            <!-- 版本选择界面 -->
+            <div class="version-selection" id="version-selection">
+                <div class="version-title">请选择版本</div>
+                <div class="version-buttons">
+                    <button class="version-btn" id="old-version">初版</button>
+                    <button class="version-btn" id="new-version">现版</button>
+                </div>
+            </div>
+            
+            <!-- 初版角色选择界面 -->
+            <div class="character-selection" id="old-characters">
+                <div class="character-title">初版 - 选择角色</div>
+                <div class="character-buttons">
+                    <button class="character-btn" data-character="xunchen">荀谌</button>
+                    <button class="character-btn" data-character="xuncai">荀采</button>
+                    <button class="character-btn" data-character="xuncan">荀粲</button>
+                </div>
+                <button class="back-btn" id="back-from-old">返回</button>
+            </div>
+            
+            <!-- 现版角色选择界面 -->
+            <div class="character-selection" id="new-characters">
+                <div class="character-title">现版 - 选择角色</div>
+                <div class="character-buttons">
+                    <button class="character-btn" data-character="xunyou">荀攸</button>
+                </div>
+                <button class="back-btn" id="back-from-new">返回</button>
+            </div>
+            
+            <!-- 荀谌技能界面 -->
+            <div class="skill-container" id="xunchen-skill">
+                <div class="skill-header">
+                    <div style="font-size: clamp(18px, 4vw, 20px); font-weight: bold; color: #1a237e;">荀谌 - 卑势</div>
+                    <button class="back-btn" id="back-from-xunchen">返回</button>
+                </div>
+                <div style="font-size: clamp(12px, 3vw, 14px); color: #555; margin-bottom: 15px; line-height: 1.4;">【三恇】中的X为【卑势】可选项的最小值且至多为3</div>
+                
+                <div style="margin-bottom: 20px;">
+                    <button class="character-btn" id="select-character" style="background-color: #1a237e; font-size: 14px; padding: 10px 15px;">选择角色</button>
+                    <div id="character-name-display" style="margin-top: 10px; font-size: 16px; font-weight: bold; color: #1a237e; padding: 8px; background-color: #f0f0f0; border-radius: 5px; display: inline-block;">未选择角色</div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <div class="xunchen-option" data-option="1">
+                        <span class="xunchen-option-number">1</span>
+                        <span class="option-text">场上牌数</span>
+                    </div>
+                    <div class="xunchen-option" data-option="2">
+                        <span class="xunchen-option-number">2</span>
+                        <span class="option-text">已损失体力值</span>
+                    </div>
+                    <div class="xunchen-option" data-option="3">
+                        <span class="xunchen-option-number">3</span>
+                        <span class="option-text">体力值与手牌数之差</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: center; margin-top: 20px;">
+                    <button class="xuncan-action-btn xuncan-reset" id="reset-xunchen">重置</button>
+                </div>
+            </div>
+            
+            <!-- 荀采技能界面 -->
+            <div class="skill-container" id="xuncai-skill">
+                <div class="skill-header">
+                    <div style="font-size: clamp(18px, 4vw, 20px); font-weight: bold; color: #8B0000;">荀采 - 技能</div>
+                    <button class="back-btn" id="back-from-xuncai">返回</button>
+                </div>
+                
+                <div class="xuncai-skills-container" style="display: flex; flex-wrap: wrap; gap: 20px;">
+                    <div class="xuncai-skill">
+                        <div class="xuncai-skill-title">烈誓</div>
+                        <div class="xuncai-skill-description">你选择一项，目标角色执行后一项（1→2/2→3/3→1）：</div>
+                        
+                        <div class="xuncai-options" id="lie-shi-options">
+                            <div class="xuncai-option">
+                                <span class="xuncai-option-number">1</span>
+                                <span class="option-text">受到1点火焰伤害</span>
+                            </div>
+                            <div class="xuncai-option">
+                                <span class="xuncai-option-number">2</span>
+                                <span class="option-text">弃置所有【闪】</span>
+                            </div>
+                            <div class="xuncai-option">
+                                <span class="xuncai-option-number">3</span>
+                                <span class="option-text">弃置所有【杀】</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="xuncai-skill">
+                        <div class="xuncai-skill-title">点盏</div>
+                        <div class="xuncai-skill-description">每花色每轮限一次，使用后执行以下选项直到无法执行：</div>
+                        
+                        <div class="xuncai-options" id="dian-zhan-options">
+                            <div class="xuncai-option">
+                                <span class="xuncai-option-number">1</span>
+                                <span class="option-text">重铸此花色的1张手牌</span>
+                            </div>
+                            <div class="xuncai-option">
+                                <span class="xuncai-option-number">2</span>
+                                <span class="option-text">若此牌目标唯一，横置该角色</span>
+                            </div>
+                            <div class="xuncai-option">
+                                <span class="xuncai-option-number">3</span>
+                                <span class="option-text">摸一张牌</span>
+                            </div>
+                        </div>
+                        
+                        <div class="xuncai-suits-container">
+                            <div class="xuncai-suit black active" data-suit="spade">♠</div>
+                            <div class="xuncai-suit red active" data-suit="heart">♥</div>
+                            <div class="xuncai-suit black active" data-suit="club">♣</div>
+                            <div class="xuncai-suit red active" data-suit="diamond">♦</div>
+                        </div>
+                        
+                        <div class="xuncai-restore-suits">
+                            <button class="xuncai-action-btn" id="restore-suits" style="background-color: #4CAF50; color: white; padding: 8px 15px; font-size: 14px;">花色复原</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="xuncai-action-buttons">
+                    <button class="xuncai-action-btn xuncai-near-death" id="near-death">进入濒死</button>
+                    <button class="xuncai-action-btn xuncai-reset" id="reset-xuncai">重置</button>
+                </div>
+            </div>
+            
+            <!-- 荀粲技能界面 -->
+            <div class="skill-container" id="xuncan-skill">
+                <div class="skill-header">
+                    <div style="font-size: clamp(18px, 4vw, 20px); font-weight: bold; color: #4a148c;">荀粲 - 伤神</div>
+                    <button class="back-btn" id="back-from-xuncan">返回</button>
+                </div>
+                <div style="font-size: clamp(12px, 3vw, 14px); color: #555; margin-bottom: 15px; line-height: 1.4;">一名角色受到属性伤害后，你可以选择执行2项：</div>
+                
+                <div style="margin-bottom: 15px;">
+                    <div class="xuncan-option disabled">
+                        <span class="xuncan-option-number">1</span>
+                        <span class="option-text">获得你场上所有牌</span>
+                    </div>
+                    <div class="xuncan-option interactive" id="option-2">
+                        <span class="xuncan-option-number">2</span>
+                        <span class="option-text">将其一张牌当作随机延时锦囊牌对你使用</span>
+                    </div>
+                    <div class="xuncan-option disabled">
+                        <span class="xuncan-option-number">3</span>
+                        <span class="option-text">令其摸牌至4张</span>
+                    </div>
+                </div>
+                
+                <!-- 延时锦囊牌选择区域 -->
+                <div class="xuncan-cards-container" id="cards-container">
+                    <div class="xuncan-cards-title">选择延时锦囊牌</div>
+                    <div class="xuncan-pool-info" id="pool-info">当前牌池：乐不思蜀、兵粮寸断、闪电</div>
+                    <div class="xuncan-cards-grid" id="cards-grid">
+                        <div class="xuncan-card" data-card="乐不思蜀">乐不思蜀</div>
+                        <div class="xuncan-card" data-card="兵粮寸断">兵粮寸断</div>
+                        <div class="xuncan-card" data-card="闪电">闪电</div>
+                        <div class="xuncan-card" data-card="+">+</div>
+                    </div>
+                    
+                    <div class="xuncan-card-input-container" id="card-input-container">
+                        <input type="text" class="xuncan-card-input" id="card-input" placeholder="输入新的延时锦囊牌名">
+                        <button class="xuncan-add-card-btn" id="add-card-btn">添加</button>
+                    </div>
+                    
+                    <button class="xuncan-draw-card-btn" id="draw-card-btn">抽取</button>
+                    
+                    <div class="xuncan-result-container" id="result-container">
+                        <div class="xuncan-result-text" id="result-text"></div>
+                    </div>
+                </div>
+                
+                <div class="xuncan-action-buttons">
+                    <button class="xuncan-action-btn xuncan-reset" id="reset-xuncan">重置</button>
+                </div>
+            </div>
+            
+            <!-- 荀攸技能界面 -->
+            <div class="skill-container" id="xunyou-skill">
+                <div class="skill-header">
+                    <div style="font-size: clamp(18px, 4vw, 20px); font-weight: bold; color: #1565c0;">荀攸 - 奇策</div>
+                    <button class="back-btn" id="back-from-xunyou">返回</button>
+                </div>
+                
+                <!-- 荀攸模式选择 -->
+                <div class="xunyou-mode-selection">
+                    <button class="xunyou-mode-btn active" data-mode="normal">普通</button>
+                    <button class="xunyou-mode-btn" data-mode="应变">应变</button>
+                </div>
+                
+                <div style="font-size: clamp(12px, 3vw, 14px); color: #555; margin-bottom: 15px; line-height: 1.4;">请为每个花色和牌类型选择对应的锦囊牌</div>
+                
+                <div class="xunyou-table-container">
+                    <table class="xunyou-card-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th class="xunyou-suit-header">♠️</th>
+                                <th class="xunyou-suit-header">♥️</th>
+                                <th class="xunyou-suit-header">♦️</th>
+                                <th class="xunyou-suit-header">♣️</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th class="xunyou-type-header">基本</th>
+                                <td data-type="basic" data-suit="spade"></td>
+                                <td data-type="basic" data-suit="heart"></td>
+                                <td data-type="basic" data-suit="diamond"></td>
+                                <td data-type="basic" data-suit="club"></td>
+                            </tr>
+                            <tr>
+                                <th class="xunyou-type-header">锦囊</th>
+                                <td data-type="trick" data-suit="spade"></td>
+                                <td data-type="trick" data-suit="heart"></td>
+                                <td data-type="trick" data-suit="diamond"></td>
+                                <td data-type="trick" data-suit="club"></td>
+                            </tr>
+                            <tr>
+                                <th class="xunyou-type-header">装备</th>
+                                <td data-type="equip" data-suit="spade"></td>
+                                <td data-type="equip" data-suit="heart"></td>
+                                <td data-type="equip" data-suit="diamond"></td>
+                                <td data-type="equip" data-suit="club"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="xunyou-action-buttons">
+                    <button class="xunyou-action-btn xunyou-reset" id="reset-xunyou">重置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框和Toast -->
+    <div class="modal" id="character-modal">
+        <div class="modal-content">
+            <div class="modal-header">选择角色</div>
+            <input type="text" class="modal-input" id="character-input" placeholder="请输入角色名称">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn" id="cancel-character">取消</button>
+                <button class="modal-btn confirm-btn" id="confirm-character">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">回复一点体力</div>
+
+    <!-- 卡片选择器 -->
+    <div class="xunyou-overlay" id="overlay"></div>
+    <div class="xunyou-card-selector" id="card-selector">
+        <div class="xunyou-selector-header">选择锦囊牌</div>
+        <div class="xunyou-card-options" id="card-options"></div>
+        <div class="xunyou-selector-footer">
+            <button class="xunyou-close-selector" id="close-selector">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        // ========== 页面导航逻辑 ==========
+        const versionSelection = document.getElementById('version-selection');
+        const oldCharacters = document.getElementById('old-characters');
+        const newCharacters = document.getElementById('new-characters');
+        const oldVersionBtn = document.getElementById('old-version');
+        const newVersionBtn = document.getElementById('new-version');
+        const backFromOld = document.getElementById('back-from-old');
+        const backFromNew = document.getElementById('back-from-new');
+        
+        // 角色技能界面
+        const xunchenSkill = document.getElementById('xunchen-skill');
+        const xuncaiSkill = document.getElementById('xuncai-skill');
+        const xuncanSkill = document.getElementById('xuncan-skill');
+        const xunyouSkill = document.getElementById('xunyou-skill');
+        
+        // 返回按钮
+        const backFromXunchen = document.getElementById('back-from-xunchen');
+        const backFromXuncai = document.getElementById('back-from-xuncai');
+        const backFromXuncan = document.getElementById('back-from-xuncan');
+        const backFromXunyou = document.getElementById('back-from-xunyou');
+        
+        // 版本选择
+        oldVersionBtn.addEventListener('click', function() {
+            versionSelection.style.display = 'none';
+            oldCharacters.style.display = 'flex';
+        });
+        
+        newVersionBtn.addEventListener('click', function() {
+            versionSelection.style.display = 'none';
+            newCharacters.style.display = 'flex';
+        });
+        
+        // 返回按钮事件
+        backFromOld.addEventListener('click', function() {
+            oldCharacters.style.display = 'none';
+            versionSelection.style.display = 'flex';
+        });
+        
+        backFromNew.addEventListener('click', function() {
+            newCharacters.style.display = 'none';
+            versionSelection.style.display = 'flex';
+        });
+        
+        backFromXunchen.addEventListener('click', function() {
+            xunchenSkill.style.display = 'none';
+            oldCharacters.style.display = 'flex';
+        });
+        
+        backFromXuncai.addEventListener('click', function() {
+            xuncaiSkill.style.display = 'none';
+            oldCharacters.style.display = 'flex';
+        });
+        
+        backFromXuncan.addEventListener('click', function() {
+            xuncanSkill.style.display = 'none';
+            oldCharacters.style.display = 'flex';
+        });
+        
+        backFromXunyou.addEventListener('click', function() {
+            xunyouSkill.style.display = 'none';
+            newCharacters.style.display = 'flex';
+        });
+        
+        // 角色选择
+        document.querySelectorAll('.character-btn[data-character]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const character = this.getAttribute('data-character');
+                oldCharacters.style.display = 'none';
+                newCharacters.style.display = 'none';
+                
+                if (character === 'xunchen') {
+                    xunchenSkill.style.display = 'flex';
+                } else if (character === 'xuncai') {
+                    xuncaiSkill.style.display = 'flex';
+                } else if (character === 'xuncan') {
+                    xuncanSkill.style.display = 'flex';
+                } else if (character === 'xunyou') {
+                    xunyouSkill.style.display = 'flex';
+                }
+            });
+        });
+
+        // ========== 荀谌功能实现 ==========
+        const selectCharacterBtn = document.getElementById('select-character');
+        const characterNameDisplay = document.getElementById('character-name-display');
+        const characterModal = document.getElementById('character-modal');
+        const characterInput = document.getElementById('character-input');
+        const cancelCharacterBtn = document.getElementById('cancel-character');
+        const confirmCharacterBtn = document.getElementById('confirm-character');
+        const resetXunchenBtn = document.getElementById('reset-xunchen');
+        const xunchenOptions = document.querySelectorAll('#xunchen-skill .xunchen-option');
+        const toast = document.getElementById('toast');
+
+        // 角色选择状态
+        let isCharacterSelected = false;
+        let selectedCharacter = '';
+
+        // 选项状态
+        const optionStates = {
+            1: false,
+            2: false,
+            3: false
+        };
+
+        // 选择角色按钮点击事件
+        selectCharacterBtn.addEventListener('click', function() {
+            if (!isCharacterSelected) {
+                characterModal.style.display = 'flex';
+                characterInput.focus();
+            }
+        });
+
+        // 取消选择角色
+        cancelCharacterBtn.addEventListener('click', function() {
+            characterModal.style.display = 'none';
+            characterInput.value = '';
+        });
+
+        // 确认选择角色
+        confirmCharacterBtn.addEventListener('click', function() {
+            const characterName = characterInput.value.trim();
+            if (characterName) {
+                selectedCharacter = characterName;
+                characterNameDisplay.textContent = characterName;
+                isCharacterSelected = true;
+                selectCharacterBtn.textContent = '已选择角色';
+                selectCharacterBtn.disabled = true;
+                selectCharacterBtn.style.backgroundColor = '#888';
+                characterModal.style.display = 'none';
+                characterInput.value = '';
+            }
+        });
+
+        // 选项点击事件
+        xunchenOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                if (!isCharacterSelected) {
+                    showToast('请先选择角色');
+                    return;
+                }
+                
+                const optionNumber = this.getAttribute('data-option');
+                optionStates[optionNumber] = !optionStates[optionNumber];
+                
+                if (optionStates[optionNumber]) {
+                    this.classList.add('disabled');
+                    showToast('回复一点体力');
+                } else {
+                    this.classList.remove('disabled');
+                }
+            });
+        });
+
+        // 重置按钮点击事件
+        resetXunchenBtn.addEventListener('click', function() {
+            // 重置角色选择
+            isCharacterSelected = false;
+            selectedCharacter = '';
+            characterNameDisplay.textContent = '未选择角色';
+            selectCharacterBtn.textContent = '选择角色';
+            selectCharacterBtn.disabled = false;
+            selectCharacterBtn.style.backgroundColor = '#1a237e';
+            
+            // 重置选项状态
+            xunchenOptions.forEach(option => {
+                const optionNumber = option.getAttribute('data-option');
+                optionStates[optionNumber] = false;
+                option.classList.remove('disabled');
+            });
+        });
+
+        // 显示提示信息
+        function showToast(message) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(event) {
+            if (event.target === characterModal) {
+                characterModal.style.display = 'none';
+                characterInput.value = '';
+            }
+        });
+
+        // ========== 荀采功能实现 ==========
+        // 初始选项内容
+        const initialOptions = {
+            lieShi: [
+                "受到1点火焰伤害",
+                "弃置所有【闪】",
+                "弃置所有【杀】"
+            ],
+            dianZhan: [
+                "重铸此花色的1张手牌",
+                "若此牌目标唯一，横置该角色",
+                "摸一张牌"
+            ]
+        };
+        
+        // 濒死状态标志
+        let isNearDeath = false;
+        
+        // 进入濒死按钮点击事件
+        document.getElementById('near-death').addEventListener('click', function() {
+            isNearDeath = !isNearDeath;
+            
+            // 获取所有选项
+            const lieShiOptions = document.querySelectorAll('#lie-shi-options .option-text');
+            const dianZhanOptions = document.querySelectorAll('#dian-zhan-options .option-text');
+            
+            if (isNearDeath) {
+                // 濒死状态：交换选项1和3
+                swapOptions(lieShiOptions);
+                swapOptions(dianZhanOptions);
+                this.textContent = '退出濒死';
+                this.style.backgroundColor = '#333';
+            } else {
+                // 正常状态：恢复初始选项
+                restoreOptions(lieShiOptions, initialOptions.lieShi);
+                restoreOptions(dianZhanOptions, initialOptions.dianZhan);
+                this.textContent = '进入濒死';
+                this.style.backgroundColor = '#8B0000';
+            }
+        });
+        
+        // 花色复原按钮点击事件
+        document.getElementById('restore-suits').addEventListener('click', function() {
+            const suits = document.querySelectorAll('.xuncai-suit');
+            suits.forEach(suit => {
+                suit.classList.add('active');
+            });
+        });
+        
+        // 重置按钮点击事件
+        document.getElementById('reset-xuncai').addEventListener('click', function() {
+            // 恢复选项内容
+            const lieShiOptions = document.querySelectorAll('#lie-shi-options .option-text');
+            const dianZhanOptions = document.querySelectorAll('#dian-zhan-options .option-text');
+            
+            restoreOptions(lieShiOptions, initialOptions.lieShi);
+            restoreOptions(dianZhanOptions, initialOptions.dianZhan);
+            
+            // 恢复花色状态
+            const suits = document.querySelectorAll('.xuncai-suit');
+            suits.forEach(suit => {
+                suit.classList.add('active');
+            });
+            
+            // 恢复濒死按钮状态
+            isNearDeath = false;
+            const nearDeathBtn = document.getElementById('near-death');
+            nearDeathBtn.textContent = '进入濒死';
+            nearDeathBtn.style.backgroundColor = '#8B0000';
+        });
+        
+        // 花色点击事件
+        document.querySelectorAll('.xuncai-suit').forEach(suit => {
+            suit.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+        
+        // 交换选项1和3的函数
+        function swapOptions(options) {
+            if (options.length >= 3) {
+                const temp = options[0].textContent;
+                options[0].textContent = options[2].textContent;
+                options[2].textContent = temp;
+            }
+        }
+        
+        // 恢复选项初始内容的函数
+        function restoreOptions(options, initialValues) {
+            options.forEach((option, index) => {
+                option.textContent = initialValues[index];
+            });
+        }
+
+        // ========== 荀粲功能实现 ==========
+        const option2 = document.getElementById('option-2');
+        const cardsContainer = document.getElementById('cards-container');
+        const cardsGrid = document.getElementById('cards-grid');
+        const poolInfo = document.getElementById('pool-info');
+        const cardInputContainer = document.getElementById('card-input-container');
+        const cardInput = document.getElementById('card-input');
+        const addCardBtn = document.getElementById('add-card-btn');
+        const drawCardBtn = document.getElementById('draw-card-btn');
+        const resultContainer = document.getElementById('result-container');
+        const resultText = document.getElementById('result-text');
+        const resetXuncanBtn = document.getElementById('reset-xuncan');
+
+        // 初始延时锦囊牌池
+        let cardPool = ['乐不思蜀', '兵粮寸断', '闪电'];
+
+        // 更新牌池信息显示
+        function updatePoolInfo() {
+            poolInfo.textContent = `当前牌池：${cardPool.join('、')}`;
+        }
+
+        // 选项2点击事件
+        option2.addEventListener('click', function() {
+            cardsContainer.style.display = 'block';
+            updatePoolInfo();
+        });
+
+        // 卡片点击事件
+        cardsGrid.addEventListener('click', function(e) {
+            if (e.target.classList.contains('xuncan-card')) {
+                const cardName = e.target.getAttribute('data-card');
+                
+                if (cardName === '+') {
+                    // 显示添加卡片输入框
+                    cardInputContainer.style.display = 'flex';
+                    cardInput.focus();
+                } else {
+                    // 选中/取消选中卡片
+                    e.target.classList.toggle('selected');
+                }
+            }
+        });
+
+        // 添加自定义卡片
+        addCardBtn.addEventListener('click', function() {
+            const newCardName = cardInput.value.trim();
+            if (newCardName) {
+                // 创建新的卡片元素
+                const newCard = document.createElement('div');
+                newCard.className = 'xuncan-card';
+                newCard.setAttribute('data-card', newCardName);
+                newCard.textContent = newCardName;
+                
+                // 插入到"+"按钮之前
+                const plusCard = cardsGrid.querySelector('[data-card="+"]');
+                cardsGrid.insertBefore(newCard, plusCard);
+                
+                // 添加到牌池中
+                cardPool.push(newCardName);
+                
+                // 更新牌池信息
+                updatePoolInfo();
+                
+                // 清空输入框并隐藏
+                cardInput.value = '';
+                cardInputContainer.style.display = 'none';
+            }
+        });
+
+        // 抽取按钮点击事件
+        drawCardBtn.addEventListener('click', function() {
+            if (cardPool.length === 0) {
+                resultText.textContent = '牌池中没有可抽取的牌';
+                resultContainer.style.display = 'block';
+                return;
+            }
+            
+            // 从牌池中随机抽取一张牌
+            const randomIndex = Math.floor(Math.random() * cardPool.length);
+            const selectedCard = cardPool[randomIndex];
+            
+            // 显示结果
+            resultText.textContent = `抽取结果：${selectedCard}`;
+            resultContainer.style.display = 'block';
+        });
+
+        // 重置按钮点击事件
+        resetXuncanBtn.addEventListener('click', function() {
+            // 隐藏卡片容器和结果
+            cardsContainer.style.display = 'none';
+            resultContainer.style.display = 'none';
+            
+            // 重置牌池
+            cardPool = ['乐不思蜀', '兵粮寸断', '闪电'];
+            
+            // 重置卡片网格
+            cardsGrid.innerHTML = `
+                <div class="xuncan-card" data-card="乐不思蜀">乐不思蜀</div>
+                <div class="xuncan-card" data-card="兵粮寸断">兵粮寸断</div>
+                <div class="xuncan-card" data-card="闪电">闪电</div>
+                <div class="xuncan-card" data-card="+">+</div>
+            `;
+            
+            // 重置输入框
+            cardInput.value = '';
+            cardInputContainer.style.display = 'none';
+            
+            // 更新牌池信息
+            updatePoolInfo();
+        });
+
+        // 按Enter键添加卡片
+        cardInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addCardBtn.click();
+            }
+        });
+
+        // 初始化牌池信息
+        updatePoolInfo();
+
+        // ========== 荀攸功能实现 ==========
+        const xunyouCardSelector = document.getElementById('card-selector');
+        const xunyouCardOptions = document.getElementById('card-options');
+        const xunyouCloseSelector = document.getElementById('close-selector');
+        const xunyouOverlay = document.getElementById('overlay');
+        const resetXunyouBtn = document.getElementById('reset-xunyou');
+        const xunyouModeBtns = document.querySelectorAll('.xunyou-mode-btn');
+
+        // 锦囊牌数据
+        const normalCards = [
+            '决斗', '火攻', '桃园结义', '万箭齐发', 
+            '南蛮入侵', '五谷丰登', '借刀杀人', '顺手牵羊', 
+            '过河拆桥', '无懈可击', '铁索连环', '无中生有'
+        ];
+        
+        const 应变Cards = [
+            '决斗', '出其不意', '桃园结义', '万箭齐发', 
+            '南蛮入侵', '五谷丰登', '水淹七军', '逐近弃远', 
+            '无懈可击', '铁索连环', '洞烛先机', '随机应变'
+        ];
+
+        // 当前选中的单元格和模式
+        let currentCell = null;
+        let currentMode = 'normal';
+
+        // 已使用的锦囊牌
+        let usedNormalCards = new Set();
+        let used应变Cards = new Set();
+        
+        // 已选择的方格
+        let selectedCells = {
+            normal: new Set(),
+            应变: new Set()
+        };
+
+        // 模式切换事件
+        xunyouModeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const mode = this.getAttribute('data-mode');
+                
+                // 更新按钮状态
+                xunyouModeBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 切换模式
+                currentMode = mode;
+                
+                // 重置表格
+                resetXunyouTable();
+            });
+        });
+
+        // 单元格点击事件
+        document.querySelectorAll('.xunyou-card-table td').forEach(cell => {
+            cell.addEventListener('click', function() {
+                // 如果这个方格已经被选择过，则无法再次操作
+                if (this.classList.contains('selected') || this.classList.contains('disabled')) {
+                    return;
+                }
+                
+                currentCell = this;
+                showXunyouCardSelector();
+            });
+        });
+
+        // 显示卡片选择器
+        function showXunyouCardSelector() {
+            // 获取当前模式可用的卡片
+            const availableCards = currentMode === 'normal' ? normalCards : 应变Cards;
+            const usedCards = currentMode === 'normal' ? usedNormalCards : used应变Cards;
+            
+            // 清空选项容器
+            xunyouCardOptions.innerHTML = '';
+            
+            // 添加卡片选项
+            availableCards.forEach(card => {
+                const option = document.createElement('div');
+                option.className = 'xunyou-card-option';
+                option.textContent = card;
+                
+                if (usedCards.has(card)) {
+                    option.classList.add('disabled');
+                } else {
+                    option.addEventListener('click', function() {
+                        selectXunyouCard(card);
+                        hideXunyouCardSelector();
+                    });
+                }
+                
+                xunyouCardOptions.appendChild(option);
+            });
+            
+            // 显示选择器和遮罩层
+            xunyouCardSelector.style.display = 'flex';
+            xunyouOverlay.style.display = 'block';
+        }
+
+        // 隐藏卡片选择器
+        function hideXunyouCardSelector() {
+            xunyouCardSelector.style.display = 'none';
+            xunyouOverlay.style.display = 'none';
+        }
+
+        // 选择卡片
+        function selectXunyouCard(card) {
+            // 设置单元格内容
+            currentCell.textContent = card;
+            currentCell.classList.add('selected');
+            currentCell.classList.add('disabled');
+            
+            // 添加到已使用集合
+            if (currentMode === 'normal') {
+                usedNormalCards.add(card);
+                selectedCells.normal.add(currentCell);
+            } else {
+                used应变Cards.add(card);
+                selectedCells.应变.add(currentCell);
+            }
+        }
+
+        // 关闭选择器
+        xunyouCloseSelector.addEventListener('click', hideXunyouCardSelector);
+        xunyouOverlay.addEventListener('click', hideXunyouCardSelector);
+
+        // 重置功能
+        resetXunyouBtn.addEventListener('click', function() {
+            resetXunyouTable();
+        });
+
+        // 重置表格
+        function resetXunyouTable() {
+            const table = document.querySelector('.xunyou-card-table');
+            
+            // 清空所有单元格
+            table.querySelectorAll('td').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('selected', 'disabled');
+            });
+            
+            // 清空已使用卡片和已选择方格
+            usedNormalCards.clear();
+            used应变Cards.clear();
+            selectedCells.normal.clear();
+            selectedCells.应变.clear();
+        }
+
+        // 横竖屏切换处理
+        function handleOrientationChange() {
+            // 强制重新计算布局
+            setTimeout(() => {
+                if (xunyouCardSelector.style.display === 'flex') {
+                    // 如果选择器正在显示，重新定位
+                    xunyouCardSelector.style.top = '50%';
+                    xunyouCardSelector.style.left = '50%';
+                    xunyouCardSelector.style.transform = 'translate(-50%, -50%)';
+                }
+            }, 100);
+        }
+
+        // 监听横竖屏切换
+        window.addEventListener('resize', handleOrientationChange);
+        window.addEventListener('orientationchange', handleOrientationChange);
+    </script>
+</body>
+</html>

@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>魔曹操小程序</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 10px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            color: #ffd700;
+            text-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .selection-screen {
+            background: rgba(30, 30, 46, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 20px;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #ffd700, transparent);
+            margin: 8px auto 0;
+        }
+        
+        .mode-select {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 18px 5px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            background: rgba(40, 40, 60, 0.6);
+            color: #ddd;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            max-width: 200px;
+        }
+        
+        .mode-btn:hover, .mode-btn.active {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: #ffd700;
+            color: #ffd700;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+        
+        .pool-section {
+            margin-top: 30px;
+        }
+        
+        .pool-container {
+            margin-bottom: 25px;
+        }
+        
+        .pool-title {
+            font-size: 18px;
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-btn {
+            background: rgba(79, 195, 247, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            color: #4fc3f7;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+        }
+        
+        .pool-items {
+            background: rgba(20, 20, 35, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        
+        .pool-items.expanded {
+            display: grid;
+        }
+        
+        .pool-item {
+            background: rgba(50, 50, 70, 0.6);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .pool-item.added {
+            background: rgba(255, 68, 68, 0.15);
+            border-color: rgba(255, 68, 68, 0.3);
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            background: #f44336;
+            border-radius: 50%;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #1a1a2e;
+            z-index: 2;
+        }
+        
+        .add-item {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px dashed rgba(76, 175, 80, 0.5);
+            color: #4caf50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .add-item:hover {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .add-item span {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+        
+        .generation-screen {
+            background: rgba(30, 30, 46, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            display: none;
+        }
+        
+        .number-select {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .number-btn {
+            aspect-ratio: 1;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            background: rgba(40, 40, 60, 0.6);
+            color: #ffd700;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .number-btn:hover, .number-btn.active {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: #ffd700;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+        
+        .result-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .result-box {
+            background: rgba(20, 20, 35, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .result-label {
+            font-size: 16px;
+            color: #4fc3f7;
+            margin-bottom: 15px;
+        }
+        
+        .result-content {
+            font-size: 22px;
+            color: #ffd700;
+            font-weight: bold;
+            word-break: break-word;
+        }
+        
+        .result-detail {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 10px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            padding: 16px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            max-width: 200px;
+        }
+        
+        .reset-btn {
+            background: linear-gradient(to right, #f44336, #d32f2f);
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+        
+        .back-btn {
+            background: linear-gradient(to right, #2196F3, #1976D2);
+            color: white;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        .add-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-title {
+            color: #ffd700;
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #4fc3f7;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            background: rgba(30, 30, 46, 0.8);
+            color: white;
+            font-size: 16px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .confirm-btn {
+            background: linear-gradient(to right, #4CAF50, #388E3C);
+            color: white;
+        }
+        
+        .cancel-btn {
+            background: linear-gradient(to right, #9E9E9E, #616161);
+            color: white;
+        }
+        
+        .special-weapon-info {
+            background: rgba(20, 20, 35, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .special-weapon-info h3 {
+            color: #ffd700;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .weapon-description {
+            font-size: 14px;
+            color: #ddd;
+            line-height: 1.6;
+        }
+        
+        .weapon-description-item {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .weapon-description-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .weapon-name {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .selection-screen, .generation-screen {
+                padding: 20px;
+            }
+            
+            .mode-btn {
+                padding: 15px 5px;
+                font-size: 16px;
+            }
+            
+            .number-btn {
+                font-size: 24px;
+            }
+            
+            .result-box {
+                min-height: 130px;
+                padding: 15px;
+            }
+            
+            .action-btn {
+                padding: 14px 20px;
+                font-size: 16px;
+            }
+            
+            .special-weapon-info {
+                padding: 15px;
+            }
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>魔曹操</h1>
+            <p>选择模式，生成你的武器和防具</p>
+        </div>
+        
+        <!-- 选择模式界面 -->
+        <div class="selection-screen" id="selectionScreen">
+            <div class="section-title">选择模式</div>
+            
+            <div class="mode-select">
+                <div class="mode-btn" data-mode="normal">正常</div>
+            </div>
+            
+            <div class="pool-section">
+                <div class="pool-container">
+                    <div class="pool-title">
+                        <span>武器池</span>
+                        <button class="toggle-btn" data-pool="weapon">展开/收起</button>
+                    </div>
+                    <div class="pool-items" id="weaponPool">
+                        <!-- 武器池内容将通过JS动态生成 -->
+                    </div>
+                </div>
+                
+                <div class="pool-container">
+                    <div class="pool-title">
+                        <span>防具池</span>
+                        <button class="toggle-btn" data-pool="armor">展开/收起</button>
+                    </div>
+                    <div class="pool-items" id="armorPool">
+                        <!-- 防具池内容将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn reset-btn" id="startBtn">开始生成</button>
+            </div>
+        </div>
+        
+        <!-- 生成界面 -->
+        <div class="generation-screen" id="generationScreen">
+            <div class="section-title">生成武器和防具</div>
+            
+            <div class="number-select">
+                <div class="number-btn" data-number="1">1</div>
+                <div class="number-btn" data-number="2">2</div>
+                <div class="number-btn" data-number="3">3</div>
+                <div class="number-btn" data-number="4">4</div>
+                <div class="number-btn" data-number="5">5</div>
+                <div class="number-btn" data-number="6">6</div>
+                <div class="number-btn" data-number="7">7</div>
+                <div class="number-btn" data-number="8">8</div>
+                <div class="number-btn" data-number="9">9</div>
+            </div>
+            
+            <div class="result-container">
+                <div class="result-box">
+                    <div class="result-label">武器</div>
+                    <div class="result-content" id="weaponResult">未选择</div>
+                    <div class="result-detail" id="weaponDetail"></div>
+                </div>
+                
+                <div class="result-box">
+                    <div class="result-label">防具</div>
+                    <div class="result-content" id="armorResult">未选择</div>
+                    <div class="result-detail" id="armorDetail"></div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn back-btn" id="backBtn">返回</button>
+                <button class="action-btn reset-btn" id="resetBtn">重置</button>
+            </div>
+        </div>
+        
+        <!-- 添加自定义项目模态框 -->
+        <div class="add-modal" id="addModal">
+            <div class="modal-content">
+                <div class="modal-title" id="modalTitle">添加自定义项目</div>
+                <div class="input-group">
+                    <label for="itemName">项目名称</label>
+                    <input type="text" id="itemName" placeholder="请输入项目名称">
+                </div>
+                <div class="input-group" id="rangeInputGroup">
+                    <label for="itemRange" id="rangeLabel">攻击范围数字</label>
+                    <input type="number" id="itemRange" min="1" max="9" placeholder="请输入1-9的数字">
+                </div>
+                <div class="modal-buttons">
+                    <button class="modal-btn cancel-btn" id="cancelBtn">取消</button>
+                    <button class="modal-btn confirm-btn" id="confirmBtn">确认添加</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>魔曹操小程序 - 基于三国杀规则改编</p>
+        </div>
+    </div>
+    
+    <script>
+        // 初始池子数据
+        const initialPools = {
+            normal: {
+                weapon: [
+                    { name: "诸葛连弩", range: 1 },
+                    { name: "雌雄双股剑", range: 2 },
+                    { name: "青钢剑", range: 2 },
+                    { name: "古锭刀", range: 2 },
+                    { name: "寒冰剑", range: 2 },
+                    { name: "贯石斧", range: 3 },
+                    { name: "青龙偃月刀", range: 3 },
+                    { name: "丈八蛇矛", range: 3 },
+                    { name: "方天画戟", range: 4 },
+                    { name: "朱雀羽扇", range: 4 },
+                    { name: "麒麟弓", range: 5 }
+                ],
+                armor: [
+                    { name: "八卦阵", wordCount: 3 },
+                    { name: "仁王盾", wordCount: 3 },
+                    { name: "藤甲", wordCount: 2 },
+                    { name: "白银狮子", wordCount: 4 }
+                ]
+            },
+        };
+        // 当前状态
+        let currentMode = "normal";
+        let currentPools = JSON.parse(JSON.stringify(initialPools));
+        let selectedNumber = null;
+        let addingToPool = null; // 当前正在向哪个池子添加项目
+
+        // DOM元素
+        const selectionScreen = document.getElementById('selectionScreen');
+        const generationScreen = document.getElementById('generationScreen');
+        const weaponPool = document.getElementById('weaponPool');
+        const armorPool = document.getElementById('armorPool');
+        const startBtn = document.getElementById('startBtn');
+        const backBtn = document.getElementById('backBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const numberBtns = document.querySelectorAll('.number-btn');
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+        const addModal = document.getElementById('addModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const itemNameInput = document.getElementById('itemName');
+        const itemRangeInput = document.getElementById('itemRange');
+        const rangeInputGroup = document.getElementById('rangeInputGroup');
+        const rangeLabel = document.getElementById('rangeLabel');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        
+        // 结果展示元素
+        const weaponResult = document.getElementById('weaponResult');
+        const weaponDetail = document.getElementById('weaponDetail');
+        const armorResult = document.getElementById('armorResult');
+        const armorDetail = document.getElementById('armorDetail');
+
+        // 初始化
+        function init() {
+            renderPools();
+            setupEventListeners();
+        }
+
+        // 渲染池子
+        function renderPools() {
+            // 清空池子
+            weaponPool.innerHTML = '';
+            armorPool.innerHTML = '';
+            
+            // 渲染武器池
+            currentPools[currentMode].weapon.forEach((weapon, index) => {
+                const weaponItem = document.createElement('div');
+                weaponItem.className = 'pool-item';
+                weaponItem.innerHTML = `
+                    ${weapon.name}
+                    ${weapon.range ? `<div style="font-size:12px;color:#aaa;margin-top:5px;">攻击范围: ${weapon.range}</div>` : ''}
+                    ${weapon.custom ? '<div class="remove-btn" data-type="weapon" data-index="' + index + '">×</div>' : ''}
+                `;
+                weaponPool.appendChild(weaponItem);
+            });
+            
+            // 添加"+"按钮到武器池
+            const weaponAddBtn = document.createElement('div');
+            weaponAddBtn.className = 'pool-item add-item';
+            weaponAddBtn.innerHTML = '<span>+</span> 添加武器';
+            weaponAddBtn.addEventListener('click', () => openAddModal('weapon'));
+            weaponPool.appendChild(weaponAddBtn);
+            
+            // 渲染防具池
+            currentPools[currentMode].armor.forEach((armor, index) => {
+                const armorItem = document.createElement('div');
+                armorItem.className = 'pool-item';
+                armorItem.innerHTML = `
+                    ${armor.name}
+                    ${armor.wordCount ? `<div style="font-size:12px;color:#aaa;margin-top:5px;">字数: ${armor.wordCount}</div>` : ''}
+                    ${armor.custom ? '<div class="remove-btn" data-type="armor" data-index="' + index + '">×</div>' : ''}
+                `;
+                armorPool.appendChild(armorItem);
+            });
+            
+            // 添加"+"按钮到防具池
+            const armorAddBtn = document.createElement('div');
+            armorAddBtn.className = 'pool-item add-item';
+            armorAddBtn.innerHTML = '<span>+</span> 添加防具';
+            armorAddBtn.addEventListener('click', () => openAddModal('armor'));
+            armorPool.appendChild(armorAddBtn);
+            
+            // 为自定义项目的删除按钮添加事件
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const type = this.getAttribute('data-type');
+                    const index = parseInt(this.getAttribute('data-index'));
+                    removeCustomItem(type, index);
+                });
+            });
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 模式选择
+            modeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    modeBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentMode = this.getAttribute('data-mode');
+                    renderPools();
+                });
+            });
+            
+            // 默认选择正常模式
+            document.querySelector('.mode-btn[data-mode="normal"]').click();
+            
+            // 展开/收起池子
+            toggleBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const pool = this.getAttribute('data-pool');
+                    const poolElement = document.getElementById(pool + 'Pool');
+                    poolElement.classList.toggle('expanded');
+                });
+            });
+            
+            // 开始生成按钮
+            startBtn.addEventListener('click', function() {
+                selectionScreen.style.display = 'none';
+                generationScreen.style.display = 'block';
+                resetGeneration();
+            });
+            
+            // 返回按钮
+            backBtn.addEventListener('click', function() {
+                generationScreen.style.display = 'none';
+                selectionScreen.style.display = 'block';
+            });
+            
+            // 重置按钮
+            resetBtn.addEventListener('click', resetGeneration);
+            
+            // 数字选择按钮
+            numberBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    numberBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedNumber = parseInt(this.getAttribute('data-number'));
+                    generateResults();
+                });
+            });
+            
+            // 模态框相关事件
+            cancelBtn.addEventListener('click', closeAddModal);
+            confirmBtn.addEventListener('click', addCustomItem);
+            
+            // 点击模态框外部关闭
+            addModal.addEventListener('click', function(e) {
+                if (e.target === addModal) {
+                    closeAddModal();
+                }
+            });
+            
+            // 监听输入框回车键
+            itemNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addCustomItem();
+                }
+            });
+            
+            itemRangeInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addCustomItem();
+                }
+            });
+        }
+
+        // 打开添加项目模态框
+        function openAddModal(poolType) {
+            addingToPool = poolType;
+            addModal.style.display = 'flex';
+            
+            if (poolType === 'weapon') {
+                modalTitle.textContent = '添加自定义武器';
+                rangeLabel.textContent = '攻击范围数字';
+                itemRangeInput.placeholder = '请输入1-9的数字';
+                rangeInputGroup.style.display = 'block';
+            } else {
+                modalTitle.textContent = '添加自定义防具';
+                rangeInputGroup.style.display = 'none';
+            }
+            
+            // 清空输入框
+            itemNameInput.value = '';
+            itemRangeInput.value = '';
+            itemNameInput.focus();
+        }
+
+        // 关闭添加项目模态框
+        function closeAddModal() {
+            addModal.style.display = 'none';
+            addingToPool = null;
+            rangeInputGroup.style.display = 'block'; // 恢复显示
+        }
+
+        // 计算中文字符数（一个汉字算一个字）
+        function countChineseCharacters(str) {
+            // 去除空格，然后计算字符数
+            return str.replace(/\s+/g, '').length;
+        }
+
+        // 添加自定义项目
+        function addCustomItem() {
+            const name = itemNameInput.value.trim();
+            
+            if (!name) {
+                alert('请输入项目名称');
+                itemNameInput.focus();
+                return;
+            }
+            
+            // 检查是否已存在同名项目
+            const existingItems = addingToPool === 'weapon' 
+                ? currentPools[currentMode].weapon 
+                : currentPools[currentMode].armor;
+            
+            if (existingItems.some(item => item.name === name)) {
+                alert('已存在同名项目，请使用不同的名称');
+                itemNameInput.focus();
+                return;
+            }
+            
+            // 添加项目
+            const newItem = {
+                name: name,
+                custom: true
+            };
+            
+            if (addingToPool === 'weapon') {
+                const range = parseInt(itemRangeInput.value);
+                
+                if (isNaN(range) || range < 1 || range > 9) {
+                    alert('请输入1-9之间的有效数字');
+                    itemRangeInput.focus();
+                    return;
+                }
+                
+                newItem.range = range;
+                currentPools[currentMode].weapon.push(newItem);
+            } else {
+                // 防具：自动计算字数
+                const wordCount = countChineseCharacters(name);
+                newItem.wordCount = wordCount;
+                currentPools[currentMode].armor.push(newItem);
+            }
+            
+            // 重新渲染池子
+            renderPools();
+            
+            // 关闭模态框
+            closeAddModal();
+            
+            // 展开对应的池子
+            const poolElement = document.getElementById(addingToPool + 'Pool');
+            poolElement.classList.add('expanded');
+        }
+
+        // 删除自定义项目
+        function removeCustomItem(type, index) {
+            if (type === 'weapon') {
+                currentPools[currentMode].weapon.splice(index, 1);
+            } else {
+                currentPools[currentMode].armor.splice(index, 1);
+            }
+            
+            renderPools();
+        }
+
+        // 重置生成界面
+        function resetGeneration() {
+            numberBtns.forEach(btn => btn.classList.remove('active'));
+            selectedNumber = null;
+            weaponResult.textContent = '未选择';
+            weaponDetail.textContent = '';
+            armorResult.textContent = '未选择';
+            armorDetail.textContent = '';
+        }
+
+        // 生成结果
+        function generateResults() {
+            if (selectedNumber === null) return;
+            
+            // 生成武器
+            const weaponPool = currentPools[currentMode].weapon;
+            const matchingWeapons = weaponPool.filter(weapon => weapon.range === selectedNumber);
+            
+            let selectedWeapon;
+            if (matchingWeapons.length > 0) {
+                selectedWeapon = matchingWeapons[Math.floor(Math.random() * matchingWeapons.length)];
+            } else {
+                selectedWeapon = weaponPool[Math.floor(Math.random() * weaponPool.length)];
+            }
+            
+            weaponResult.textContent = selectedWeapon.name;
+            weaponDetail.textContent = `攻击范围: ${selectedWeapon.range}`;
+            
+            // 生成防具
+            const armorPool = currentPools[currentMode].armor;
+            const matchingArmors = armorPool.filter(armor => armor.wordCount === selectedNumber);
+            
+            let selectedArmor;
+            if (matchingArmors.length > 0) {
+                selectedArmor = matchingArmors[Math.floor(Math.random() * matchingArmors.length)];
+            } else {
+                selectedArmor = armorPool[Math.floor(Math.random() * armorPool.length)];
+            }
+            
+            armorResult.textContent = selectedArmor.name;
+            armorDetail.textContent = `字数: ${selectedArmor.wordCount}`;
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

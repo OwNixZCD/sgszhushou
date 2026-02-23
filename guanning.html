@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关宁技能程序</title>
+    <!-- SheetJS库用于读取Excel文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #fdbb2d;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #fdbb2d;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            background: #fdbb2d;
+            color: #1a2a6c;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            min-width: 120px;
+        }
+        
+        button:hover {
+            background: #ffcc44;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            min-height: 150px;
+        }
+        /* 技能按钮的box大小 */
+        .skill-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 150px;
+        }
+        
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .skill-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .skill-type {
+            font-size: 0.8rem;
+            color: #fdbb2d;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        /* 下面的是按钮弹出的css样式 */
+        .skill-description {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            border-radius: 0 0 10px 10px;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            z-index: 10;
+            transition: all 0.2s ease;
+            height: 200px;
+            overflow-y: auto;
+        }
+        
+        .skill-card.active .skill-description {
+            top: 0;
+        }
+        
+        .delete-confirm {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(200, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .delete-confirm p {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .delete-confirm-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .delete-confirm-buttons button {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            min-width: 60px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #aaa;
+            font-size: 1.2rem;
+            grid-column: 1 / -1;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: rgba(30, 30, 40, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #fdbb2d;
+            padding-bottom: 10px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #fdbb2d;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .skill-category {
+            margin-bottom: 25px;
+        }
+        
+        .category-title {
+            font-size: 1.2rem;
+            color: #fdbb2d;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .skill-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .skill-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .skill-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .skill-item-name {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .skill-item-desc {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #ccc;
+            margin-bottom: 10px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .skill-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .skill-item-actions button {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            min-width: auto;
+        }
+        
+        .add-skill-form {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #fdbb2d;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .skills-container {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .skill-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>关宁技能程序</h1>
+            <div class="subtitle">点击按钮随机获取技能，点击技能查看描述，双击删除</div>
+        </header>
+        
+        <div class="controls">
+            <button id="killBtn">龙诵（出牌阶段）</button>
+            <button id="resetBtn">重置</button>
+            <button id="addSkillBtn">增加技能</button>
+        </div>
+    
+        <div class="skills-container" id="skillsContainer">
+            <div class="empty-state">点击上方按钮获取技能</div>
+        </div>
+        
+        <footer>
+            关宁技能程序 &copy; 2025 - 三国杀十周年
+        </footer>
+    </div>
+
+    <!-- 技能管理模态框 -->
+    <div class="modal" id="skillModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">技能管理</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            
+            <div class="skill-category">
+                <h3 class="category-title">出牌阶段技能</h3>
+                <div class="skill-list" id="killSkillsList">
+                    <!-- 出牌阶段技能列表 -->
+                </div>
+            </div>
+            
+            <div class="add-skill-form">
+                <h3 class="category-title">添加新技能</h3>
+                <div class="form-group">
+                    <label for="skillType">技能类型</label>
+                    <select id="skillType">
+                        <option value="kill">出牌阶段技能</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="skillName">技能名称</label>
+                    <input type="text" id="skillName" placeholder="输入技能名称">
+                </div>
+                <div class="form-group">
+                    <label for="skillDescription">技能描述</label>
+                    <textarea id="skillDescription" placeholder="输入技能描述"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button id="saveSkillBtn">保存技能</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 从表格数据中提取技能信息
+        const skillData = {
+            kill: [
+                { name: "界义绝", description: "出牌阶段限一次，你可以弃置一张牌，然后令一名其他角色展示一张手牌：若其展示红色牌，你获得之并可以令其回复1点体力；黑色牌，本回合其不能使用或打出手牌且非锁定技失效，你对其使用♥【杀】伤害+1" },
+                { name: "界制衡", description: "出牌阶段限一次，你可以弃置任意张牌，然后摸等量的牌，若你弃置了所有手牌，你多摸一张牌。" },
+                { name: "谋国色", description: "出牌阶段限一次，你可以选择一项：1.将一张♦牌当乐不思蜀使用；2.弃置一张♦牌并弃置场上一张乐不思蜀。若如此做，你摸一张牌。" },
+                { name: "新反间", description: "出牌阶段限一次，你可以展示一张手牌并交给一名其他角色，然后其选择一项：1.展示所有手牌（至少一张），并弃置其装备区和手牌区里与你展示牌花色相同的所有牌；2.失去1点体力。" },
+                { name: "离间", description: "出牌阶段限一次，你可以弃置一张牌并选择两名男性角色，然后令其中一名角色视为对另一名角色使用一张【决斗】。" },
+                { name: "界青囊", description: "出牌阶段限一次，你可以弃置一张手牌并令一名角色回复1点体力。若你弃置的牌为红色，则可以再次发动此技能，但不能选择本回合选择过的角色。" },
+                { name: "界仁德", description: "出牌阶段每名角色限一次，你可以将任意张手牌交给一名其他角色；每阶段你因“仁德”交给其他角色第二张牌后，你可以视为使用一张基本牌。" },
+                { name: "界结姻", description: "出牌阶段限一次，你可以选择一名男性角色并选择一项:1.弃置一张手牌；2.将一张装备牌置入其装备区。若如此做，你与其体力值较高的角色摸一张牌，较低的角色回复1点体力。" },
+                { name: "奇袭", description: "你可以将一张黑色牌当【过河拆桥】使用。" },
+                { name: "界强袭", description: "出牌阶段限一次，你可以失去1点体力或弃置一张武器牌，并选择你攻击范围内的一名角色，然后对其造成1点伤害。" },
+                { name: "界驱虎", description: "出牌阶段限一次，你可以与一名体力值大于你的角色拼点：若你赢，该角色对其攻击范围内你选择的一名角色造成1点伤害：没赢，其对你造成1点伤害。" },
+                { name: "天义", description: "出牌阶段限一次，你可以与一名角色拼点：若你赢，本回合你使用【杀】的次数+1，你使用【杀】无距离限制且可以增加一个目标；没赢，本回合你不能使用【杀】。" },
+                { name: "乱击", description: "你可以将两张花色相同的手牌当一张【万箭齐发】使用。" },
+                { name: "酒池", description: "你可以将一张♠手牌当【酒】使用。" },
+                { name: "帝盟", description: "出牌阶段限一次，你可以弃置X张牌，然后令两名其他角色交换手牌（X为这两名角色的手牌数之差）。" },
+                { name: "直谏", description: "出牌阶段，你可以将手牌中的一张装备牌置入一名其他角色的装备区，然后摸一张牌。" },
+                { name: "枪舞", description: "出牌阶段限一次，你可以进行判定，本回合你使用点数大于判定结果的【杀】无次数限制，点数小于判定结果的【杀】无距离限制。" },
+                { name: "神攻心", description: "出牌阶段限一次，你可以观看一名其他角色的手牌，并可以展示其中一张♥牌，然后将此牌置于牌堆顶或弃置此牌。" },
+                { name: "散谣", description: "出牌阶段限一次，你可以弃置任意张牌，然后对场上等量名体力值最高的其他角色各造成1点伤害。" },
+                { name: "荐言", description: "出牌阶段各限一次，你可以声明一种颜色或类别，然后连续亮出牌堆顶的牌直到出现一张颜色和类别与你声明的相同的牌，然后你将此牌交给一名男性角色，其余牌置入弃牌堆。" },
+                { name: "甘露", description: "出牌阶段限一次，你可以令两名角色交换装备区里的牌，若这两名角色装备区里的牌数之差大于X，你弃置两张手牌（X为你已损失的体力值）。" },
+                { name: "界明策", description: "出牌阶段限一次，你可以将一张【杀】或装备牌交给一名其他角色，然后其选择一项：1.你与其各摸一张牌：2.视为对你选择的一名角色使用一张无距离限制的【杀】，若此【杀】造成伤害，你与其各摸一张牌。" },
+                { name: "界陷阵", description: "每回合限一次，出牌阶段，你可以与一名角色拼点：若你赢，本回合你对其使用牌无距离次数限制且无视其防具，你使用每种牌名第一次对其造成伤害时，此伤害+1：没赢，本回合你不能使用【杀】且结束阶段你展示任意张【杀】本回合不计入手牌上限。" },
+                { name: "安恤", description: "出牌阶段限一次，你可以选择两名手牌数不等的其他角色，其中手牌数较少的角色获得另一名角色的一张手牌并展示之，然后若这两名角色的手牌数相等，你回复1点体力。若展示的牌不为♠，你摸一张牌。" },
+                { name: "弓骑", description: "出牌阶段限一次，你可以弃置一张牌，若如此做，本回合你使用与之花色相同的【杀】无次数限制，其他角色均视为在你的攻击范围内。若此牌为装备牌，你可以弃置一名其他角色的一张牌。" },
+                { name: "奇策", description: "出牌阶段限一次，你可以将所有手牌当一张普通锦囊使用。" },
+                { name: "灭计", description: "出牌阶价段限一次，你可以选择一名有手牌的其他角色，然后展示一张武器牌或黑色锦囊牌并置于牌堆顶，然后令其选择一项：1. 弃置一张锦囊牌：2.依次弃置两张非锦囊牌。" },
+                { name: "慎行", description: "出牌阶段，你可以弃置X张牌，然后摸一张牌（X为你此阶段发动“慎行”的次数且至多为2）。" },
+                { name: "界明鉴", description: "出牌阶段限一次，你可以将所有手牌交给一名其他角色，然后该角色下回合的手牌上限+1，且出牌阶段内可以多使用一张【杀】，首次造成伤害后你判定一次“恢拓”。" },
+                { name: "怃戎", description: "出牌阶段限一次，你可以与一名其他角色同时展示一张手牌，若你展示【杀】其未展示【闪】，你对其造成1点伤害，若其展示【闪】你未展示【杀】，你获得其一张牌。" },
+                { name: "安国", description: "出牌阶段限一次，你可以令一名其他角色执行符合条件的项：1.若其手牌数为场上最少，其摸一张牌：2.若其体力值为场上最低其回复1点体力：3.若其装备区里的牌数为场上最少，其使用弃牌堆中的一张装备牌。然后你执行其未执行且你符合条件的项若你与其共计执行所有项，你可以重铸任意张牌。" },
+                { name: "怀异", description: "出牌阶段限一次，你可以展示所有手牌（至少一张），若颜色均相同，你摸一张牌。若包含不同颜色，你弃置其中一种颜色的所有牌，然后获得一至等量名其他角色的各一张牌，若你获得至少两张牌，你失去1点体力。" },
+                { name: "密诏", description: "出牌阶段限一次，你可以将所有手牌交给一名其他角色（至少一张），然后该角色与你选择的另一名其他角色拼点，赢的角色视为对没赢的角色使用一张无距离限制的【杀】。" },
+                { name: "去疾", description: "出牌阶段限一次，你可以弃置X张牌令至多等量名角色各回复1点体力，若你弃置黑色牌，你失去1点体力（X为你已损失的体力值）。" },
+                { name: "立牧", description: "出牌阶段，你可以将一张♦牌当【乐不思蜀】对自己使用，然后回复1点体力；若你的判定区里有牌，你对攻击范围内的角色使用牌无距离次数限制。" },
+                { name: "过论", description: "出牌阶段限一次，你可以展示一名其他角色的一张手牌，然后你可以展示一张牌与此牌交换，若你展示的点数：大于其展示的牌，其摸一张牌：小于其展示的牌，你摸一张牌。" },
+                { name: "督粮", description: "出牌阶段限一次，你可以获得一名其他角色的一张手牌并选择一项：1.该角色将牌堆顶的一张牌置于其武将牌上，其下个摸牌阶段开始时获得之;2.令其展示牌堆顶的两张牌，然后获得其中所有基本牌。" },
+                { name: "资援", description: "出牌阶段限一次，你可以将任意张点数之和为13的手牌展示并交给一名其他角色，然后其回复1点体力。" },
+                { name: "闪袭", description: "出牌阶段限一次，你可以弃置一张红色基本牌并选择你攻击范围内的一名角色，然后你弃置其一张牌，若其失去【闪】，你观看其手牌，否则其观看你的手牌。" },
+                { name: "雪恨", description: "出牌阶段限一次，你可以弃置一张红色牌并横置至多X名角色，然后对其中一名角色造成1点火焰伤害（X为你已损失的体力值且至少为1）。" },
+                { name: "颂词", description: "出牌阶段，你可以选择一项：1.令一名手牌数小于等于其体力值的角色摸两张牌；2.令一名手牌数大于其体力值的角色弃置两张牌。每名角色限一次。弃牌阶段结束时，若你对所有存活角色均发动过“颂词”，则你摸一张牌。" },
+                { name: "盗书", description: "出牌阶段限一次，你可以选择一名角色并选择一种花色，然后获得该角色一张手牌并展示。若此牌与你选择的花色相同，你对其造成1点伤害且此技能视为未发动过；若花色不同，则你交给该角色一张其他花色的手牌（若没有需展示所有手牌）。" },
+                { name: "蛮嗣", description: "出牌阶段限一次，你可以将所有手牌当一张【南蛮入侵】使用（至少一张）；一名角色受到【南蛮入侵】造成的伤害后，你摸一张牌。" },
+                { name: "奋钺", description: "出牌阶段限X次（X为与你不同阵营的存活角色数），你可以与一名角色拼点，若你赢，根据你拼点的牌的点数执行以下效果：小于等于K，视为对其使用一张雷【杀】；小于等于9，获得弃牌堆中的一张【杀】；小于等于5，获得其一张牌。" },
+                { name: "贪狈", description: "出牌阶段限一次，你可以令一名其他角色选择一项直到回合结束：1.你获得其区域里的一张牌，然后你不能对其使用牌：2.你对其使用牌无距离次数限制。" },
+                { name: "掠命", description: "出牌阶段限一次，你可以令一名装备区里牌数小于你的角色声明一个点数，然后你进行判定：若结果与其声明的点数相同，你对其造成2点伤害；不同，你获得其区域里的一张牌。" },
+                { name: "严教", description: "出牌阶段限一次，你可以展示牌堆顶的四张牌并选择一名其他角色，该角色可以将其中任意张牌分为点数之和相等的两组，你与其各获得其中一组，若至少两张牌未分组，本回合你的手牌上限-1。" },
+                { name: "机捷", description: "出牌阶段限一次，你可以观看牌堆底的一张牌，然后将此牌交给一名角色。" },
+                { name: "狂斧", description: "出牌阶段限一次，你可以弃置场上一张装备牌，然后视为使用一张无次数和距离限制的【杀】。若弃置的不是你的牌且【杀】没有造成伤害你弃置两张手牌；若弃置的是你的牌且【杀】造成了伤害，你摸两张牌。" },
+                { name: "谮毁", description: "当你使用【杀】或普通锦囊牌指定唯一目标时，你可以选择一名不为此牌目标的其他角色，令其选择一项：1.交给你一张牌，然后代替你成为此牌的使用者；2.成为此牌目标，本回合“谮毁”失效。" },
+                { name: "界战绝", description: "出牌阶段，你可以将所有手牌当一张【决斗】使用（至少一张），结算完成后，你和受伤角色各摸一张牌，若你此阶段因“战绝”摸过至少三张牌，此阶段“战绝”失效。" },
+                { name: "连环", description: "你可以将一张♣手牌当【铁索连环】使用或重铸。" },
+                { name: "奋迅", description: "出牌阶段限一次，你可以选择一名其他角色，本回合你计算与其的距离视为1，然后直到回合结束时，若你未对其造成过伤害，你弃置一张牌。" },
+                { name: "苦肉", description: "出牌阶段，你可以失去1点体力，然后摸两张牌。" },
+                { name: "定叛", description: "出牌阶段限X次，你可以令一名装备区有牌的角色摸一张牌并选择一项：1.令你弃置其装备区里的一张牌；2.获得其装备区里的所有牌，若如此做，你对其造成1点伤害（X为场上存活角色最多阵营的角色数）。" },
+                { name: "敏思", description: "出牌阶段限一次，你可以弃置任意张点数之和为13的牌，然后模2X张牌并展示之，直到回合结束，你展示的牌中：红色牌不计入你的手牌上限，黑色牌无距离限制（X为你弃置的牌数）。" },
+                { name: "连诛", description: "出牌阶段限一次，你可以展示一张牌并交给一名其他角色，若此牌为：红色，你摸一张牌；黑色，其选择弃置两张牌或令你摸两张牌。" },
+                { name: "摧坚", description: "出牌阶段限一次，你可以选择一名有手牌的其他角色，若其手牌中有【闪】，其将所有【闪】和防具牌交给你，然后你交给其等量的牌。" },
+                { name: "血诏", description: "出牌阶段限一次，你可以弃置一张手牌并选择至多X名其他角色（X为你的体力上限），这些角色依次选择一项：1.交给你一张牌，然后其摸一张牌，本回合你使用【杀】的次数+1；2.本回合不能响应你使用的牌。若没有角色交给你牌，你将手牌摸至体力上限。" },
+                { name: "倾城", description: "出牌阶价段限一次，你可以与一名手牌数不大于你的男性角色交换手牌。" },
+                { name: "黩武", description: "出牌阶段，你可以弃置X张牌并选择你攻击范围内的一名角色，然后对其造成1点伤害（X为其的体力值），若其因此进入濒死状态且未死亡，结算完成，你失去1点体力，本回合“黩武”失效。" },
+                { name: "承赏", description: "出牌阶段限一次，当你对其他角色使用的牌结算完成后，若此牌未造成过伤害，你可以连续亮出牌堆直到出现一张类型相同的牌，然后你获得之并弃置其他亮出的牌。" },
+                { name: "危盟", description: "出牌阶段限一次，你可以获得一名其他角色的至多X张手牌并展示之（X为你的体力值），然后展示并交给其等量的牌。若你获得的牌点数之和大于你交给其的牌点数之和，你弃置其区域里的一张牌；小于你交给其的牌点数之和，你摸一张牌。" },
+                { name: "挑衅", description: "出牌阶段限一次，你可以选择一名攻击范围内包含你的角色，其需对你使用一张【杀】，否则你弃置其一张牌。" },
+                { name: "图南", description: "出牌阶段限一次，你可以令一名其他角色观看牌堆顶的一张牌，然后其选择一项：1.无距离限制使用此牌：2.将此牌当【杀】使用。" },
+                { name: "颂蜀", description: "出牌阶段限一次，你可以与一名角色拼点：若你赢，你重置“颂蜀”；没赢，你与其各摸两张牌。" },
+                { name: "魄袭", description: "出牌阶段限一次，你可以观看一名其他角色的手牌，然后你可以弃置你与其手里共计四张不同花色的牌，若如此做，你根据此次你的弃牌数量执行以下效果：没有，减1点体力上限；一张，结束出牌阶段且本回合手牌上限-1；三张、回复1点体力；四张，摸四张牌。" },
+                { name: "怒嗔", description: "出牌阶段限一次，你可以展示一名其他角色一张手牌，然后你选择一项：1.弃置任意张同花色的牌，对其造成等量的伤害；2.展示其手牌，获得其中所有此花色的牌。" },
+                { name: "勘集", description: "出牌阶段限两次，你可以展示所有手牌，若花色均不相同，你摸两张牌，然后若你的手牌中包含四种花色，你跳过本回合的弃牌阶段。" },
+                { name: "断粮", description: "你可以将一张黑色非锦囊牌当【兵粮寸断】使用；你对手牌数不小于你的角色使用【兵粮寸断】无距离限制。" },
+                { name: "火计", description: "你可以将一张红色手牌当【火攻】使用。" },
+                { name: "品第", description: "出牌阶段，你可以弃置一张牌并选择一名其他角色（不能弃置相同类型牌且不能指定相同的角色），然后令其执行一项：1.摸X张牌；2.弃置X张牌（X为本回合此技能发动次数）。若其已受伤，你须横置自身。" },
+                { name: "朝凤", description: "出牌阶段限一次，当你使用牌造成伤害时，你可以弃置一张手牌，然后摸一张牌，若你弃置的牌与造成伤害的牌颜色相同，改为摸两张，类别相同，此伤害+1。" },
+                { name: "营说", description: "出牌阶段限一次，你可以将一张牌交给你攻击范围内的一名角色，然后其选择一项：1.交给你至少两张装备牌；2.你对其造成1点伤害。" },
+                { name: "同礼", description: "出牌阶段，当你使用牌指定目标后，若你此阶段使用过的牌数等于X，你可以展示手牌并令此牌多结算X次（X为你手牌中包含的花色数）。" },
+                { name: "清谈", description: "出牌阶段限一次，你可以令所有角色同时展示一张手牌，然后你可以获得其中一种花色的所有牌，弃置其余花色的牌，被你获得牌的角色各摸一张牌。" },
+                { name: "长驱", description: "出牌阶段限一次，你可以从你的上家或下家起选择任意名座次连续的其他角色，以此法选择的首名角色获得战舰标记。获得战舰标记的角色需要选择一项：1.交给你X张手牌，然后将战舰标记移动到下个目标；2.本回合受到的属性伤害+1，然后横置之（X为选项一被选择的次数且至少为1）。" },
+                { name: "谏国", description: "出牌阶段限一次，你可以令一名角色：1.摸一张牌，然后弃置一半数量的手牌；2.弃一张牌，然后摸当前手牌数一半数量的牌（向上取整）。" },
+                { name: "狐魅", description: "出牌阶段每项限一次，你可令一名体力值至多为X的角色（X为你本阶段造成的伤害数）：1.摸一张牌；2.交给你一张牌；3.回复1点体力。" },
+                { name: "彩妆", description: "出牌阶段限一次，你可以弃置任意张牌，然后令你的手牌对其他角色可见直到此流程结束，你重复摸牌直到手牌中至少拥有与弃牌花色数相同的花色数。" },
+                { name: "文灿", description: "出牌阶段限一次，你可以选择至多两名体力值不同的其他角色，这些角色依次选择一项：1.弃置两张花色不同的牌；2.你本回合对其使用牌无次数和距离限制。" },
+                { name: "自固", description: "出牌阶段限一次，你可弃置一张牌，然后获得场上一张装备牌。若你没有因此获得其他角色的牌，你摸一张牌。" },
+                { name: "救陷", description: "出牌阶段限一次，你可以重铸一半数量的手牌（向上取整），然后视为使用一张【决斗】。此牌对目标角色造成伤害后，你可令其攻击范围内的一名其他角色回复1点体力。" },
+                { name: "谏诤", description: "出牌阶段限一次，你可观看一名其他角色的手牌，然后若其中有你可以使用的牌，你可以获得并使用其中一张。若此牌指定了该角色为目标，则横置你与其的武将牌，然后其观看你的手牌。" },
+                { name: "心幽", description: "出牌阶段限一次，你可以回满体力并将手牌摸至体力上限。若你因此摸超过两张牌，结束阶段你失去1点体力；若你因此回复体力，结束阶段你弃置一张牌。" },
+                { name: "驰应", description: "出牌阶段限一次，你可以选一名体力值小于等于你的角色，其可以选择弃置其攻击范围内任意名其他角色各一张牌。若你选择的是其他角色，该角色获得其中的基本牌。" },
+                { name: "介绫", description: "出牌阶段每种花色限一次，你可以将两张花色不同的手牌当无距离和次数限制的【杀】使用。若此【杀】：造成伤害，其失去1点体力；没造成伤害，其获得一个“生妒”标记。" },
+                { name: "间计", description: "出牌阶段限一次，你可令至多X名相邻角色各弃置一张牌。然后其中手牌数最多的角色可以视为对一名其他以此法被选择的角色使用一张【杀】（X为你的攻击范围）。" },
+                { name: "强峙", description: "出牌阶段限一次，你可以选择一名其他角色，然后弃置你与其共计三张牌。若其失去三张牌，其对你造成1点伤害；若你失去三张牌，你对其造成1点伤害。" },
+                { name: "琼英", description: "出牌阶段限一次，你可以移动场上一张牌，然后你弃置一张同花色的手牌（若没有需展示手牌）。" },
+                { name: "违忤", description: "出牌阶段限一次，你可以将一张红色牌当无距离限制的【顺手牵羊】使用。" },
+                { name: "花火", description: "出牌阶段限一次，你可以将一张红色手牌当无次数限制的火【杀】使用。若目标角色有“硝引”牌，你可以令所有有“硝引”牌的角色均成为此【杀】的目标且无距离限制。" },
+                { name: "良秀", description: "出牌阶段每种类型的牌限一次，你可以弃置两张不同类型的牌并摸两张牌，然后展示所有手牌，若如此做，你可以将两张与你弃置类型均不同的牌交给任意角色。" },
+                { name: "数荐", description: "出牌阶段限三次，你可以交给一名其他角色一张牌，然后其选择一项：1.令你摸三张牌并弃置两张牌；2.视为使用三张【过河拆桥】，本回合此技能失效。此阶段再次发动此技能时，选项中数字-1。" },
+                { name: "纵势", description: "出牌阶段，你可展示一张基本牌或普通锦囊牌，然后展示所有手牌并将此花色的所有其他手牌当这张牌使用。此牌可指定的目标数改为以此法使用的牌数。" },
+                { name: "抚黎", description: "出牌阶段限一次，你可以展示所有手牌并弃置一种类别的所有手牌，然后摸弃置牌的牌名字数之和张牌（摸牌数至多为手牌最多角色的手牌数），然后令一名角色的攻击范围-1直到你的下个回合开始。若弃置牌中包含伤害牌，则改为其攻击范围减至0直到你的下回合开始。" },
+                { name: "梁燕", description: "出牌阶段限一次，你可以选择一名其他角色，你摸/弃至多两张牌，该角色弃/摸等量的牌。然后若你与其手牌数相同，以此法摸牌的角色跳过下一个弃牌阶段。" },
+                { name: "溃阵", description: "出牌阶段限一次，你可以令一名手牌数或体力值大于等于你的角色视为对你使用一张【决斗】：若你因此受到伤害，你展示其手牌并获得其中所有【杀】以此法获得的【杀】无次数限制且对其他角色可见直到回合结束；若你没有因此受到伤害，其失去1点体力。" },
+                { name: "凶算", description: "出牌阶段限一次，你可以弃置一张手牌并选择一名角色，对其造成1点伤害，然后你摸三张牌。若你没有选择自己，则你失去1点体力。" },
+                { name: "滤心", description: "出牌阶段限一次，你可以展示并交给一名其他角色一张手牌然后你选一项：1.令其摸X张牌并展示之：2.你弃置其X张手牌（X为游戏轮数且最多为5）。若其获得/弃置了你交给其牌名相同的牌，该角色下次发动技能时回复/失去1点体力。" },
+                { name: "惠济", description: "出牌阶段限一次，你可以令一名角色摸两张牌或移动场上的一张装备牌。若其手牌数大于等于存活人数，其视为使用一张【五谷丰登】，以此法使用的【五谷丰登】改为从该角色手牌中挑选。" },
+                { name: "悖逆", description: "出牌阶段限一次，你可以将手牌调整至体力上限张，然后令一名角色视为对另一名角色使用一张【杀】，这两名角色的非锁定技本回合失效。" },
+                { name: "寄春", description: "出牌阶段各限一次，你可以展示一张牌，然后选择一项：1.将此牌交给一名手牌数小于你的角色，然后你摸X张牌；2.弃置此牌，并弃置一名手牌数大于你的角色区域内至多X张牌（X为此牌名字数）。" }
+            ]
+        };
+
+        // 从localStorage加载技能数据，如果没有则使用默认数据
+        function loadSkillData() {
+            const savedData = localStorage.getItem('soulFiveTigerSkills');
+            if (savedData) {
+                return JSON.parse(savedData);
+            }
+            return skillData;
+        }
+
+        // 保存技能数据到localStorage
+        function saveSkillData(data) {
+            localStorage.setItem('soulFiveTigerSkills', JSON.stringify(data));
+        }
+
+        // 当前使用的技能数据
+        let currentSkillData = loadSkillData();
+
+        // 游戏状态
+        let currentSkills = [];
+        let clickTimers = {};
+
+        // DOM元素
+        const killBtn = document.getElementById('killBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const addSkillBtn = document.getElementById('addSkillBtn');
+        const skillsContainer = document.getElementById('skillsContainer');
+        const skillModal = document.getElementById('skillModal');
+        const closeModal = document.getElementById('closeModal');
+        const saveSkillBtn = document.getElementById('saveSkillBtn');
+
+        // 获取随机技能
+        function getRandomSkill(type) {
+            const skills = currentSkillData[type];
+            if (skills && skills.length > 0) {
+                const randomIndex = Math.floor(Math.random() * skills.length);
+                return skills[randomIndex];
+            }
+            return null;
+        }
+
+        // 添加技能到展示区
+        function addSkillToDisplay(skill, type) {
+            // 检查是否已达到最大技能数
+            if (currentSkills.length >= 1) {
+                alert("最多只能展示1个技能！");
+                return;
+            }
+            
+            // 检查是否已存在相同技能
+            if (currentSkills.some(s => s.name === skill.name && s.type === type)) {
+                alert("该技能已存在！");
+                return;
+            }
+            
+            // 添加技能到当前技能列表
+            const skillWithType = { ...skill, type };
+            currentSkills.push(skillWithType);
+            
+            // 更新显示
+            updateSkillsDisplay();
+        }
+
+        // 更新技能显示
+        function updateSkillsDisplay() {
+            skillsContainer.innerHTML = '';
+            
+            if (currentSkills.length === 0) {
+                skillsContainer.innerHTML = '<div class="empty-state">点击上方按钮获取技能</div>';
+                return;
+            }
+            
+            currentSkills.forEach(skill => {
+                const skillCard = document.createElement('div');
+                skillCard.className = 'skill-card';
+                skillCard.dataset.name = skill.name;
+                skillCard.dataset.type = skill.type;
+                
+                const typeText = {
+                    'kill': '出牌阶段'
+                };
+                
+                skillCard.innerHTML = `
+                    <div class="skill-name">${skill.name}</div>
+                    <div class="skill-type">${typeText[skill.type]}</div>
+                    <div class="skill-description">${skill.description}</div>
+                `;
+                
+                // 点击事件 - 显示/隐藏描述
+                skillCard.addEventListener('click', function(e) {
+                    // 如果已经显示了删除确认，则不处理点击事件
+                    if (this.querySelector('.delete-confirm')) {
+                        return;
+                    }
+                    
+                    const key = skill.name + skill.type;
+                    
+                    // 如果已经有计时器，说明是双击
+                    if (clickTimers[key]) {
+                        clearTimeout(clickTimers[key]);
+                        delete clickTimers[key];
+                        showDeleteConfirm(this, skill.name, skill.type);
+                    } else {
+                        // 第一次点击，显示描述
+                        this.classList.toggle('active');
+                        
+                        // 设置计时器，如果一定时间内没有再次点击，则清除计时器
+                        clickTimers[key] = setTimeout(() => {
+                            delete clickTimers[key];
+                        }, 500);
+                    }
+                });
+                
+                skillsContainer.appendChild(skillCard);
+            });
+        }
+
+        // 显示删除确认
+        function showDeleteConfirm(card, name, type) {
+            // 先隐藏描述
+            card.classList.remove('active');
+            
+            const deleteConfirm = document.createElement('div');
+            deleteConfirm.className = 'delete-confirm';
+            deleteConfirm.innerHTML = `
+                <p>是否删除本技能？</p>
+                <div class="delete-confirm-buttons">
+                    <button class="confirm-delete">确认</button>
+                    <button class="cancel-delete">取消</button>
+                </div>
+            `;
+            
+            card.appendChild(deleteConfirm);
+            
+            // 确认删除
+            deleteConfirm.querySelector('.confirm-delete').addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeSkill(name, type);
+            });
+            
+            // 取消删除
+            deleteConfirm.querySelector('.cancel-delete').addEventListener('click', function(e) {
+                e.stopPropagation();
+                deleteConfirm.remove();
+            });
+        }
+
+        // 移除技能
+        function removeSkill(name, type) {
+            currentSkills = currentSkills.filter(skill => !(skill.name === name && skill.type === type));
+            delete clickTimers[name + type];
+            updateSkillsDisplay();
+        }
+
+        // 重置所有技能
+        function resetSkills() {
+            currentSkills = [];
+            clickTimers = {};
+            updateSkillsDisplay();
+        }
+
+        // 打开技能管理模态框
+        function openSkillModal() {
+            // 更新技能列表显示
+            updateSkillLists();
+            skillModal.style.display = 'flex';
+        }
+
+        // 关闭技能管理模态框
+        function closeSkillModal() {
+            skillModal.style.display = 'none';
+        }
+
+        // 更新技能列表显示
+        function updateSkillLists() {
+            const types = ['kill'];
+            const typeNames = {
+                'kill': '出牌阶段技能'
+            };
+            
+            types.forEach(type => {
+                const listElement = document.getElementById(`${type}SkillsList`);
+                listElement.innerHTML = '';
+                
+                if (currentSkillData[type] && currentSkillData[type].length > 0) {
+                    currentSkillData[type].forEach((skill, index) => {
+                        const skillItem = document.createElement('div');
+                        skillItem.className = 'skill-item';
+                        
+                        skillItem.innerHTML = `
+                            <div class="skill-item-header">
+                                <div class="skill-item-name">${skill.name}</div>
+                                <div class="skill-item-actions">
+                                    <button class="delete-skill" data-type="${type}" data-index="${index}">删除</button>
+                                </div>
+                            </div>
+                            <div class="skill-item-desc">${skill.description}</div>
+                        `;
+                        
+                        listElement.appendChild(skillItem);
+                    });
+                } else {
+                    listElement.innerHTML = '<div style="color: #aaa; text-align: center; padding: 10px;">暂无技能</div>';
+                }
+            });
+            
+            // 添加删除按钮事件
+            document.querySelectorAll('.delete-skill').forEach(button => {
+                button.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const index = parseInt(this.dataset.index);
+                    
+                    if (confirm(`确定要删除技能 "${currentSkillData[type][index].name}" 吗？`)) {
+                        currentSkillData[type].splice(index, 1);
+                        saveSkillData(currentSkillData);
+                        updateSkillLists();
+                    }
+                });
+            });
+        }
+
+        // 保存新技能
+        function saveNewSkill() {
+            const type = document.getElementById('skillType').value;
+            const name = document.getElementById('skillName').value.trim();
+            const description = document.getElementById('skillDescription').value.trim();
+            
+            if (!name) {
+                alert('请输入技能名称！');
+                return;
+            }
+            
+            if (!description) {
+                alert('请输入技能描述！');
+                return;
+            }
+            
+            // 检查是否已存在同名技能
+            if (currentSkillData[type].some(skill => skill.name === name)) {
+                alert('该技能名称已存在！');
+                return;
+            }
+            
+            // 添加新技能
+            currentSkillData[type].push({ name, description });
+            saveSkillData(currentSkillData);
+            
+            // 更新显示
+            updateSkillLists();
+            
+            // 清空表单
+            document.getElementById('skillName').value = '';
+            document.getElementById('skillDescription').value = '';
+            
+            alert('技能添加成功！');
+        }
+    
+        // 事件监听
+        killBtn.addEventListener('click', function() {
+            const skill = getRandomSkill('kill');
+            if (skill) {
+                addSkillToDisplay(skill, 'kill');
+            }
+        });
+
+        resetBtn.addEventListener('click', resetSkills);
+        addSkillBtn.addEventListener('click', openSkillModal);
+        closeModal.addEventListener('click', closeSkillModal);
+        saveSkillBtn.addEventListener('click', saveNewSkill);
+
+        // 初始化显示
+        updateSkillsDisplay();
+    </script>
+</body>
+</html>
