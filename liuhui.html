@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>刘徽 · 割圆术 · 点亮顺序移除</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', '华文楷体', 'KaiTi', 'Microsoft YaHei', sans-serif;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(145deg, #1e3c2c 0%, #2a5a3a 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .card {
+            max-width: 700px;
+            width: 100%;
+            background: #efe6d7;
+            background-image: radial-gradient(circle at 30% 20%, #f8f0e0 0%, #dac8b0 100%);
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.6), 0 0 0 2px #b59e7b inset, 0 0 0 5px #e3d1b5 inset;
+            padding: 24px 20px 30px;
+            transition: all 0.2s;
+        }
+        h1 {
+            text-align: center;
+            margin: 0 0 8px 0;
+            font-weight: 400;
+            font-size: 2.4rem;
+            letter-spacing: 6px;
+            color: #2d2418;
+            text-shadow: 3px 3px 0 #b5926a, 6px 6px 0 rgba(0,0,0,0.1);
+            font-family: '华文楷体', 'KaiTi', cursive;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-top: -8px;
+            margin-bottom: 18px;
+            color: #4a3723;
+            font-style: italic;
+            border-bottom: 2px dashed #ab8b62;
+            padding-bottom: 10px;
+        }
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0 10px;
+            filter: drop-shadow(8px 8px 6px #3f2e1c);
+            position: relative;
+            cursor: pointer;
+        }
+        canvas {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1/1;
+            display: block;
+            border-radius: 50%;
+            background: #2d3e2b;
+            background: radial-gradient(circle at 30% 30%, #4b6e3f, #1f3a1d);
+            box-shadow: 0 0 0 6px #ab8b62, 0 12px 28px black;
+            border: 2px solid #6d4f32;
+            touch-action: manipulation;
+        }
+        .info-panel {
+            background: #e6d8c4;
+            border-radius: 60px 60px 30px 30px;
+            padding: 18px 16px 20px;
+            margin: 18px 0 12px;
+            border: 3px solid #b48c5e;
+            box-shadow: inset 0 2px 8px #9f835d, 0 8px 0 #5f422b;
+        }
+        .status-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            row-gap: 10px;
+            font-size: 1.2rem;
+            background: #493e2b50;
+            padding: 10px 18px;
+            border-radius: 40px;
+            margin-bottom: 14px;
+            backdrop-filter: blur(2px);
+            color: #1a2c15;
+            font-weight: 500;
+        }
+        .available-badge {
+            background: #2b6e4e;
+            color: #f9f1d2;
+            padding: 5px 20px;
+            border-radius: 30px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border: 2px solid #f5cd7a;
+            box-shadow: 0 0 0 2px #17422e;
+            min-width: 70px;
+            text-align: center;
+        }
+        .lit-counter {
+            background: #362713;
+            color: #f5d79c;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+        }
+        .removed-box {
+            background: #342b1c;
+            color: #ffebc0;
+            padding: 12px 18px;
+            border-radius: 40px;
+            font-size: 1.3rem;
+            border: 2px solid #ccaa73;
+            margin: 8px 0 12px;
+            word-break: break-word;
+            line-height: 1.6;
+        }
+        .removed-box span {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffe394;
+            margin: 0 2px;
+            display: inline-block;
+        }
+        .reward-message {
+            background: #774e2b;
+            color: #ffeec2;
+            border-radius: 28px;
+            padding: 10px 16px;
+            font-size: 1.1rem;
+            text-align: center;
+            border: 2px solid #e9b56a;
+            margin: 12px 0 5px;
+            font-weight: 500;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn {
+            background: #b48b54;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            border-radius: 60px;
+            color: #1d281b;
+            box-shadow: 0 7px 0 #5f3f22, 0 10px 12px black;
+            cursor: pointer;
+            transition: 0.07s linear;
+            flex: 1 1 auto;
+            min-width: 160px;
+            border: 2px solid #ebc285;
+            text-shadow: 0 1px 0 #ffddb0;
+            letter-spacing: 2px;
+            touch-action: manipulation;
+        }
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #5f3f22, 0 6px 10px black;
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            transform: translateY(4px);
+            box-shadow: 0 3px 0 #5f3f22;
+            pointer-events: none;
+        }
+        .btn.reset {
+            background: #7c5f40;
+            color: #f6e7d3;
+            box-shadow: 0 7px 0 #3d2e1d, 0 10px 12px black;
+        }
+        .footer-note {
+            text-align: center;
+            color: #3b2d1c;
+            font-size: 0.95rem;
+            margin-top: 18px;
+            border-top: 1px dashed #957553;
+            padding-top: 14px;
+        }
+        .hint-tap {
+            text-align: center;
+            font-size: 1.1rem;
+            background: #7a5d3f60;
+            border-radius: 60px;
+            padding: 5px 15px;
+            color: #213b1a;
+            margin-top: 8px;
+            backdrop-filter: blur(2px);
+            border: 1px solid #be9f73;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>割 圆</h1>
+    <div class="subtitle">刘徽 · 一将成名</span></div>
+
+    <div class="canvas-container">
+        <canvas id="circleCanvas" width="400" height="400"></canvas>
+    </div>
+    <div class="hint-tap">👉 点击数字开始割圆 👈</div>
+
+    <div class="info-panel">
+        <div class="status-row">
+            <span> 可点亮</span>
+            <span class="available-badge" id="availableCount">0</span>
+            <span class="lit-counter" id="litProgress">0/13</span>
+        </div>
+
+        <div class="removed-box">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 1.3rem;"> 徽率 (首末点亮)</span>
+                <span id="removedList" style="font-size: 2rem; line-height: 1.4;">—</span>
+            </div>
+        </div>
+
+        <div class="reward-message" id="rewardMessage">
+            ⚜️ 点击圆点，开始割圆 ⚜️
+        </div>
+
+        <div class="button-group">
+            <button class="btn reset" id="resetBtn">♻️ 重演 · 割圆</button>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        《九章算术注》
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 基础点数 ----------
+        const BASE_POINTS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+
+        // ---------- 全局状态 ----------
+        let ring = [];               // 当前圆环的点数数组（顺序排列）
+        let lit = [];                // 是否已点亮 (boolean[])
+        let allowed = [];            // 当前可点亮的点 (boolean[])
+        let removed = [];            // 已移除的点数（收集到的首尾）
+
+        // 记录本轮第一个点亮的索引和最后一个点亮的索引
+        let firstLitIndex = null;    // 本轮第一次点亮时的索引
+        let lastLitIndex = null;     // 本轮最后一次点亮时的索引
+
+        let lastReward = '';          // 最近一次奖励信息
+
+        // 存储每个点的画布坐标
+        let pointsPos = [];           // 存放 { x, y, index }
+
+        // DOM 元素
+        const canvas = document.getElementById('circleCanvas');
+        const ctx = canvas.getContext('2d');
+        const availableSpan = document.getElementById('availableCount');
+        const litProgressSpan = document.getElementById('litProgress');
+        const removedSpan = document.getElementById('removedList');
+        const rewardMsgSpan = document.getElementById('rewardMessage');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // ---------- 辅助函数 ----------
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // ---------- 更新 allowed 数组 ----------
+        function updateAllowed() {
+            if (ring.length === 0) {
+                allowed = [];
+                return;
+            }
+
+            // 如果没有任何点亮，则所有点都可作为起点
+            if (lit.every(v => v === false)) {
+                allowed = new Array(ring.length).fill(true);
+                return;
+            }
+
+            // 可点亮：未点亮 且 至少有一个邻居已点亮
+            allowed = new Array(ring.length).fill(false);
+            for (let i = 0; i < ring.length; i++) {
+                if (lit[i]) continue;
+                const left = (i - 1 + ring.length) % ring.length;
+                const right = (i + 1) % ring.length;
+                if (lit[left] || lit[right]) {
+                    allowed[i] = true;
+                }
+            }
+        }
+
+        // ---------- 检查是否全部点亮，若是则触发完成 ----------
+        function checkAllLitAndFinish() {
+            if (ring.length === 0) return false;
+            const allLit = lit.every(v => v === true);
+            if (allLit) {
+                finishCircle();
+                return true;
+            }
+            return false;
+        }
+
+        // ---------- 完成一轮割圆（按照点亮顺序移除首末）----------
+        function finishCircle() {
+            if (ring.length === 0) return;
+
+            // 特殊处理：当圆环只剩下3个点时，不再移除，而是重置点亮状态，形成循环
+            if (ring.length === 3) {
+                // 重置所有点为未点亮，且全部可点亮
+                lit = new Array(3).fill(false);
+                allowed = new Array(3).fill(true);
+                // 重置本轮记录
+                firstLitIndex = null;
+                lastLitIndex = null;
+                lastReward = '🌀 股算·三才循环 🌀 (可反复点亮)';
+                updateDisplay();
+                drawCircle();
+                return;
+            }
+
+            // 正常移除：根据 firstLitIndex 和 lastLitIndex 移除对应的点数
+            // 注意：这两个索引一定有效，且对应的点已点亮
+            const firstIdx = firstLitIndex;
+            const lastIdx = lastLitIndex;
+
+            // 获取对应的点数
+            const firstPoint = ring[firstIdx];
+            const lastPoint = ring[lastIdx];
+
+            // 记录奖励信息
+            if (firstIdx === lastIdx) {
+                lastReward = `✨ 获得 ${firstPoint} ✨ (首末合一)`;
+            } else {
+                lastReward = `✨ 获得 ${firstPoint} · ${lastPoint} ✨`;
+            }
+
+            // 将首末加入 removed (若相同只加一次)
+            if (firstIdx === lastIdx) {
+                removed.push(firstPoint);
+            } else {
+                removed.push(firstPoint, lastPoint);
+            }
+
+            // 生成新圆环：剔除 firstIdx 和 lastIdx 对应的元素（如果相同则只剔除一个）
+            const newRing = [];
+            for (let i = 0; i < ring.length; i++) {
+                if (i === firstIdx || i === lastIdx) continue;
+                newRing.push(ring[i]);
+            }
+            ring = newRing;
+
+            if (ring.length === 0) {
+                lit = [];
+                allowed = [];
+            } else {
+                lit = new Array(ring.length).fill(false);
+                allowed = new Array(ring.length).fill(true); // 新环全部可点亮
+            }
+
+            // 重置本轮点亮记录
+            firstLitIndex = null;
+            lastLitIndex = null;
+
+            updateDisplay();
+            drawCircle();
+
+            // 如果圆环变空，最后一条信息改为结束语
+            if (ring.length === 0) {
+                lastReward = '🏁 割圆终尽 · 徽率已成 🏁';
+                rewardMsgSpan.textContent = lastReward;
+            }
+        }
+
+        // ---------- 尝试点亮 index 处的点数 ----------
+        function tryLight(index) {
+            if (ring.length === 0) return false;
+            if (index < 0 || index >= ring.length) return false;
+            if (lit[index]) return false;
+            if (!allowed[index]) return false;
+
+            // 点亮
+            lit[index] = true;
+
+            // 记录本轮第一个和最后一个点亮索引
+            if (firstLitIndex === null) {
+                // 本轮第一次点亮
+                firstLitIndex = index;
+                lastLitIndex = index;
+            } else {
+                // 后续点亮更新最后一个
+                lastLitIndex = index;
+            }
+
+            // 重新计算可点亮
+            updateAllowed();
+
+            updateDisplay();
+            drawCircle();
+
+            // 检查是否全部点亮
+            checkAllLitAndFinish();
+
+            return true;
+        }
+
+        // ---------- 重置游戏 ----------
+        function resetGame() {
+            const shuffled = shuffleArray([...BASE_POINTS]);
+            ring = [...shuffled];
+            lit = new Array(ring.length).fill(false);
+            allowed = new Array(ring.length).fill(true);
+            removed = [];
+            firstLitIndex = null;
+            lastLitIndex = null;
+            lastReward = '⚜️ 点击圆点，开始割圆 ⚜️';
+            updateDisplay();
+            drawCircle();
+        }
+
+        // ---------- 更新所有文本显示 ----------
+        function updateDisplay() {
+            // 可点亮数量
+            const avail = allowed.filter(v => v).length;
+            availableSpan.textContent = avail;
+
+            // 点亮进度
+            const litCount = lit.filter(v => v).length;
+            litProgressSpan.textContent = `${litCount}/${ring.length}`;
+
+            // 已移除点数（徽率）—— 用间隔号连接所有移除的点
+            if (removed.length === 0) {
+                removedSpan.innerHTML = '—';
+            } else {
+                const removedStr = removed.join(' · ');
+                removedSpan.innerHTML = `<span>${removedStr}</span>`;
+            }
+
+            rewardMsgSpan.textContent = lastReward;
+        }
+
+        // ---------- 绘制圆环，并记录点坐标（无虚线圆环）----------
+        function drawCircle() {
+            ctx.clearRect(0, 0, 400, 400);
+            pointsPos = [];
+
+            if (ring.length === 0) {
+                ctx.font = 'bold 24px "KaiTi", "华文楷体", serif';
+                ctx.fillStyle = '#efe6cf';
+                ctx.shadowColor = '#000';
+                ctx.shadowBlur = 12;
+                ctx.fillText('⚪ 圆满', 120, 220);
+                ctx.shadowBlur = 0;
+                return;
+            }
+
+            const centerX = 200, centerY = 200;
+            const radius = 150;
+            const pointRadius = 28;
+            const total = ring.length;
+            const startAngle = -Math.PI / 2;
+
+            for (let i = 0; i < total; i++) {
+                const angle = startAngle + (i / total) * 2 * Math.PI;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                pointsPos.push({ x, y, index: i });
+
+                ctx.beginPath();
+                ctx.arc(x, y, pointRadius, 0, 2 * Math.PI);
+                if (lit[i]) {
+                    ctx.fillStyle = '#F4C542'; // 金色已点亮
+                } else if (allowed[i]) {
+                    ctx.fillStyle = '#9FC5A8'; // 可点亮浅绿
+                } else {
+                    ctx.fillStyle = '#B0B7B0'; // 不可点亮灰
+                }
+                ctx.shadowColor = '#1e2b0e';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#3f321e';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.font = (ring[i] === '10' ? 'bold 20px "Segoe UI", "KaiTi"' : 'bold 24px "Segoe UI", "KaiTi"');
+                ctx.fillStyle = '#1f2c14';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(ring[i], x, y);
+
+                if (allowed[i] && !lit[i]) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, pointRadius + 5, 0, 2 * Math.PI);
+                    ctx.strokeStyle = '#E63946';
+                    ctx.lineWidth = 3;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#ffaa70';
+                    ctx.stroke();
+                }
+            }
+
+            // 不再绘制虚线圆环
+        }
+
+        // ---------- 画布点击处理 ----------
+        function handleCanvasClick(e) {
+            if (ring.length === 0) return;
+
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+                e.preventDefault();
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const canvasX = (clientX - rect.left) * scaleX;
+            const canvasY = (clientY - rect.top) * scaleY;
+
+            const threshold = 30;
+            let minDist = Infinity;
+            let selectedIdx = -1;
+
+            for (let p of pointsPos) {
+                const dx = p.x - canvasX;
+                const dy = p.y - canvasY;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < threshold && dist < minDist) {
+                    minDist = dist;
+                    selectedIdx = p.index;
+                }
+            }
+
+            if (selectedIdx !== -1) {
+                tryLight(selectedIdx);
+            }
+        }
+
+        // ---------- 绑定事件 ----------
+        canvas.addEventListener('click', handleCanvasClick);
+        canvas.addEventListener('touchstart', handleCanvasClick, { passive: false });
+        canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+        canvas.addEventListener('touchend', (e) => e.preventDefault());
+
+        resetBtn.addEventListener('click', function() {
+            resetGame();
+        });
+
+        document.querySelectorAll('.btn, canvas').forEach(el => {
+            el.addEventListener('mousedown', (e) => e.preventDefault());
+        });
+
+        resetGame();
+    })();
+</script>
+</body>
+</html>
