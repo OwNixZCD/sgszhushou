@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>周群·天算 · 一占归简</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Noto Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #1a2a1f;
+            background-image: radial-gradient(circle at 10% 20%, #2d4a2a, #0f1e0f);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .card {
+            max-width: 720px;
+            width: 100%;
+            background: #ecd9b4;
+            border: 6px solid #b58b5b;
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.7), inset 0 2px 8px rgba(255, 245, 200, 0.8);
+            padding: 24px 16px 30px;
+            position: relative;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        .title-section h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #2e2b1f;
+            text-shadow: 4px 4px 0 #b58b5b, 2px 2px 0 #f5e7c8;
+            letter-spacing: 4px;
+            margin: 0;
+            font-family: 'Times New Roman', 'Songti SC', serif;
+        }
+
+        .title-section h2 {
+            font-size: 1.2rem;
+            color: #3b3b1c;
+            background: #b58b5b;
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 40px;
+            color: #fcf3da;
+            margin-top: 8px;
+            box-shadow: inset 0 -2px 0 #5e3e24;
+            font-weight: 500;
+        }
+
+        .skill-desc {
+            background: #c9ae84;
+            border-radius: 30px;
+            padding: 12px 20px;
+            margin: 16px 4px 20px;
+            color: #1f2c13;
+            border: 2px solid #8b6f48;
+            box-shadow: inset 0 2px 6px #fbeacb, 0 6px 0 #6b4f32;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .skill-desc span {
+            background: #2d4127;
+            color: #f9eace;
+            padding: 2px 12px;
+            border-radius: 30px;
+            margin: 0 4px;
+            white-space: nowrap;
+        }
+
+        /* 签筒网格 */
+        .sign-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 14px;
+            margin: 16px 0 18px;
+        }
+
+        .sign-item {
+            background: #fcf2dd;
+            border: 3px solid #a5724a;
+            border-radius: 35px 35px 25px 25px;
+            padding: 18px 6px 12px;
+            box-shadow: 0 8px 0 #7b5839, inset 0 -2px 8px #ffeecc;
+            transition: all 0.15s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .sign-item.highlight {
+            border: 5px solid #ffd966;
+            box-shadow: 0 0 0 4px #f1c40f, 0 8px 0 #7b5839;
+            transform: scale(1.02);
+            background: #fff2d0;
+        }
+
+        .sign-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        .sign-name span {
+            font-size: 2rem;
+        }
+        .sign-name .name-cn {
+            font-size: 1.3rem;
+            background: #ab8b63;
+            color: #2e1e0f;
+            padding: 2px 8px;
+            border-radius: 30px;
+        }
+
+        .sign-effect {
+            font-size: 0.8rem;
+            background: #dac09a;
+            padding: 6px 8px;
+            border-radius: 20px;
+            width: 90%;
+            text-align: center;
+            font-weight: 600;
+            color: #1f3a1f;
+            margin: 8px 0 6px;
+            border: 1px solid #9b7a58;
+            line-height: 1.2;
+            min-height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .weight-area {
+            font-size: 0.9rem;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 6px 0 4px;
+            background: #be9f78;
+            border-radius: 30px;
+            padding: 5px 6px;
+            color: #2b1f0f;
+            font-weight: 600;
+        }
+
+        .weight-num {
+            background: #2a3a24;
+            color: #f1d9ae;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .prob-num {
+            background: #2e3d2e;
+            color: #ffea9e;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .pray-btn {
+            background: #b48a5a;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            margin-top: 6px;
+            font-weight: 700;
+            color: #1b2f0d;
+            box-shadow: 0 4px 0 #5d3f27, 0 2px 8px #efdbb0;
+            width: 85%;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            transition: 0.05s linear;
+            cursor: pointer;
+            border: 1px solid #e7c994;
+        }
+
+        .pray-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #5d3f27;
+        }
+
+        .action-panel {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin: 16px 0 12px;
+        }
+
+        .btn-primary {
+            background: #e0b887;
+            border: 4px solid #946b42;
+            border-radius: 60px;
+            padding: 18px 36px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #312714;
+            box-shadow: 0 8px 0 #6b4b2b, 0 4px 15px black;
+            flex: 0 1 auto;
+            min-width: 200px;
+            cursor: pointer;
+            transition: 0.05s linear;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            display: inline-block;  /* 确保可以控制显示隐藏 */
+        }
+
+        .btn-primary:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #6b4b2b;
+        }
+
+        .btn-secondary {
+            background: #6f8c5d;
+            border: 2px solid #2b482b;
+            border-radius: 40px;
+            padding: 12px 24px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #fcf9e3;
+            box-shadow: 0 5px 0 #2b4020;
+            cursor: pointer;
+            transition: 0.05s linear;
+        }
+
+        .btn-secondary:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        .result-area {
+            background: #332e1e;
+            border-radius: 60px;
+            padding: 24px 24px;
+            margin-top: 24px;
+            border: 3px solid #cbaa77;
+            color: #fff0c5;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: inset 0 -3px 0 #61573b;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-sign {
+            font-size: 3.2rem;
+            line-height: 1.3;
+            color: #ffd966;
+            text-shadow: 2px 2px 0 #b57c48;
+        }
+
+        .result-desc {
+            font-size: 1.3rem;
+            color: #ecd9b4;
+            margin-top: 10px;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.8rem;
+            color: #3b3824;
+            font-weight: 500;
+        }
+
+        button {
+            user-select: none;
+            font-family: inherit;
+        }
+
+        .reset-btn {
+            background: #7f6b4b;
+            box-shadow: 0 4px 0 #4a3a27;
+            color: #f1e2c6;
+        }
+    </style>
+</head>
+<body>
+<div class="card" id="zhouqunCard">
+    <div class="title-section">
+        <h1>周 群</h1>
+    </div>
+    <div class="skill-desc">
+        <span>【天算·简】</span> 祈禳一次 → 占卜一次 
+    </div>
+
+    <!-- 签筒动态渲染位置 -->
+    <div id="signContainer" class="sign-grid"></div>
+
+    <div class="action-panel">
+        <button class="btn-primary" id="drawBtn">占 卜</button>
+        <button class="btn-secondary reset-btn" id="resetWeightBtn">重置</button>
+    </div>
+
+    <div class="result-area" id="resultBox">
+        <span class="result-sign">✨ 未占 ✨</span>
+        <span class="result-desc">先祈禳一签，或直接占卜</span>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        // 签运数据（移动版天算效果）
+        const signs = [
+            {
+                name: '上上签',
+                emoji: '🌟',
+                desc: '天佑·防止伤害',
+                effect: '当你受到伤害时，防止之',
+                weight: 1,
+            },
+            {
+                name: '上签',
+                emoji: '👍',
+                desc: '鸿运·受伤摸排',
+                effect: '当你受到伤害时，将此伤害值改为1；当你受到1点伤害后，你摸一张牌',
+                weight: 1,
+            },
+            {
+                name: '中签',
+                emoji: '😐',
+                desc: '平稳·受伤改火伤',
+                effect: '当你受到伤害时，将此伤害改为火焰伤害，然后若此次伤害大于1，将伤害值改为1；',
+                weight: 1,
+            },
+            {
+                name: '下签',
+                emoji: '👎',
+                desc: '小灾·受到伤害+1',
+                effect: '当你受到伤害时，此伤害+1',
+                weight: 1,
+            },
+            {
+                name: '下下签',
+                emoji: '💀',
+                desc: '大难·加伤禁桃酒',
+                effect: '当你受到伤害时，此伤害+1；你不能使用【桃】和【酒】',
+                weight: 1,
+            }
+        ];
+
+        // 引用DOM
+        const container = document.getElementById('signContainer');
+        const drawBtn = document.getElementById('drawBtn');
+        const resetBtn = document.getElementById('resetWeightBtn');
+        const resultBox = document.getElementById('resultBox');
+        const resultSignSpan = resultBox.querySelector('.result-sign');
+        const resultDescSpan = resultBox.querySelector('.result-desc');
+
+        // 状态：是否已经祈禳 (只能一次)
+        let hasPrayed = false;
+
+        // 存储每个卡片对应的索引 (用于高亮)
+        let signElements = [];
+
+        // 计算总权重
+        function totalWeight() {
+            return signs.reduce((acc, cur) => acc + cur.weight, 0);
+        }
+
+        // 更新所有概率数值 + 权重显示
+        function updateAllProbabilities() {
+            const total = totalWeight();
+            signs.forEach((s, idx) => {
+                const weightSpan = document.getElementById(`weight-${idx}`);
+                const probSpan = document.getElementById(`prob-${idx}`);
+                if (weightSpan) {
+                    weightSpan.innerText = `⚖️ ${s.weight}`;
+                }
+                if (probSpan) {
+                    const percent = total > 0 ? (s.weight / total * 100).toFixed(1) : '0.0';
+                    probSpan.innerText = `${percent}%`;
+                }
+            });
+        }
+
+        // 移除所有高亮
+        function clearHighlights() {
+            signElements.forEach(el => {
+                if (el) el.classList.remove('highlight');
+            });
+        }
+
+        // 祈禳：只能使用一次，增加指定签权重(+1)，然后隐藏签筒
+        function pray(index) {
+            if (hasPrayed) {
+                // 已经祈禳过，不能再改
+                resultSignSpan.innerText = '⚠️ 已祈禳 ⚠️';
+                resultDescSpan.innerText = '只能祈禳一次，直接占卜或重置';
+                return;
+            }
+            if (index >= 0 && index < signs.length) {
+                signs[index].weight += 1;      // 权重加1
+                hasPrayed = true;               // 标记已祈禳
+                container.style.display = 'none'; // 签筒消失
+                updateAllProbabilities();        // 更新内部数据 (虽然隐藏)
+                clearHighlights();
+
+                // 提示祈禳成功，准备占卜
+                resultSignSpan.innerText = '🙏 祈禳完成 🙏';
+                resultDescSpan.innerText = `「${signs[index].name}」权重增加，点击占卜`;
+            }
+        }
+
+        // 重置所有权重为1，显示签筒，显示占卜按钮，清空祈禳标记
+        function resetWeights() {
+            signs.forEach(s => s.weight = 1);
+            hasPrayed = false;
+            container.style.display = 'grid';    // 重新显示签筒
+            drawBtn.style.display = 'inline-block'; // 恢复占卜按钮
+            updateAllProbabilities();
+            clearHighlights();
+            resultSignSpan.innerText = '⚖️ 重置完成 ⚖️';
+            resultDescSpan.innerText = '所有签运概率均等，可重新祈禳';
+        }
+
+        // 占卜抽签：基于权重随机抽取一个索引
+        function drawSign() {
+            const total = totalWeight();
+            if (total <= 0) return null; // 不可能为0，以防万一
+
+            let rand = Math.random() * total;
+            let cumulative = 0;
+            for (let i = 0; i < signs.length; i++) {
+                cumulative += signs[i].weight;
+                if (rand < cumulative) {
+                    return i;
+                }
+            }
+            return signs.length - 1;
+        }
+
+        // 执行占卜并展示结果（放大），之后隐藏签筒（如果未隐藏）和占卜按钮，只剩重置
+        function performDraw() {
+            const idx = drawSign();
+            if (idx === null) return;
+
+            const selectedSign = signs[idx];
+
+            // 如果签筒可见（未祈禳或已重置），高亮抽中的卡片；但占卜后立刻隐藏，所以短暂高亮可能看不到，但保留无妨
+            if (container.style.display !== 'none') {
+                clearHighlights();
+                const targetCard = document.getElementById(`sign-${idx}`);
+                if (targetCard) targetCard.classList.add('highlight');
+            }
+
+            // 放大显示抽中签
+            resultSignSpan.innerHTML = `${selectedSign.emoji} ${selectedSign.name} ${selectedSign.emoji}`;
+            resultDescSpan.innerText = `【效果】${selectedSign.effect}`;
+
+            // 关键：占卜后隐藏签筒（确保隐藏）和占卜按钮，只剩重置按钮
+            container.style.display = 'none';
+            drawBtn.style.display = 'none';
+            // 已祈禳标记不用动，但占卜后不能再祈禳或占卜，符合预期
+        }
+
+        // 渲染签板
+        function renderSigns() {
+            let htmlStr = '';
+            signs.forEach((s, idx) => {
+                htmlStr += `
+                    <div class="sign-item" data-index="${idx}" id="sign-${idx}">
+                        <div class="sign-name">
+                            <span>${s.emoji}</span>
+                            <span class="name-cn">${s.name}</span>
+                        </div>
+                        <div class="sign-effect">${s.desc}</div>
+                        <div class="weight-area">
+                            <span class="weight-num" id="weight-${idx}">⚖️ ${s.weight}</span>
+                            <span class="prob-num" id="prob-${idx}">0%</span>
+                        </div>
+                        <button class="pray-btn" data-pray="${idx}">祈 禳</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = htmlStr;
+            container.style.display = 'grid';  // 确保签筒显示
+
+            // 重新绑定所有祈禳按钮
+            document.querySelectorAll('.pray-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = btn.getAttribute('data-pray');
+                    if (index !== null) pray(parseInt(index));
+                });
+            });
+
+            // 更新概率显示
+            updateAllProbabilities();
+
+            // 储存卡片元素引用
+            signElements = signs.map((_, i) => document.getElementById(`sign-${i}`));
+        }
+
+        // 初始化渲染
+        renderSigns();
+
+        // 绑定占卜按钮
+        drawBtn.addEventListener('click', () => {
+            performDraw();
+        });
+
+        // 绑定重置按钮
+        resetBtn.addEventListener('click', () => {
+            resetWeights();
+        });
+
+        // 简单触摸优化
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(b => {
+            b.addEventListener('touchstart', (e) => {
+                e.preventDefault();  // 防止双击缩放 (可选)
+            }, { passive: false });
+        });
+    })();
+</script>
+</body>
+</html>
