@@ -3,113 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>曹金玉</title>
-     <style>
-        /* 给列表容器设置样式，清除所有子li的黑点 */
-        .no-dot {
-            list-style-type: none; /* 核心属性：清除列表标记 */
-            padding-left: 0; /* 可选：清除默认的左内边距，让列表靠左对齐 */
+    <title>曹金玉 · 隅泣 · 玲珑面板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f6f0f8 0%, #e9e2ef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            max-width: 950px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 48px;
+            box-shadow: 0 25px 45px -12px rgba(78, 45, 98, 0.35), 
+                        0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 2rem 2.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.2s ease;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #4a2f5c, #8b6f9c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+            margin-bottom: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1::before {
+            content: "✨";
+            font-size: 2rem;
+            background: none;
+            -webkit-text-fill-color: initial;
+            color: #b495c4;
+        }
+
+        hr {
+            border: none;
+            height: 3px;
+            background: linear-gradient(90deg, #c5b1d9, #ecd8ff, #c5b1d9);
+            border-radius: 6px;
+            margin: 0.8rem 0 1.8rem 0;
+            opacity: 0.6;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: #3e2c4a;
+            margin: 1.2rem 0 0.8rem 0;
+            letter-spacing: 0.3px;
+            border-left: 8px solid #b698d0;
+            padding-left: 1rem;
+        }
+
+        /* 数值卡片网格 — 原来 ul.no-dot 改造为 grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+            list-style: none;
+            padding-left: 0;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .stat-item {
+            background: white;
+            border-radius: 32px;
+            padding: 1.3rem 0.8rem;
+            text-align: center;
+            box-shadow: 0 12px 24px -12px rgba(105, 70, 130, 0.25);
+            border: 1px solid rgba(230, 215, 245, 0.6);
+            transition: transform 0.2s, box-shadow 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 22px 30px -14px #aa8ec7;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #5b4870;
+            letter-spacing: 0.3px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 3.2rem;
+            font-weight: 700;
+            line-height: 1;
+            display: inline-block;
+            background: linear-gradient(145deg, #352a3f, #624d77);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-cap {
+            font-size: 1.1rem;
+            color: #b19ac5;
+            margin-left: 4px;
+            font-weight: 400;
+        }
+
+        /* 技能描述条 */
+        .skill-description {
+            background: #f0e7fa;
+            border-radius: 60px;
+            padding: 1.2rem 2rem;
+            margin: 1.8rem 0 2rem;
+            text-align: center;
+            border: 1px solid #dcc7f0;
+            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.8), 0 8px 12px -8px #b194cc;
+        }
+
+        .skill-description p {
+            font-size: 1.25rem;
+            color: #2f2339;
+            font-weight: 500;
+        }
+
+        .skill-description span {
+            display: inline-block;
+            background: #7d619b;
+            color: white;
+            font-weight: 600;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            margin: 0 4px;
+            min-width: 2.6rem;
+            box-shadow: 0 4px 0 #4d3a60;
+        }
+
+        /* 按钮组通用 */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 1.2rem 0 0.8rem;
+        }
+
+        .btn {
+            border: none;
+            background: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 550;
+            color: #3c2b48;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(150, 120, 180, 0.25);
+            transition: all 0.15s ease;
+            border: 1px solid rgba(200, 175, 225, 0.5);
+            flex: 1 0 auto;
+            min-width: 150px;
+            backdrop-filter: blur(2px);
+            letter-spacing: 0.3px;
+        }
+
+        .btn:hover {
+            background: #f4ecfe;
+            box-shadow: 0 12px 18px -8px #a987c2;
+            border-color: #b484e0;
+            transform: scale(1.02);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 8px #ab8ec9;
+        }
+
+        /* 选中数值类型的按钮高亮 */
+        .btn.selected {
+            background: #a27cb9;
+            color: white;
+            border-color: #6d4f8b;
+            box-shadow: 0 8px 18px #8e6cae, 0 0 0 3px rgba(230, 210, 255, 0.7);
+        }
+
+        /* 技能触发区的按钮特殊色 */
+        .btn-trigger {
+            background: #e3d1f5;
+            border-color: #b693da;
+            font-weight: 600;
+            color: #311f40;
+        }
+
+        .btn-trigger:hover {
+            background: #d2b9f0;
+        }
+
+        .btn-reset {
+            background: #d9c6e6;
+            color: #352442;
+            border-color: #b19acd;
+        }
+
+        .btn-reset:hover {
+            background: #c7afdf;
+        }
+
+        /* 当前选中提示 */
+        .selected-hint {
+            background: #efe6ff;
+            border-radius: 60px;
+            padding: 0.8rem 1.8rem;
+            display: inline-block;
+            margin: 0.5rem 0 0.2rem;
+            border: 1px dashed #b27ed6;
+            font-size: 1.15rem;
+            font-weight: 500;
+            color: #342545;
+        }
+
+        .selected-hint strong {
+            color: #642c9e;
+            background: #f0e2ff;
+            padding: 0.3rem 1.2rem;
+            border-radius: 50px;
+            margin-left: 10px;
+        }
+
+        footer {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #b19ec9;
+            margin-top: 2rem;
+            border-top: 1px dashed #ddcef0;
+            padding-top: 1rem;
+        }
+
+        /* 移动端调整 */
+        @media (max-width: 600px) {
+            .card { padding: 1.5rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 2rem; }
+            .btn { min-width: 100%; }
         }
     </style>
 </head>
 <body>
-    <h1>曹金玉 · 技能小程序</h1>
+    <div class="card">
+        <h1>曹金玉</h1>
         <hr>
 
-    <!-- 隅泣当前数值展示 -->
-    <ul class="no-dot">
-        <li>每回合的发动次数：<span id="triggerCount">2</span>（上限5）</li>
-        <li>观看牌堆顶牌数：<span id="cardView">3</span>（上限5）</li>
-        <li>给受伤角色牌数：<span id="giveCard">1</span>（上限5）</li>
-        <li>自身获得牌数：<span id="getCard">1</span>（上限5）</li>
-    </ul>
+        <!-- 数值展示区：网格卡片，复用原本的 ul + 样式增强 -->
+        <ul class="stats-grid no-dot">
+            <li class="stat-item">
+                <span class="stat-label">⚡ 每回合发动</span>
+                <span class="stat-value" id="triggerCount">2</span><span class="stat-cap">/5</span>
+            </li>
+            <li class="stat-item">
+                <span class="stat-label">👀 观看牌堆顶</span>
+                <span class="stat-value" id="cardView">3</span><span class="stat-cap">/5</span>
+            </li>
+            <li class="stat-item">
+                <span class="stat-label">🎁 给受伤角色</span>
+                <span class="stat-value" id="giveCard">1</span><span class="stat-cap">/5</span>
+            </li>
+            <li class="stat-item">
+                <span class="stat-label">🃏 自身获得</span>
+                <span class="stat-value" id="getCard">1</span><span class="stat-cap">/5</span>
+            </li>
+        </ul>
 
-    <!-- 数值选择区（替换为独立按钮） -->
-    <h3>选择要提升的数值类型（点击选中）</h3>
-    <p>
-        <button id="btn_triggerCount" onclick="selectValueType('triggerCount')">每回合的发动次数</button>
-        <button id="btn_cardView" onclick="selectValueType('cardView')">观看牌堆顶牌数</button>
-        <button id="btn_giveCard" onclick="selectValueType('giveCard')">给受伤角色牌数</button>
-        <button id="btn_getCard" onclick="selectValueType('getCard')">自身获得牌数</button>
-    </p>
-    <p><strong>当前选中：</strong><span id="selectedTypeText">每回合发动次数</span></p>
+        <!-- 动态技能描述 (原descXX元素) 让技能更直观 -->
+        <div class="skill-description">
+            <p>✨ 隅泣 · 每回合最多 <span id="descCount">2</span> 次 ✨ 观看牌堆顶 <span id="descView">3</span> 张，<br> 
+            可给受伤角色 <span id="descGive">1</span> 张，然后自己获得 <span id="descGet">1</span> 张。</p>
+        </div>
 
-    <!-- 技能触发区 -->
-    <h3>触发技能提升数值</h3>
-    <p>
-        <button onclick="updateYuqi('xianjing_hurt')">娴静（受伤状态，数值+1）</button>
-        <button onclick="updateYuqi('xianjing_healthy')">娴静（未受伤状态，数值+2）</button>
-        <button onclick="updateYuqi('shanshen')">善身（数值+2）</button>
-        <button onclick="resetYuqi()">重置所有数值</button>
-    </p>
+        <!-- 选择要提升的数值类型 -->
+        <h3>⚙️ ① 选择要强化的属性</h3>
+        <div class="button-group">
+            <button class="btn" id="btn_triggerCount" onclick="selectValueType('triggerCount')">⚡ 发动次数</button>
+            <button class="btn" id="btn_cardView" onclick="selectValueType('cardView')">👀 观牌数</button>
+            <button class="btn" id="btn_giveCard" onclick="selectValueType('giveCard')">🎁 给牌数</button>
+            <button class="btn" id="btn_getCard" onclick="selectValueType('getCard')">🃏 获得牌数</button>
+        </div>
+
+        <!-- 当前选中状态卡片 -->
+        <div class="selected-hint">
+            🎯 当前选中：<strong id="selectedTypeText">每回合发动次数</strong>
+        </div>
+
+        <!-- 技能触发区 -->
+        <h3>🌸 ② 触发技能 · 提升数值</h3>
+        <div class="button-group">
+            <button class="btn btn-trigger" onclick="updateYuqi('xianjing_hurt')">💔 娴静·受伤 (+1)</button>
+            <button class="btn btn-trigger" onclick="updateYuqi('xianjing_healthy')">❤️ 娴静·未伤 (+2)</button>
+            <button class="btn btn-trigger" onclick="updateYuqi('shanshen')">🧘 善身 (+2)</button>
+            <button class="btn btn-reset" onclick="resetYuqi()">🔄 重置所有</button>
+        </div>
+
+        <footer>—— 玲珑巧技 · 静待隅泣 ——</footer>
+    </div>
 
     <script>
-        // 初始化数值和选中状态
-        const yuqiValues = {
-            triggerCount: 2, // 发动次数
-            cardView: 3,     // 观牌数
-            giveCard: 1,     // 给牌数
-            getCard: 1       // 拿牌数
-        };
-        const MAX_VALUE = 5; // 所有数值上限
-        let selectedType = 'triggerCount'; // 默认选中第一个数值
-
-        // 选择数值类型（核心：标记选中状态）
-        function selectValueType(type) {
-            // 更新选中类型
-            selectedType = type;
-            // 重置所有按钮样式（纯HTML下用文字提示，无CSS）
-            const btnTexts = {
-                triggerCount: "每回合发动次数",
-                cardView: "观看牌堆顶牌数",
-                giveCard: "给受伤角色牌数上限",
-                getCard: "自身获得牌数上限"
+        (function() {
+            // ---------- 核心数据 ----------
+            const yuqiValues = {
+                triggerCount: 2,   // 发动次数
+                cardView: 3,       // 观牌数
+                giveCard: 1,       // 给牌数
+                getCard: 1         // 拿牌数
             };
-            // 显示当前选中的文本
-            document.getElementById('selectedTypeText').textContent = btnTexts[type];
-        }
+            const MAX_VALUE = 5;    
+            let selectedType = 'triggerCount';   // 当前选中的数值类型
 
-        // 核心：更新选中的隅泣数值
-        function updateYuqi(skillType) {
-            // 1. 确定不同技能的加成数值
-            let addNum = 0;
-            if (skillType === 'xianjing_hurt') addNum = 1;    // 娴静-受伤：+1
-            if (skillType === 'xianjing_healthy') addNum = 2;// 娴静-未受伤：+2
-            if (skillType === 'shanshen') addNum = 2;         // 善身：+2
+            // ---------- DOM 元素 ----------
+            const triggerSpan = document.getElementById('triggerCount');
+            const cardViewSpan = document.getElementById('cardView');
+            const giveCardSpan = document.getElementById('giveCard');
+            const getCardSpan = document.getElementById('getCard');
 
-            // 2. 计算新数值（不超过上限）
-            yuqiValues[selectedType] = Math.min(yuqiValues[selectedType] + addNum, MAX_VALUE);
-            
-            // 3. 更新页面显示的数值
-            document.getElementById(selectedType).textContent = yuqiValues[selectedType];
-            // 同步更新技能说明里的数值
-            document.getElementById('descCount').textContent = yuqiValues.triggerCount;
-            document.getElementById('descView').textContent = yuqiValues.cardView;
-            document.getElementById('descGive').textContent = yuqiValues.giveCard;
-            document.getElementById('descGet').textContent = yuqiValues.getCard;
-        }
+            const descCountSpan = document.getElementById('descCount');
+            const descViewSpan = document.getElementById('descView');
+            const descGiveSpan = document.getElementById('descGive');
+            const descGetSpan = document.getElementById('descGet');
 
-        // 重置所有数值到初始状态
-        function resetYuqi() {
-            // 重置数值
-            yuqiValues.triggerCount = 2;
-            yuqiValues.cardView = 3;
-            yuqiValues.giveCard = 1;
-            yuqiValues.getCard = 1;
-            // 重置选中状态
-            selectedType = 'triggerCount';
-            document.getElementById('selectedTypeText').textContent = "每回合发动次数";
-            
-            // 同步更新页面所有显示
-            document.getElementById('triggerCount').textContent = 2;
-            document.getElementById('cardView').textContent = 3;
-            document.getElementById('giveCard').textContent = 1;
-            document.getElementById('getCard').textContent = 1;
-            document.getElementById('descCount').textContent = 2;
-            document.getElementById('descView').textContent = 3;
-            document.getElementById('descGive').textContent = 1;
-            document.getElementById('descGet').textContent = 1;
-        }
+            const selectedTypeText = document.getElementById('selectedTypeText');
+
+            // 按钮元素
+            const btnTrigger = document.getElementById('btn_triggerCount');
+            const btnCardView = document.getElementById('btn_cardView');
+            const btnGive = document.getElementById('btn_giveCard');
+            const btnGet = document.getElementById('btn_getCard');
+            const allTypeBtns = [btnTrigger, btnCardView, btnGive, btnGet];
+
+            // ---------- 统一渲染：更新所有数值显示 (包括卡片 + 技能描述) ----------
+            function renderValues() {
+                // 卡片大数字
+                triggerSpan.textContent = yuqiValues.triggerCount;
+                cardViewSpan.textContent = yuqiValues.cardView;
+                giveCardSpan.textContent = yuqiValues.giveCard;
+                getCardSpan.textContent = yuqiValues.getCard;
+
+                // 技能描述中的小标签
+                descCountSpan.textContent = yuqiValues.triggerCount;
+                descViewSpan.textContent = yuqiValues.cardView;
+                descGiveSpan.textContent = yuqiValues.giveCard;
+                descGetSpan.textContent = yuqiValues.getCard;
+            }
+
+            // ---------- 清除所有按钮的选中样式 ----------
+            function clearSelectedStyle() {
+                allTypeBtns.forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+            }
+
+            // ---------- 选中数值类型 (UI + 变量) ----------
+            window.selectValueType = function(type) {
+                // 更新选中变量
+                selectedType = type;
+
+                // 更新上方提示文字
+                const typeNameMap = {
+                    'triggerCount': '每回合发动次数',
+                    'cardView': '观看牌堆顶牌数',
+                    'giveCard': '给受伤角色牌数',
+                    'getCard': '自身获得牌数'
+                };
+                selectedTypeText.textContent = typeNameMap[type] || '';
+
+                // 按钮样式高亮
+                clearSelectedStyle();
+                switch (type) {
+                    case 'triggerCount': btnTrigger.classList.add('selected'); break;
+                    case 'cardView': btnCardView.classList.add('selected'); break;
+                    case 'giveCard': btnGive.classList.add('selected'); break;
+                    case 'getCard': btnGet.classList.add('selected'); break;
+                }
+            };
+
+            // ---------- 触发技能增加数值 ----------
+            window.updateYuqi = function(skillType) {
+                let addNum = 0;
+                if (skillType === 'xianjing_hurt') addNum = 1;      // 受伤+1
+                if (skillType === 'xianjing_healthy') addNum = 2;   // 未伤+2
+                if (skillType === 'shanshen') addNum = 2;           // 善身+2
+
+                // 对当前选中的数值进行增加 (不超过上限)
+                yuqiValues[selectedType] = Math.min(yuqiValues[selectedType] + addNum, MAX_VALUE);
+
+                // 重新渲染所有显示
+                renderValues();
+            };
+
+            // ---------- 重置所有数值 + 恢复默认选中 ----------
+            window.resetYuqi = function() {
+                // 重置数值
+                yuqiValues.triggerCount = 2;
+                yuqiValues.cardView = 3;
+                yuqiValues.giveCard = 1;
+                yuqiValues.getCard = 1;
+
+                // 重置选中为“发动次数”
+                window.selectValueType('triggerCount');
+
+                // 更新显示
+                renderValues();
+            };
+
+            // ---------- 初始化：设置默认选中并渲染数值 ----------
+            window.addEventListener('DOMContentLoaded', function() {
+                // 保证初始选中样式
+                window.selectValueType('triggerCount');
+                renderValues();
+
+                // 额外检查：若某些按钮的 onclick 被覆盖，但已经内联 ok 
+                // 确保重置时也能正确更新描述 (descXX已经存在)
+            });
+
+        })();  // 结束闭包
     </script>
 </body>
 </html>
