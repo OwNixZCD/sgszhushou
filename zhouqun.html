@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>周群·天算 · 一占归简</title>
+    <title>周群·天算 · 手机适配版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -19,45 +19,44 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 12px; /* 稍微减小边距，给手机更多空间 */
         }
 
         .card {
             max-width: 720px;
             width: 100%;
             background: #ecd9b4;
-            border: 6px solid #b58b5b;
-            border-radius: 48px 48px 32px 32px;
+            border: 4px solid #b58b5b; /* 边框略微减薄，适应小屏 */
+            border-radius: 36px 36px 28px 28px;
             box-shadow: 0 20px 30px rgba(0, 0, 0, 0.7), inset 0 2px 8px rgba(255, 245, 200, 0.8);
-            padding: 24px 16px 30px;
+            padding: 20px 12px 24px; /* 左右内边距减小 */
             position: relative;
         }
 
         .title-section {
             text-align: center;
-            margin-bottom: 18px;
-            position: relative;
+            margin-bottom: 14px;
         }
 
         .title-section h1 {
-            font-size: 2.2rem;
+            font-size: 2rem; /* 稍微缩小 */
             font-weight: 800;
             color: #2e2b1f;
-            text-shadow: 4px 4px 0 #b58b5b, 2px 2px 0 #f5e7c8;
-            letter-spacing: 4px;
+            text-shadow: 3px 3px 0 #b58b5b, 1px 1px 0 #f5e7c8;
+            letter-spacing: 3px;
             margin: 0;
             font-family: 'Times New Roman', 'Songti SC', serif;
         }
 
         .title-section h2 {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #3b3b1c;
             background: #b58b5b;
             display: inline-block;
-            padding: 6px 20px;
-            border-radius: 40px;
+            padding: 4px 16px;
+            border-radius: 30px;
             color: #fcf3da;
-            margin-top: 8px;
+            margin-top: 6px;
             box-shadow: inset 0 -2px 0 #5e3e24;
             font-weight: 500;
         }
@@ -65,12 +64,12 @@
         .skill-desc {
             background: #c9ae84;
             border-radius: 30px;
-            padding: 12px 20px;
-            margin: 16px 4px 20px;
+            padding: 10px 16px;
+            margin: 12px 2px 16px;
             color: #1f2c13;
             border: 2px solid #8b6f48;
-            box-shadow: inset 0 2px 6px #fbeacb, 0 6px 0 #6b4f32;
-            font-size: 0.95rem;
+            box-shadow: inset 0 2px 6px #fbeacb, 0 4px 0 #6b4f32; /* 降低阴影高度 */
+            font-size: 0.9rem;
             font-weight: 500;
             text-align: center;
         }
@@ -78,87 +77,86 @@
         .skill-desc span {
             background: #2d4127;
             color: #f9eace;
-            padding: 2px 12px;
+            padding: 2px 10px;
             border-radius: 30px;
             margin: 0 4px;
             white-space: nowrap;
         }
 
-        /* 签筒网格 */
+        /* 签筒网格 - 手机优化：最小宽度100px，更紧凑 */
         .sign-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 14px;
-            margin: 16px 0 18px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 12px 0 14px;
         }
 
         .sign-item {
             background: #fcf2dd;
-            border: 3px solid #a5724a;
-            border-radius: 35px 35px 25px 25px;
-            padding: 18px 6px 12px;
-            box-shadow: 0 8px 0 #7b5839, inset 0 -2px 8px #ffeecc;
+            border: 2px solid #a5724a;
+            border-radius: 28px 28px 20px 20px;
+            padding: 12px 4px 8px;
+            box-shadow: 0 5px 0 #7b5839, inset 0 -2px 6px #ffeecc;
             transition: all 0.15s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
         }
 
         .sign-item.highlight {
-            border: 5px solid #ffd966;
-            box-shadow: 0 0 0 4px #f1c40f, 0 8px 0 #7b5839;
+            border: 4px solid #ffd966;
+            box-shadow: 0 0 0 3px #f1c40f, 0 5px 0 #7b5839;
             transform: scale(1.02);
             background: #fff2d0;
         }
 
         .sign-name {
-            font-size: 1.5rem;
+            font-size: 1.2rem; /* 缩小 */
             font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 4px;
-            margin-bottom: 6px;
+            gap: 2px;
+            margin-bottom: 4px;
         }
         .sign-name span {
-            font-size: 2rem;
+            font-size: 1.6rem; /* 表情符号缩小 */
         }
         .sign-name .name-cn {
-            font-size: 1.3rem;
+            font-size: 1rem;
             background: #ab8b63;
             color: #2e1e0f;
-            padding: 2px 8px;
-            border-radius: 30px;
+            padding: 2px 6px;
+            border-radius: 20px;
         }
 
         .sign-effect {
-            font-size: 0.8rem;
+            font-size: 0.7rem; /* 小字更小 */
             background: #dac09a;
-            padding: 6px 8px;
-            border-radius: 20px;
-            width: 90%;
+            padding: 4px 6px;
+            border-radius: 16px;
+            width: 95%;
             text-align: center;
             font-weight: 600;
             color: #1f3a1f;
-            margin: 8px 0 6px;
+            margin: 6px 0 4px;
             border: 1px solid #9b7a58;
             line-height: 1.2;
-            min-height: 54px;
+            min-height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .weight-area {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             width: 100%;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            margin: 6px 0 4px;
+            margin: 4px 0 4px;
             background: #be9f78;
-            border-radius: 30px;
-            padding: 5px 6px;
+            border-radius: 20px;
+            padding: 4px 4px;
             color: #2b1f0f;
             font-weight: 600;
         }
@@ -166,37 +164,39 @@
         .weight-num {
             background: #2a3a24;
             color: #f1d9ae;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            padding: 2px 6px;
+            border-radius: 16px;
+            font-size: 0.7rem;
         }
 
         .prob-num {
             background: #2e3d2e;
             color: #ffea9e;
-            padding: 2px 8px;
-            border-radius: 20px;
+            padding: 2px 6px;
+            border-radius: 16px;
+            font-size: 0.7rem;
         }
 
         .pray-btn {
             background: #b48a5a;
             border: none;
-            border-radius: 40px;
-            padding: 8px 16px;
-            margin-top: 6px;
+            border-radius: 30px;
+            padding: 6px 12px;
+            margin-top: 4px;
             font-weight: 700;
             color: #1b2f0d;
-            box-shadow: 0 4px 0 #5d3f27, 0 2px 8px #efdbb0;
-            width: 85%;
-            font-size: 1rem;
+            box-shadow: 0 3px 0 #5d3f27, 0 2px 6px #efdbb0;
+            width: 90%;
+            font-size: 0.9rem;
             letter-spacing: 1px;
             transition: 0.05s linear;
             cursor: pointer;
             border: 1px solid #e7c994;
+            touch-action: manipulation; /* 优化触摸 */
         }
 
         .pray-btn:active {
-            transform: translateY(4px);
+            transform: translateY(3px);
             box-shadow: 0 1px 0 #5d3f27;
         }
 
@@ -205,68 +205,66 @@
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 16px;
-            margin: 16px 0 12px;
+            gap: 12px;
+            margin: 12px 0 8px;
         }
 
         .btn-primary {
             background: #e0b887;
-            border: 4px solid #946b42;
-            border-radius: 60px;
-            padding: 18px 36px;
-            font-size: 1.8rem;
+            border: 3px solid #946b42;
+            border-radius: 50px;
+            padding: 14px 24px; /* 减小内边距 */
+            font-size: 1.4rem; /* 缩小 */
             font-weight: 800;
             color: #312714;
-            box-shadow: 0 8px 0 #6b4b2b, 0 4px 15px black;
+            box-shadow: 0 5px 0 #6b4b2b, 0 4px 12px black;
             flex: 0 1 auto;
-            min-width: 200px;
+            min-width: 160px; /* 减小最小宽度 */
             cursor: pointer;
             transition: 0.05s linear;
             text-transform: uppercase;
-            letter-spacing: 6px;
+            letter-spacing: 4px;
             display: inline-block;
+            touch-action: manipulation;
         }
 
         .btn-primary:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #6b4b2b;
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #6b4b2b;
         }
 
         .btn-secondary {
             background: #6f8c5d;
             border: 2px solid #2b482b;
             border-radius: 40px;
-            padding: 12px 24px;
+            padding: 10px 20px;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #fcf9e3;
-            box-shadow: 0 5px 0 #2b4020;
+            box-shadow: 0 4px 0 #2b4020;
             cursor: pointer;
             transition: 0.05s linear;
-        }
-
-        .btn-secondary:active {
-            transform: translateY(5px);
-            box-shadow: none;
-        }
-
-        /* 移动端触摸优化：禁用双击缩放，保留滚动 */
-        button {
             touch-action: manipulation;
         }
 
+        .btn-secondary:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* 结果区域优化 */
         .result-area {
             background: #332e1e;
-            border-radius: 60px;
-            padding: 24px 24px;
-            margin-top: 24px;
+            border-radius: 40px;
+            padding: 18px 16px;
+            margin-top: 20px;
             border: 3px solid #cbaa77;
             color: #fff0c5;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
             box-shadow: inset 0 -3px 0 #61573b;
-            min-height: 140px;
+            min-height: 120px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -274,22 +272,23 @@
         }
 
         .result-sign {
-            font-size: 3.2rem;
-            line-height: 1.3;
+            font-size: 2.6rem; /* 手机稍小 */
+            line-height: 1.2;
             color: #ffd966;
             text-shadow: 2px 2px 0 #b57c48;
         }
 
         .result-desc {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             color: #ecd9b4;
-            margin-top: 10px;
+            margin-top: 8px;
+            word-break: break-word;
         }
 
         .footer-note {
             text-align: center;
-            margin-top: 18px;
-            font-size: 0.8rem;
+            margin-top: 14px;
+            font-size: 0.7rem;
             color: #3b3824;
             font-weight: 500;
         }
@@ -303,6 +302,68 @@
             background: #7f6b4b;
             box-shadow: 0 4px 0 #4a3a27;
             color: #f1e2c6;
+        }
+
+        /* 更小屏幕下的进一步调整 */
+        @media (max-width: 480px) {
+            .card {
+                padding: 16px 8px 20px;
+                border-radius: 28px 28px 22px 22px;
+            }
+            .title-section h1 {
+                font-size: 1.8rem;
+                text-shadow: 2px 2px 0 #b58b5b, 1px 1px 0 #f5e7c8;
+            }
+            .sign-grid {
+                grid-template-columns: repeat(2, 1fr); /* 强制两列，避免伸缩 */
+                gap: 8px;
+            }
+            .sign-name {
+                font-size: 1rem;
+            }
+            .sign-name span {
+                font-size: 1.4rem;
+            }
+            .sign-name .name-cn {
+                font-size: 0.9rem;
+            }
+            .sign-effect {
+                font-size: 0.65rem;
+                min-height: 40px;
+            }
+            .pray-btn {
+                font-size: 0.8rem;
+                padding: 5px 8px;
+            }
+            .btn-primary {
+                font-size: 1.2rem;
+                padding: 12px 16px;
+                min-width: 140px;
+                letter-spacing: 3px;
+            }
+            .btn-secondary {
+                font-size: 1rem;
+                padding: 8px 16px;
+            }
+            .result-sign {
+                font-size: 2.2rem;
+            }
+            .result-desc {
+                font-size: 1rem;
+            }
+            .weight-area {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* 超小屏 (小于360px) 调整为单列？但保持两列更好，适当压缩 */
+        @media (max-width: 359px) {
+            .sign-grid {
+                grid-template-columns: 1fr; /* 改为单列，更易读 */
+            }
+            .sign-effect {
+                min-height: auto;
+            }
         }
     </style>
 </head>
