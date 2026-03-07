@@ -323,8 +323,7 @@
         <!-- 技能触发区 -->
         <h3>🌸 ② 触发技能 · 提升数值</h3>
         <div class="button-group">
-            <button class="btn btn-trigger" onclick="updateYuqi('xianjing_hurt')">💔 娴静·受伤 (+1)</button>
-            <button class="btn btn-trigger" onclick="updateYuqi('xianjing_healthy')">❤️ 娴静·未伤 (+2)</button>
+            <button class="btn btn-trigger" onclick="updateYuqi('xianjing_hurt')">❤️ 娴静(+1)</button>
             <button class="btn btn-trigger" onclick="updateYuqi('shanshen')">🧘 善身 (+2)</button>
             <button class="btn btn-reset" onclick="resetYuqi()">🔄 重置所有</button>
         </div>
@@ -422,7 +421,6 @@
             window.updateYuqi = function(skillType) {
                 let addNum = 0;
                 if (skillType === 'xianjing_hurt') addNum = 1;      // 受伤+1
-                if (skillType === 'xianjing_healthy') addNum = 2;   // 未伤+2
                 if (skillType === 'shanshen') addNum = 2;           // 善身+2
 
                 // 对当前选中的数值进行增加 (不超过上限)
@@ -459,3 +457,4 @@
     </script>
 </body>
 </html>
+
