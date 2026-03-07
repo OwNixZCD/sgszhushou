@@ -224,7 +224,7 @@
             transition: 0.05s linear;
             text-transform: uppercase;
             letter-spacing: 6px;
-            display: inline-block;  /* 确保可以控制显示隐藏 */
+            display: inline-block;
         }
 
         .btn-primary:active {
@@ -248,6 +248,11 @@
         .btn-secondary:active {
             transform: translateY(5px);
             box-shadow: none;
+        }
+
+        /* 移动端触摸优化：禁用双击缩放，保留滚动 */
+        button {
+            touch-action: manipulation;
         }
 
         .result-area {
@@ -532,13 +537,7 @@
             resetWeights();
         });
 
-        // 简单触摸优化
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(b => {
-            b.addEventListener('touchstart', (e) => {
-                e.preventDefault();  // 防止双击缩放 (可选)
-            }, { passive: false });
-        });
+        // 移除可能干扰移动端点击的 touchstart 拦截代码，改用 CSS touch-action 处理
     })();
 </script>
 </body>
