@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>曹婴 · 伏间（顶部编号）</title>
+    <title>曹婴 · 伏间</title>
     <style>
         * {
             box-sizing: border-box;
@@ -127,7 +127,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;  /* 改为顶部对齐 */
+            justify-content: flex-start;
             transition: border 0.2s, box-shadow 0.2s;
             position: relative;
         }
@@ -137,7 +137,7 @@
             box-shadow: 0 10px 0 #832012, inset 0 0 20px #ffcf7c;
             background: #fbeec9;
         }
-        /* 被观看的黄色边框 (会叠加在原有边框上) */
+        /* 被观看的黄色边框 */
         .player-card.watched {
             border-color: #f5c542 !important;
             box-shadow: 0 10px 0 #b3872b, inset 0 0 20px #fff1b5, 0 0 15px gold;
@@ -153,7 +153,7 @@
             border: 2px solid #e7c682;
             color: #251e0f;
             line-height: 1.2;
-            margin-bottom: 15px;          /* 与后续元素的间距 */
+            margin-bottom: 15px;
         }
         .badge {
             background: #c0392b;
@@ -180,13 +180,143 @@
             font-size: 1.2rem;
             text-shadow: 2px 2px 0 #2b4127;
         }
+
+        /* ===== 手机适配：两列小卡片 ===== */
+        @media screen and (max-width: 600px) {
+            .game-container {
+                padding: 12px 8px;
+                border-radius: 32px 32px 24px 24px;
+            }
+            h1 {
+                font-size: 1.3rem;
+                justify-content: center;
+                gap: 5px;
+            }
+            h1 small {
+                font-size: 0.8rem;
+                padding: 0.2rem 0.6rem;
+            }
+
+            /* 控制面板：并排 */
+            .control-panel {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+                padding: 10px 6px;
+                gap: 6px;
+                border-radius: 40px;
+                margin: 10px 0 15px;
+            }
+
+            .control-item {
+                flex: 1 1 calc(50% - 6px);
+                min-width: 120px;
+                flex-direction: column;
+                padding: 8px 5px;
+                gap: 4px;
+                box-shadow: 0 3px 0 #6b5a38;
+            }
+            .control-item label {
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+            .control-item select,
+            .control-item input {
+                width: 100%;
+                font-size: 0.8rem;
+                padding: 5px 8px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 8px 12px;
+                font-size: 0.9rem;
+                border-bottom-width: 3px;
+                margin-top: 4px;
+            }
+
+            /* 玩家网格：两列布局 */
+            .players-grid {
+                grid-template-columns: repeat(2, 1fr);  /* 两列 */
+                gap: 8px;
+                margin: 12px 0 8px;
+            }
+
+            .player-card {
+                width: auto;              /* 由grid分配宽度 */
+                min-height: 60px;          /* 缩小高度 */
+                padding: 6px 4px;
+                border-radius: 16px;
+                border-width: 3px;
+                box-shadow: 0 3px 0 #6a4e26, inset 0 -2px 5px #ffeecc;
+            }
+            .player-card[data-caoying="true"] {
+                box-shadow: 0 3px 0 #832012, inset 0 0 10px #ffcf7c;
+            }
+            .player-card.watched {
+                box-shadow: 0 3px 0 #b3872b, inset 0 0 10px #fff1b5, 0 0 6px gold;
+            }
+
+            .player-name {
+                font-size: 0.9rem;         /* 更小字体 */
+                padding: 3px 8px;
+                margin-bottom: 3px;
+                border-width: 1.5px;
+            }
+
+            .badge {
+                font-size: 0.55rem;        /* 徽章进一步缩小 */
+                padding: 2px 6px;
+                border-width: 1px;
+                margin-top: 2px;
+            }
+            .badge.watch-badge {
+                box-shadow: 0 2px 0 #8f6800;
+            }
+
+            footer {
+                font-size: 0.7rem;
+                margin-top: 6px;
+            }
+        }
+
+        /* 超小屏（如 iPhone SE）再微调 */
+        @media screen and (max-width: 400px) {
+            .control-item {
+                min-width: 100px;
+                padding: 6px 4px;
+            }
+            .control-item label {
+                font-size: 0.7rem;
+            }
+            .control-item select,
+            .control-item input {
+                font-size: 0.7rem;
+                padding: 4px 6px;
+            }
+            .btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+            .player-card {
+                min-height: 50px;
+            }
+            .player-name {
+                font-size: 0.8rem;
+                padding: 2px 6px;
+            }
+            .badge {
+                font-size: 0.5rem;
+                padding: 2px 4px;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="game-container">
     <h1>
          曹婴 · 伏间 
-        <small>座位版</small>
     </h1>
 
     <div class="control-panel">
@@ -201,10 +331,10 @@
         <button class="btn" id="activateFujianBtn">⚡ 发动【伏间】</button>
     </div>
 
-    <!-- 玩家网格：编号在顶部，曹婴徽章在编号下方，观看时添加黄色边框+观看徽章 -->
+    <!-- 玩家网格 -->
     <div id="playersGrid" class="players-grid"></div>
 
-    <footer>—— 点击发动随机观看，黄色高亮持续数秒 ——</footer>
+    <footer>—— 点击发动随机观看，黄色高亮持续5秒 ——</footer>
 </div>
 
 <script>
@@ -214,30 +344,23 @@
         const activateBtn = document.getElementById('activateFujianBtn');
         const playersGrid = document.getElementById('playersGrid');
 
-        // 内部手牌数据 (只存储长度)
-        let players = []; // 每个元素是数组，长度代表手牌数 (0-6)
-
-        // 当前被观看的玩家索引及定时器
+        let players = [];
         let currentWatchedIndex = null;
         let watchTimer = null;
 
-        // 生成随机手牌长度 (0~6)
         function randomHandLength() {
-            return Math.floor(Math.random() * 7); // 0-6
+            return Math.floor(Math.random() * 7);
         }
 
-        // 根据座位数初始化手牌
         function initPlayersHands(seatNum) {
             players = Array.from({ length: seatNum }, () => Array(randomHandLength()).fill({}));
         }
 
-        // 计算全场最少手牌数
         function getMinHandCount() {
             if (players.length === 0) return 0;
             return Math.min(...players.map(p => p.length));
         }
 
-        // 清除之前的观看高亮
         function clearWatchHighlight() {
             if (watchTimer) {
                 clearTimeout(watchTimer);
@@ -254,7 +377,6 @@
             }
         }
 
-        // 渲染玩家卡片
         function renderPlayers() {
             playersGrid.innerHTML = '';
             const caoyingIdx = parseInt(caoyingSelect.value, 10);
@@ -266,13 +388,11 @@
                 card.setAttribute('data-index', i);
                 if (isCaoying) card.setAttribute('data-caoying', 'true');
 
-                // 玩家名称 (始终在顶部)
                 const nameSpan = document.createElement('div');
                 nameSpan.className = 'player-name';
                 nameSpan.textContent = `P${i+1}`;
                 card.appendChild(nameSpan);
 
-                // 如果是曹婴，添加固定徽章
                 if (isCaoying) {
                     const badge = document.createElement('div');
                     badge.className = 'badge';
@@ -282,12 +402,9 @@
 
                 playersGrid.appendChild(card);
             }
-
-            // 重新渲染后清除高亮
             clearWatchHighlight();
         }
 
-        // 更新下拉框
         function updateCaoyingSelect(seatNum) {
             const prevVal = caoyingSelect.value;
             caoyingSelect.innerHTML = '';
@@ -304,7 +421,6 @@
             }
         }
 
-        // 重置座位 & 手牌
         function resetBySeat() {
             let seat = parseInt(seatInput.value, 10);
             seat = Math.min(8, Math.max(2, seat));
@@ -315,39 +431,28 @@
             renderPlayers();
         }
 
-        // 发动伏间
         function activateFujian() {
-            // 每次发动先随机刷新所有玩家的手牌数量 (模拟新回合)
             players = players.map(() => Array(randomHandLength()).fill({}));
 
             const caoyingIdx = parseInt(caoyingSelect.value, 10);
             const total = players.length;
 
-            if (total < 2) {
-                return;
-            }
+            if (total < 2) return;
 
-            // 筛选其他玩家索引
             const otherIndices = [];
             for (let i = 0; i < total; i++) {
                 if (i !== caoyingIdx) otherIndices.push(i);
             }
             if (otherIndices.length === 0) return;
 
-            // 随机选择一名其他玩家
             const targetIdx = otherIndices[Math.floor(Math.random() * otherIndices.length)];
 
-            // 清除之前的观看高亮
             clearWatchHighlight();
 
-            // 获取目标卡片
             const targetCard = document.querySelector(`.player-card[data-index="${targetIdx}"]`);
             if (!targetCard) return;
 
-            // 添加观看高亮class
             targetCard.classList.add('watched');
-
-            // 创建并添加“观看”徽章
             const watchBadge = document.createElement('div');
             watchBadge.className = 'badge watch-badge';
             watchBadge.textContent = '👀 观看';
@@ -355,7 +460,6 @@
 
             currentWatchedIndex = targetIdx;
 
-            // 设置5秒后移除
             watchTimer = setTimeout(() => {
                 if (currentWatchedIndex === targetIdx) {
                     targetCard.classList.remove('watched');
@@ -364,10 +468,9 @@
                     currentWatchedIndex = null;
                     watchTimer = null;
                 }
-            }, 3000);
+            }, 5000);
         }
 
-        // 监听事件
         seatInput.addEventListener('input', function(e) {
             let val = parseInt(e.target.value, 10);
             val = Math.min(8, Math.max(2, val));
@@ -376,18 +479,15 @@
         });
 
         caoyingSelect.addEventListener('change', function() {
-            renderPlayers(); // 更新曹婴高亮，同时清除之前的观看
+            renderPlayers();
         });
 
         activateBtn.addEventListener('click', activateFujian);
 
-        // 初始化
         initPlayersHands(4);
         updateCaoyingSelect(4);
         renderPlayers();
     })();
 </script>
 </body>
-
 </html>
-
