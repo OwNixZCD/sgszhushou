@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>曹金玉 · 隅泣 · 玲珑面板</title>
+    <title>曹金玉 · 隅泣</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: linear-gradient(145deg, #f6f0f8 0%, #e9e2ef 100%);
+            background: linear-gradient(145deg, #f0e9f5 0%, #e0d3eb 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -22,7 +22,7 @@
         }
 
         .card {
-            max-width: 950px;
+            max-width: 1100px;          /* 稍加宽，适应5个卡片 */
             width: 100%;
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(8px);
@@ -76,10 +76,10 @@
             padding-left: 1rem;
         }
 
-        /* 数值卡片网格 — 原来 ul.no-dot 改造为 grid */
+        /* 数值卡片网格 — 5列 */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);  /* 从4改成5 */
             gap: 1.2rem;
             list-style: none;
             padding-left: 0;
@@ -131,7 +131,7 @@
             font-weight: 400;
         }
 
-        /* 技能描述条 */
+        /* 技能描述条 (现在包含距离) */
         .skill-description {
             background: #f0e7fa;
             border-radius: 60px;
@@ -171,7 +171,7 @@
         .btn {
             border: none;
             background: white;
-            padding: 12px 24px;
+            padding: 12px 20px;
             border-radius: 60px;
             font-size: 1rem;
             font-weight: 550;
@@ -181,7 +181,7 @@
             transition: all 0.15s ease;
             border: 1px solid rgba(200, 175, 225, 0.5);
             flex: 1 0 auto;
-            min-width: 150px;
+            min-width: 130px;        /* 稍小一点让5个按钮挤下 */
             backdrop-filter: blur(2px);
             letter-spacing: 0.3px;
         }
@@ -259,9 +259,11 @@
         }
 
         /* 移动端调整 */
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
             .card { padding: 1.5rem; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
             h1 { font-size: 2rem; }
             .btn { min-width: 100%; }
         }
@@ -272,7 +274,7 @@
         <h1>曹金玉</h1>
         <hr>
 
-        <!-- 数值展示区：网格卡片，复用原本的 ul + 样式增强 -->
+        <!-- 数值展示区：5个核心属性，增加了距离 -->
         <ul class="stats-grid no-dot">
             <li class="stat-item">
                 <span class="stat-label">⚡ 每回合发动</span>
@@ -290,21 +292,27 @@
                 <span class="stat-label">🃏 自身获得</span>
                 <span class="stat-value" id="getCard">1</span><span class="stat-cap">/5</span>
             </li>
+            <!-- 新增的距离卡片 -->
+            <li class="stat-item">
+                <span class="stat-label">📏 距离</span>
+                <span class="stat-value" id="distance">0</span><span class="stat-cap">/5</span>
+            </li>
         </ul>
 
-        <!-- 动态技能描述 (原descXX元素) 让技能更直观 -->
+        <!-- 动态技能描述 (现在包含距离) -->
         <div class="skill-description">
-            <p>每回合最多发动 <span id="descCount">2</span> 次  观看牌堆顶 <span id="descView">3</span> 张，<br> 
-            可给受伤角色 <span id="descGive">1</span> 张，然后自己获得 <span id="descGet">1</span> 张。</p>
+            <p>每回合最多发动 <span id="descCount">2</span> 次，当受伤角色与你距离 <span id="descDistance">2</span>，你可以观看牌堆顶 <span id="descView">3</span> 张牌，<br> 
+            给受伤角色至多 <span id="descGive">1</span> 张牌，自身获得至多 <span id="descGet">1</span> 张牌。</p>
         </div>
 
-        <!-- 选择要提升的数值类型 -->
+        <!-- 选择要提升的数值类型：增加距离按钮 -->
         <h3>⚙️ ① 选择要强化的属性</h3>
         <div class="button-group">
             <button class="btn" id="btn_triggerCount" onclick="selectValueType('triggerCount')">⚡ 发动次数</button>
             <button class="btn" id="btn_cardView" onclick="selectValueType('cardView')">👀 观牌数</button>
             <button class="btn" id="btn_giveCard" onclick="selectValueType('giveCard')">🎁 给牌数</button>
             <button class="btn" id="btn_getCard" onclick="selectValueType('getCard')">🃏 获得牌数</button>
+            <button class="btn" id="btn_distance" onclick="selectValueType('distance')">📏 距离</button>
         </div>
 
         <!-- 当前选中状态卡片 -->
@@ -321,17 +329,18 @@
             <button class="btn btn-reset" onclick="resetYuqi()">🔄 重置所有</button>
         </div>
 
-        <footer>—— 玲珑巧技 · 静待隅泣 ——</footer>
+        <footer>—— 新增「距离」属性，灵动控场 ——</footer>
     </div>
 
     <script>
         (function() {
-            // ---------- 核心数据 ----------
+            // ---------- 核心数据：新增 distance ----------
             const yuqiValues = {
                 triggerCount: 2,   // 发动次数
                 cardView: 3,       // 观牌数
                 giveCard: 1,       // 给牌数
-                getCard: 1         // 拿牌数
+                getCard: 1,        // 拿牌数
+                distance: 0        // 距离 (初始值2，上限5)
             };
             const MAX_VALUE = 5;    
             let selectedType = 'triggerCount';   // 当前选中的数值类型
@@ -341,40 +350,45 @@
             const cardViewSpan = document.getElementById('cardView');
             const giveCardSpan = document.getElementById('giveCard');
             const getCardSpan = document.getElementById('getCard');
+            const distanceSpan = document.getElementById('distance');       // 新增
 
             const descCountSpan = document.getElementById('descCount');
             const descViewSpan = document.getElementById('descView');
             const descGiveSpan = document.getElementById('descGive');
             const descGetSpan = document.getElementById('descGet');
+            const descDistanceSpan = document.getElementById('descDistance'); // 新增
 
             const selectedTypeText = document.getElementById('selectedTypeText');
 
-            // 按钮元素
+            // 按钮元素 (5个)
             const btnTrigger = document.getElementById('btn_triggerCount');
             const btnCardView = document.getElementById('btn_cardView');
             const btnGive = document.getElementById('btn_giveCard');
             const btnGet = document.getElementById('btn_getCard');
-            const allTypeBtns = [btnTrigger, btnCardView, btnGive, btnGet];
+            const btnDistance = document.getElementById('btn_distance');    // 新增
+            const allTypeBtns = [btnTrigger, btnCardView, btnGive, btnGet, btnDistance];
 
-            // ---------- 统一渲染：更新所有数值显示 (包括卡片 + 技能描述) ----------
+            // ---------- 统一渲染：更新所有数值显示 (卡片 + 技能描述) ----------
             function renderValues() {
                 // 卡片大数字
                 triggerSpan.textContent = yuqiValues.triggerCount;
                 cardViewSpan.textContent = yuqiValues.cardView;
                 giveCardSpan.textContent = yuqiValues.giveCard;
                 getCardSpan.textContent = yuqiValues.getCard;
+                distanceSpan.textContent = yuqiValues.distance;    // 新增
 
                 // 技能描述中的小标签
                 descCountSpan.textContent = yuqiValues.triggerCount;
                 descViewSpan.textContent = yuqiValues.cardView;
                 descGiveSpan.textContent = yuqiValues.giveCard;
                 descGetSpan.textContent = yuqiValues.getCard;
+                descDistanceSpan.textContent = yuqiValues.distance; // 新增
             }
 
             // ---------- 清除所有按钮的选中样式 ----------
             function clearSelectedStyle() {
                 allTypeBtns.forEach(btn => {
-                    btn.classList.remove('selected');
+                    if (btn) btn.classList.remove('selected');
                 });
             }
 
@@ -388,7 +402,8 @@
                     'triggerCount': '每回合发动次数',
                     'cardView': '观看牌堆顶牌数',
                     'giveCard': '给受伤角色牌数',
-                    'getCard': '自身获得牌数'
+                    'getCard': '自身获得牌数',
+                    'distance': '距离'
                 };
                 selectedTypeText.textContent = typeNameMap[type] || '';
 
@@ -399,6 +414,7 @@
                     case 'cardView': btnCardView.classList.add('selected'); break;
                     case 'giveCard': btnGive.classList.add('selected'); break;
                     case 'getCard': btnGet.classList.add('selected'); break;
+                    case 'distance': btnDistance.classList.add('selected'); break;
                 }
             };
 
@@ -418,11 +434,12 @@
 
             // ---------- 重置所有数值 + 恢复默认选中 ----------
             window.resetYuqi = function() {
-                // 重置数值
+                // 重置数值 (distance重置为2)
                 yuqiValues.triggerCount = 2;
                 yuqiValues.cardView = 3;
                 yuqiValues.giveCard = 1;
                 yuqiValues.getCard = 1;
+                yuqiValues.distance = 2;   // 新增
 
                 // 重置选中为“发动次数”
                 window.selectValueType('triggerCount');
@@ -433,17 +450,12 @@
 
             // ---------- 初始化：设置默认选中并渲染数值 ----------
             window.addEventListener('DOMContentLoaded', function() {
-                // 保证初始选中样式
+                // 确保初始选中样式
                 window.selectValueType('triggerCount');
                 renderValues();
-
-                // 额外检查：若某些按钮的 onclick 被覆盖，但已经内联 ok 
-                // 确保重置时也能正确更新描述 (descXX已经存在)
             });
 
         })();  // 结束闭包
     </script>
 </body>
 </html>
-
-
