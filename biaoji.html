@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>模块 · 数量与上限调节器</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f0f2f5 0%, #e6e9f0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+      padding: 1rem;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 48px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.6);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 620px;
+      border: 1px solid rgba(255,255,255,0.4);
+      transition: all 0.2s ease;
+    }
+
+    .module-badge {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .module-badge span {
+      display: inline-block;
+      background: #1e293b;
+      color: #f8fafc;
+      font-weight: 600;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      padding: 0.5rem 2.2rem;
+      border-radius: 60px;
+      box-shadow: 0 8px 14px -6px rgba(0,0,0,0.2);
+      border: 1px solid #475569;
+      text-transform: uppercase;
+      backdrop-filter: blur(2px);
+    }
+
+    .fraction {
+      text-align: center;
+      margin: 1.8rem 0 2.5rem 0;
+    }
+
+    .fraction-display {
+      background: #0f172a;
+      padding: 1.2rem 2rem;
+      border-radius: 120px;
+      display: inline-block;
+      box-shadow: inset 0 -4px 0 #334155, 0 20px 30px -10px #1e293b;
+    }
+
+    .fraction span {
+      font-size: 5.5rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      line-height: 1;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    #quantity-display, #max-display {
+      color: #facc15;
+      background: #0b1120;
+      padding: 0.2rem 0.8rem;
+      border-radius: 40px;
+      min-width: 130px;
+      display: inline-block;
+      letter-spacing: 4px;
+    }
+
+    .slash {
+      color: #94a3b8;
+      font-size: 4rem;
+      margin: 0 0.2rem;
+      font-weight: 300;
+      text-shadow: none;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .control-group {
+      flex: 1 1 200px;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 48px;
+      padding: 1.8rem 1rem 1.5rem 1rem;
+      box-shadow: 0 10px 20px -8px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.7);
+      transition: transform 0.15s;
+      text-align: center;
+    }
+
+    .control-group:hover {
+      transform: translateY(-3px);
+    }
+
+    .quantity-group {
+      background: linear-gradient(145deg, #dbeafe, #ede9fe);
+      border: 1px solid #a5b4fc;
+    }
+
+    .limit-group {
+      background: linear-gradient(145deg, #d1fae5, #dcfce7);
+      border: 1px solid #6ee7b7;
+    }
+
+    .group-label {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 1.2rem;
+      text-transform: uppercase;
+      display: inline-block;
+      padding: 0.2rem 1.2rem;
+      border-radius: 40px;
+      background: rgba(0,0,0,0.05);
+    }
+
+    .quantity-group .group-label {
+      color: #1e3a8a;
+      background: #bfdbfe;
+    }
+
+    .limit-group .group-label {
+      color: #065f46;
+      background: #a7f3d0;
+    }
+
+    .button-pair {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      background: white;
+      font-size: 2.2rem;
+      font-weight: 600;
+      width: 70px;
+      height: 70px;
+      border-radius: 50px;
+      box-shadow: 0 8px 0 #b0b0b0, 0 10px 20px -5px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: all 0.08s linear;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      border: 2px solid rgba(255,255,255,0.8);
+      line-height: 1;
+    }
+
+    .btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #7a7a7a, 0 5px 12px -3px rgba(0,0,0,0.2);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      transform: translateY(4px);
+      box-shadow: 0 4px 0 #9ca3af, 0 5px 10px -4px rgba(0,0,0,0.2);
+      pointer-events: none;
+      filter: grayscale(0.3);
+    }
+
+    .quantity-group .btn {
+      background: #facc15;
+      color: #0f172a;
+      box-shadow: 0 8px 0 #b45309, 0 10px 20px -5px #b4530960;
+    }
+
+    .quantity-group .btn:disabled {
+      box-shadow: 0 4px 0 #92400e;
+      background: #fbbf24;
+    }
+
+    .limit-group .btn {
+      background: #2dd4bf;
+      color: #0c4a6e;
+      box-shadow: 0 8px 0 #0d9488, 0 10px 20px -5px #0f766e;
+    }
+
+    .limit-group .btn:disabled {
+      box-shadow: 0 4px 0 #115e59;
+      background: #5eead4;
+    }
+
+    .btn span {
+      display: block;
+      font-size: 2.6rem;
+      transform: scale(1.1);
+    }
+
+    .hint-text {
+      text-align: center;
+      margin-top: 2rem;
+      color: #334155;
+      font-weight: 500;
+      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+      background: rgba(255,255,255,0.7);
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      display: inline-block;
+      width: auto;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hint-text span {
+      display: inline-block;
+      background: #1e293b;
+      color: #f1f5f9;
+      border-radius: 20px;
+      padding: 0.2rem 0.9rem;
+      margin: 0 0.3rem;
+      font-size: 0.8rem;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 1.2rem;
+    }
+
+    /* ---------- 移动端优化 (针对小屏幕进一步缩小) ---------- */
+    @media (max-width: 480px) {
+      .card {
+        padding: 1.2rem 0.8rem;        /* 减小卡片内边距 */
+      }
+
+      .module-badge {
+        margin-bottom: 1rem;
+      }
+
+      .module-badge span {
+        font-size: 1.2rem;              /* 模块字体缩小 */
+        padding: 0.3rem 1.5rem;
+        border-radius: 40px;
+      }
+
+      .fraction {
+        margin: 1rem 0 1.5rem 0;
+      }
+
+      .fraction-display {
+        padding: 0.8rem 1.2rem;         /* 分数区域缩小 */
+        border-radius: 80px;
+      }
+
+      .fraction span {
+        font-size: 3.2rem;               /* 数字缩小 */
+      }
+
+      #quantity-display, #max-display {
+        min-width: 80px;                 /* 最小宽度减小 */
+        letter-spacing: 2px;
+        padding: 0.1rem 0.4rem;
+      }
+
+      .slash {
+        font-size: 2.8rem;
+        margin: 0 0.1rem;
+      }
+
+      .controls-row {
+        gap: 0.8rem;
+      }
+
+      .control-group {
+        padding: 1.2rem 0.5rem 1rem 0.5rem;  /* 按钮组内边距减小 */
+        border-radius: 36px;
+      }
+
+      .group-label {
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+        padding: 0.2rem 0.8rem;
+      }
+
+      .button-pair {
+        gap: 0.6rem;
+      }
+
+      .btn {
+        width: 55px;                      /* 按钮稍小，但仍方便点击 */
+        height: 55px;
+        font-size: 1.8rem;
+        box-shadow: 0 5px 0 #b0b0b0, 0 8px 15px -5px rgba(0,0,0,0.2);
+      }
+
+      .btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 1px 0 #7a7a7a, 0 5px 10px -3px rgba(0,0,0,0.2);
+      }
+
+      .btn span {
+        font-size: 2.2rem;
+      }
+
+      .hint-text {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.8rem;
+        margin-top: 1.2rem;
+      }
+
+      .hint-text span {
+        padding: 0.1rem 0.6rem;
+        font-size: 0.7rem;
+      }
+
+      footer {
+        font-size: 0.7rem;
+        margin-top: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="module-badge">
+      <span>标 记 数</span>
+    </div>
+
+    <div class="fraction">
+      <div class="fraction-display">
+        <span id="quantity-display">00</span>
+        <span class="slash">/</span>
+        <span id="max-display">00</span>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <div class="control-group quantity-group">
+        <div class="group-label">数 量</div>
+        <div class="button-pair">
+          <button class="btn" id="quantity-decr" aria-label="减少数量"><span>−</span></button>
+          <button class="btn" id="quantity-incr" aria-label="增加数量"><span>+</span></button>
+        </div>
+        <div style="margin-top: 8px; font-size: 0.8rem; color:#1e3a8a; font-weight:500;">调节左侧数字</div>
+      </div>
+
+      <div class="control-group limit-group">
+        <div class="group-label">上 限</div>
+        <div class="button-pair">
+          <button class="btn" id="max-decr" aria-label="减少上限"><span>−</span></button>
+          <button class="btn" id="max-incr" aria-label="增加上限"><span>+</span></button>
+        </div>
+        <div style="margin-top: 8px; font-size: 0.8rem; color:#065f46; font-weight:500;">调节右侧数字</div>
+      </div>
+    </div>
+
+
+    <footer>数量上限 · 最大99</footer>
+  </div>
+
+  <script>
+    (function() {
+      const quantitySpan = document.getElementById('quantity-display');
+      const maxSpan = document.getElementById('max-display');
+
+      const quantityDecr = document.getElementById('quantity-decr');
+      const quantityIncr = document.getElementById('quantity-incr');
+      const maxDecr = document.getElementById('max-decr');
+      const maxIncr = document.getElementById('max-incr');
+
+      let quantity = 0;
+      let max = 0;
+
+      const formatTwoDigits = (num) => String(num).padStart(2, '0');
+
+      function updateDisplay() {
+        // 强制约束
+        if (quantity > max) quantity = max;
+        if (quantity < 0) quantity = 0;
+        if (max < 0) max = 0;
+        if (max > 99) max = 99;
+
+        quantitySpan.textContent = formatTwoDigits(quantity);
+        maxSpan.textContent = formatTwoDigits(max);
+
+        quantityDecr.disabled = (quantity <= 0);
+        quantityIncr.disabled = (quantity >= max);
+        maxDecr.disabled = (max <= 0);
+        maxIncr.disabled = (max >= 99);
+      }
+
+      // 数量减
+      quantityDecr.addEventListener('click', function() {
+        if (quantity > 0) quantity--;
+        updateDisplay();
+      });
+
+      // 数量加
+      quantityIncr.addEventListener('click', function() {
+        if (quantity < max) quantity++;
+        updateDisplay();
+      });
+
+      // 上限减
+      maxDecr.addEventListener('click', function() {
+        let newMax = max - 1;
+        if (newMax >= 0) {
+          if (newMax < quantity) quantity = newMax;
+          max = newMax;
+        }
+        updateDisplay();
+      });
+
+      // 上限加
+      maxIncr.addEventListener('click', function() {
+        if (max < 99) max++;
+        updateDisplay();
+      });
+
+      // 初始化
+      updateDisplay();
+
+      // 添加title提示
+      quantityDecr.title = '减少数量（前方数字）';
+      quantityIncr.title = '增加数量（前方数字）';
+      maxDecr.title = '减少上限（后方数字）';
+      maxIncr.title = '增加上限（后方数字）';
+    })();
+  </script>
+</body>
+</html>
