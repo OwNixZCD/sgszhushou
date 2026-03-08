@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>关宁技能程序</title>
-    <!-- SheetJS库用于读取Excel文件 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -80,115 +78,54 @@
             transform: translateY(1px);
         }
         
-        button:disabled {
-            background: #666;
-            color: #999;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
         .skills-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
-            min-height: 150px;
         }
-        /* 技能按钮的box大小 */
+        
+        /* 技能卡片样式 */
         .skill-card {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
+            border-radius: 12px;
+            padding: 20px 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
             text-align: center;
-            min-height: 150px;
         }
         
         .skill-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            transform: translateY(-3px);
             background: rgba(255, 255, 255, 0.15);
         }
         
         .skill-name {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 12px;
+            width: 100%;
         }
         
-        .skill-type {
-            font-size: 0.8rem;
-            color: #fdbb2d;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-        /* 下面的是按钮弹出的css样式 */
+        /* 技能描述：始终显示 */
         .skill-description {
-            position: absolute;
-            top: 100%;
-            left: 0;
             width: 100%;
             background: rgba(0, 0, 0, 0.9);
-            padding: 10px;
-            border-radius: 0 0 10px 10px;
-            font-size: 0.8rem;
-            line-height: 1.4;
-            z-index: 10;
-            transition: all 0.2s ease;
-            height: 200px;
-            overflow-y: auto;
-        }
-        
-        .skill-card.active .skill-description {
-            top: 0;
-        }
-        
-        .delete-confirm {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(200, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
             border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-        }
-        
-        .delete-confirm p {
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        
-        .delete-confirm-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .delete-confirm-buttons button {
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            min-width: 60px;
+            padding: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
         }
         
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
+            padding: 50px 20px;
             color: #aaa;
             font-size: 1.2rem;
             grid-column: 1 / -1;
@@ -203,151 +140,7 @@
             font-size: 0.9rem;
         }
         
-        /* 模态框样式 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: rgba(30, 30, 40, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #fdbb2d;
-            padding-bottom: 10px;
-        }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            color: #fdbb2d;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-        }
-        
-        .skill-category {
-            margin-bottom: 25px;
-        }
-        
-        .category-title {
-            font-size: 1.2rem;
-            color: #fdbb2d;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .skill-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 15px;
-        }
-        
-        .skill-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .skill-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .skill-item-name {
-            font-weight: bold;
-            font-size: 1rem;
-        }
-        
-        .skill-item-desc {
-            font-size: 0.85rem;
-            line-height: 1.4;
-            color: #ccc;
-            margin-bottom: 10px;
-            max-height: 100px;
-            overflow-y: auto;
-        }
-        
-        .skill-item-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .skill-item-actions button {
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            min-width: auto;
-        }
-        
-        .add-skill-form {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #fdbb2d;
-        }
-        
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 8px 12px;
-            border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(0, 0, 0, 0.5);
-            color: #fff;
-        }
-        
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
             .controls {
                 flex-direction: column;
                 align-items: center;
@@ -355,14 +148,10 @@
             
             button {
                 width: 100%;
-                max-width: 300px;
+                max-width: 280px;
             }
             
             .skills-container {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-            
-            .skill-list {
                 grid-template-columns: 1fr;
             }
         }
@@ -372,13 +161,12 @@
     <div class="container">
         <header>
             <h1>关宁技能程序</h1>
-            <div class="subtitle">点击按钮随机获取技能，点击技能查看描述，双击删除</div>
+            <div class="subtitle">点击按钮随机获取技能</div>
         </header>
         
         <div class="controls">
             <button id="killBtn">龙诵（出牌阶段）</button>
             <button id="resetBtn">重置</button>
-            <button id="addSkillBtn">增加技能</button>
         </div>
     
         <div class="skills-container" id="skillsContainer">
@@ -390,46 +178,8 @@
         </footer>
     </div>
 
-    <!-- 技能管理模态框 -->
-    <div class="modal" id="skillModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">技能管理</h2>
-                <button class="close-modal" id="closeModal">&times;</button>
-            </div>
-            
-            <div class="skill-category">
-                <h3 class="category-title">出牌阶段技能</h3>
-                <div class="skill-list" id="killSkillsList">
-                    <!-- 出牌阶段技能列表 -->
-                </div>
-            </div>
-            
-            <div class="add-skill-form">
-                <h3 class="category-title">添加新技能</h3>
-                <div class="form-group">
-                    <label for="skillType">技能类型</label>
-                    <select id="skillType">
-                        <option value="kill">出牌阶段技能</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="skillName">技能名称</label>
-                    <input type="text" id="skillName" placeholder="输入技能名称">
-                </div>
-                <div class="form-group">
-                    <label for="skillDescription">技能描述</label>
-                    <textarea id="skillDescription" placeholder="输入技能描述"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button id="saveSkillBtn">保存技能</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // 从表格数据中提取技能信息
+        // 硬编码技能数据（出牌阶段技能）
         const skillData = {
             kill: [
                 { name: "界义绝", description: "出牌阶段限一次，你可以弃置一张牌，然后令一名其他角色展示一张手牌：若其展示红色牌，你获得之并可以令其回复1点体力；黑色牌，本回合其不能使用或打出手牌且非锁定技失效，你对其使用♥【杀】伤害+1" },
@@ -538,39 +288,17 @@
             ]
         };
 
-        // 从localStorage加载技能数据，如果没有则使用默认数据
-        function loadSkillData() {
-            const savedData = localStorage.getItem('soulFiveTigerSkills');
-            if (savedData) {
-                return JSON.parse(savedData);
-            }
-            return skillData;
-        }
-
-        // 保存技能数据到localStorage
-        function saveSkillData(data) {
-            localStorage.setItem('soulFiveTigerSkills', JSON.stringify(data));
-        }
-
-        // 当前使用的技能数据
-        let currentSkillData = loadSkillData();
-
         // 游戏状态
         let currentSkills = [];
-        let clickTimers = {};
 
         // DOM元素
         const killBtn = document.getElementById('killBtn');
         const resetBtn = document.getElementById('resetBtn');
-        const addSkillBtn = document.getElementById('addSkillBtn');
         const skillsContainer = document.getElementById('skillsContainer');
-        const skillModal = document.getElementById('skillModal');
-        const closeModal = document.getElementById('closeModal');
-        const saveSkillBtn = document.getElementById('saveSkillBtn');
 
         // 获取随机技能
         function getRandomSkill(type) {
-            const skills = currentSkillData[type];
+            const skills = skillData[type];
             if (skills && skills.length > 0) {
                 const randomIndex = Math.floor(Math.random() * skills.length);
                 return skills[randomIndex];
@@ -580,23 +308,18 @@
 
         // 添加技能到展示区
         function addSkillToDisplay(skill, type) {
-            // 检查是否已达到最大技能数
             if (currentSkills.length >= 1) {
                 alert("最多只能展示1个技能！");
                 return;
             }
             
-            // 检查是否已存在相同技能
             if (currentSkills.some(s => s.name === skill.name && s.type === type)) {
                 alert("该技能已存在！");
                 return;
             }
             
-            // 添加技能到当前技能列表
             const skillWithType = { ...skill, type };
             currentSkills.push(skillWithType);
-            
-            // 更新显示
             updateSkillsDisplay();
         }
 
@@ -612,200 +335,30 @@
             currentSkills.forEach(skill => {
                 const skillCard = document.createElement('div');
                 skillCard.className = 'skill-card';
-                skillCard.dataset.name = skill.name;
-                skillCard.dataset.type = skill.type;
                 
-                const typeText = {
-                    'kill': '出牌阶段'
-                };
-                
+                // 直接显示技能名和描述，无类型标签，无需点击事件
                 skillCard.innerHTML = `
                     <div class="skill-name">${skill.name}</div>
-                    <div class="skill-type">${typeText[skill.type]}</div>
                     <div class="skill-description">${skill.description}</div>
                 `;
-                
-                // 点击事件 - 显示/隐藏描述
-                skillCard.addEventListener('click', function(e) {
-                    // 如果已经显示了删除确认，则不处理点击事件
-                    if (this.querySelector('.delete-confirm')) {
-                        return;
-                    }
-                    
-                    const key = skill.name + skill.type;
-                    
-                    // 如果已经有计时器，说明是双击
-                    if (clickTimers[key]) {
-                        clearTimeout(clickTimers[key]);
-                        delete clickTimers[key];
-                        showDeleteConfirm(this, skill.name, skill.type);
-                    } else {
-                        // 第一次点击，显示描述
-                        this.classList.toggle('active');
-                        
-                        // 设置计时器，如果一定时间内没有再次点击，则清除计时器
-                        clickTimers[key] = setTimeout(() => {
-                            delete clickTimers[key];
-                        }, 500);
-                    }
-                });
                 
                 skillsContainer.appendChild(skillCard);
             });
         }
 
-        // 显示删除确认
-        function showDeleteConfirm(card, name, type) {
-            // 先隐藏描述
-            card.classList.remove('active');
-            
-            const deleteConfirm = document.createElement('div');
-            deleteConfirm.className = 'delete-confirm';
-            deleteConfirm.innerHTML = `
-                <p>是否删除本技能？</p>
-                <div class="delete-confirm-buttons">
-                    <button class="confirm-delete">确认</button>
-                    <button class="cancel-delete">取消</button>
-                </div>
-            `;
-            
-            card.appendChild(deleteConfirm);
-            
-            // 确认删除
-            deleteConfirm.querySelector('.confirm-delete').addEventListener('click', function(e) {
-                e.stopPropagation();
-                removeSkill(name, type);
-            });
-            
-            // 取消删除
-            deleteConfirm.querySelector('.cancel-delete').addEventListener('click', function(e) {
-                e.stopPropagation();
-                deleteConfirm.remove();
-            });
-        }
-
-        // 移除技能
-        function removeSkill(name, type) {
-            currentSkills = currentSkills.filter(skill => !(skill.name === name && skill.type === type));
-            delete clickTimers[name + type];
-            updateSkillsDisplay();
-        }
-
         // 重置所有技能
         function resetSkills() {
             currentSkills = [];
-            clickTimers = {};
             updateSkillsDisplay();
         }
 
-        // 打开技能管理模态框
-        function openSkillModal() {
-            // 更新技能列表显示
-            updateSkillLists();
-            skillModal.style.display = 'flex';
-        }
-
-        // 关闭技能管理模态框
-        function closeSkillModal() {
-            skillModal.style.display = 'none';
-        }
-
-        // 更新技能列表显示
-        function updateSkillLists() {
-            const types = ['kill'];
-            const typeNames = {
-                'kill': '出牌阶段技能'
-            };
-            
-            types.forEach(type => {
-                const listElement = document.getElementById(`${type}SkillsList`);
-                listElement.innerHTML = '';
-                
-                if (currentSkillData[type] && currentSkillData[type].length > 0) {
-                    currentSkillData[type].forEach((skill, index) => {
-                        const skillItem = document.createElement('div');
-                        skillItem.className = 'skill-item';
-                        
-                        skillItem.innerHTML = `
-                            <div class="skill-item-header">
-                                <div class="skill-item-name">${skill.name}</div>
-                                <div class="skill-item-actions">
-                                    <button class="delete-skill" data-type="${type}" data-index="${index}">删除</button>
-                                </div>
-                            </div>
-                            <div class="skill-item-desc">${skill.description}</div>
-                        `;
-                        
-                        listElement.appendChild(skillItem);
-                    });
-                } else {
-                    listElement.innerHTML = '<div style="color: #aaa; text-align: center; padding: 10px;">暂无技能</div>';
-                }
-            });
-            
-            // 添加删除按钮事件
-            document.querySelectorAll('.delete-skill').forEach(button => {
-                button.addEventListener('click', function() {
-                    const type = this.dataset.type;
-                    const index = parseInt(this.dataset.index);
-                    
-                    if (confirm(`确定要删除技能 "${currentSkillData[type][index].name}" 吗？`)) {
-                        currentSkillData[type].splice(index, 1);
-                        saveSkillData(currentSkillData);
-                        updateSkillLists();
-                    }
-                });
-            });
-        }
-
-        // 保存新技能
-        function saveNewSkill() {
-            const type = document.getElementById('skillType').value;
-            const name = document.getElementById('skillName').value.trim();
-            const description = document.getElementById('skillDescription').value.trim();
-            
-            if (!name) {
-                alert('请输入技能名称！');
-                return;
-            }
-            
-            if (!description) {
-                alert('请输入技能描述！');
-                return;
-            }
-            
-            // 检查是否已存在同名技能
-            if (currentSkillData[type].some(skill => skill.name === name)) {
-                alert('该技能名称已存在！');
-                return;
-            }
-            
-            // 添加新技能
-            currentSkillData[type].push({ name, description });
-            saveSkillData(currentSkillData);
-            
-            // 更新显示
-            updateSkillLists();
-            
-            // 清空表单
-            document.getElementById('skillName').value = '';
-            document.getElementById('skillDescription').value = '';
-            
-            alert('技能添加成功！');
-        }
-    
         // 事件监听
         killBtn.addEventListener('click', function() {
             const skill = getRandomSkill('kill');
-            if (skill) {
-                addSkillToDisplay(skill, 'kill');
-            }
+            if (skill) addSkillToDisplay(skill, 'kill');
         });
 
         resetBtn.addEventListener('click', resetSkills);
-        addSkillBtn.addEventListener('click', openSkillModal);
-        closeModal.addEventListener('click', closeSkillModal);
-        saveSkillBtn.addEventListener('click', saveNewSkill);
 
         // 初始化显示
         updateSkillsDisplay();
