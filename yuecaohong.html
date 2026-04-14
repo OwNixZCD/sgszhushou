@@ -311,7 +311,7 @@
                     <li>选择任务后，其他任务将被锁定无法选择</li>
                     <li>点击"已完成"按钮后，将展示摸金结果</li>
                     <li>摸金结果：首先随机展示"装备"、"锦囊"或"基本"中的一项</li>
-                    <li>如果结果不是"装备"，则额外随机展示"数值加一"或"不可响应"中的一项</li>
+                    <li>每种类型都有独立的"数值加一"或"不可响应"效果随机抽取</li>
                     <li>确认结果后，将开启新一轮摸金任务</li>
                 </ol>
             </div>
@@ -349,9 +349,24 @@
             "一名其他角色失去所有手牌"
         ];
 
-        // 摸金结果选项
-        const resultTypes = ["装备", "锦囊（只有不可响应）", "基本"];
-        const effectTypes = ["数值加一", "不可响应", "不可响应", "不可响应"];
+        // 摸金结果配置 - 每种类型独立配置效果
+        const resultConfig = {
+            "装备": {
+                effects: ["怎么滴，你装备还想要效果😡"],
+                goldAdd: 1 // 获得装备类型奖励时增加的摸金数
+            },
+            "锦囊": {
+                effects: [ "不可响应"],
+                goldAdd: 1 // 获得锦囊类型奖励时增加的摸金数
+            },
+            "基本": {
+                effects: ["数值加一（基本）", "不可响应（基本）"],
+                goldAdd: 1 // 获得基本类型奖励时增加的摸金数
+            }
+        };
+        
+        // 基础结果类型
+        const resultTypes = ["装备", "锦囊", "基本"];
         
         // 游戏状态
         let gameState = {
@@ -475,25 +490,23 @@
         function generateRandomResult() {
             // 随机选择结果类型
             const resultIndex = Math.floor(Math.random() * resultTypes.length);
-            const result = resultTypes[resultIndex];
+            const resultType = resultTypes[resultIndex];
+            
+            // 获取该类型对应的配置
+            const config = resultConfig[resultType];
+            
+            // 随机选择该类型对应的效果
+            const effectIndex = Math.floor(Math.random() * config.effects.length);
+            const effect = config.effects[effectIndex];
+            
+            // 增加摸金计数
+            gameState.goldCount += config.goldAdd;
             
             // 构建弹窗内容
-            let modalHTML = `<div class="modal-result">获得：${result}</div>`;
-            
-            // 如果结果不是"装备"，则随机添加一个效果
-            if (result !== "装备") {
-                const effectIndex = Math.floor(Math.random() * effectTypes.length);
-                const effect = effectTypes[effectIndex];
-                modalHTML += `<div class="modal-effect">效果：${effect}</div>`;
-                
-                // 如果获得效果，增加摸金计数
-                gameState.goldCount++;
-            }
-            
-            // 如果获得装备，也增加摸金计数
-            if (result === "装备") {
-                gameState.goldCount++;
-            }
+            let modalHTML = `
+                <div class="modal-result">获得：${resultType}</div>
+                <div class="modal-effect">效果：${effect}</div>
+            `;
             
             modalContent.innerHTML = modalHTML;
         }
