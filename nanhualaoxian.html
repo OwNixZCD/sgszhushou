@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>南华老仙天书面杀工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffcc00;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            font-size: 24px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #ffcc00;
+            border-bottom: 1px solid #ffcc00;
+            padding-bottom: 5px;
+        }
+        
+        .version-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .version-btn {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(to right, #4a9eff, #2c5aa0);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .version-btn.active {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            box-shadow: 0 0 10px rgba(255, 138, 0, 0.7);
+        }
+        
+        .near-death-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(to right, #ff4757, #cc3745);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .near-death-btn.active {
+            background: linear-gradient(to right, #2ed573, #1e9e50);
+            box-shadow: 0 0 10px rgba(46, 213, 115, 0.7);
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .option-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .option {
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .option:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            background-color: rgba(255, 204, 0, 0.3);
+            border-color: #ffcc00;
+        }
+        
+        .tianshu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .tianshu-item {
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            border-left: 5px solid #ffcc00;
+        }
+        
+        .tianshu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .tianshu-name {
+            font-weight: bold;
+            color: #ffcc00;
+            font-size: 16px;
+        }
+        
+        .tianshu-content {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .tianshu-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tianshu-count {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .count-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ffcc00;
+            color: #000;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .assign-btn {
+            background-color: #4a9eff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal h3 {
+            margin-bottom: 15px;
+            color: #ffcc00;
+            text-align: center;
+        }
+        
+        .modal input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .confirm-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .cancel-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #ffcc00;
+        }
+        
+        .version-info {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #ffcc00;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>南华老仙天书面杀工具</h1>
+        
+        <!-- 版本选择 -->
+        <div class="section">
+            <h2>濒死结算后再点</h2>
+            <button id="nearDeathBtn" class="near-death-btn">濒死结算后（点击后上限+1）</button>
+        </div>
+        
+        <div class="section">
+            <h2>抽取天书</h2>
+            <button id="drawBtn" class="btn">开始抽取天书</button>
+            
+            <div id="timingSection" style="display: none;">
+                <h3>选择使用时机：</h3>
+                <div id="timingOptions" class="option-list"></div>
+            </div>
+            
+            <div id="effectSection" style="display: none;">
+                <h3>选择天书效果：</h3>
+                <div id="effectOptions" class="option-list"></div>
+            </div>
+            
+            <div id="status" class="status"></div>
+        </div>
+        
+        <div class="section">
+            <h2>自己的天书 (<span id="ownLimit">0</span>/<span id="ownMax">2</span>)</h2>
+            <div id="ownTianshu" class="tianshu-list"></div>
+        </div>
+        
+        <div class="section">
+            <h2>他人的天书</h2>
+            <div id="otherTianshu" class="tianshu-list"></div>
+        </div>
+    </div>
+    
+    <!-- 分配姓名模态框 -->
+    <div id="assignModal" class="modal">
+        <div class="modal-content">
+            <h3>分配天书给角色</h3>
+            <input type="text" id="characterName" placeholder="输入角色姓名">
+            <div class="modal-buttons">
+                <button id="confirmAssign" class="confirm-btn">确定</button>
+                <button id="cancelAssign" class="cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 替换天书模态框 -->
+    <div id="replaceModal" class="modal">
+        <div class="modal-content">
+            <h3>替换天书</h3>
+            <p>你的天书已满，请选择一个天书替换：</p>
+            <div id="replaceOptions" class="option-list"></div>
+            <div class="modal-buttons">
+                <button id="cancelReplace" class="cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据定义
+        const timingData = [
+            { id: 1, text: "你使用牌后", triggerType: 1 },
+            { id: 2, text: "其他角色对你使用牌后", triggerType: 1 },
+            { id: 3, text: "你失去手牌后", triggerType: 1 },
+            { id: 4, text: "出牌阶段开始时", triggerType: 2 },
+            { id: 5, text: "你受到伤害后", triggerType: 2 },
+            { id: 6, text: "准备阶段", triggerType: 2 },
+            { id: 7, text: "结束阶段", triggerType: 2 },
+            { id: 8, text: "你造成伤害后", triggerType: 2 },
+            { id: 9, text: "你成为【杀】的目标时", triggerType: 2 },
+            { id: 10, text: "你使用或打出【闪】时", triggerType: 2 },
+            { id: 11, text: "一张判定牌生效前", triggerType: 2 },
+            { id: 12, text: "你使用的牌被抵消后", triggerType: 2 },
+            { id: 13, text: "当一张判定牌生效后", triggerType: 2 },
+            { id: 14, text: "你于回合外失去红色牌后", triggerType: 2 },
+            { id: 15, text: "弃牌阶段开始时", triggerType: 2 },
+            { id: 16, text: "一名角色受到【杀】的伤害后", triggerType: 2 },
+            { id: 17, text: "摸牌阶段开始时", triggerType: 2 },
+            { id: 18, text: "你成为普通锦囊牌的目标后", triggerType: 2 },
+            { id: 19, text: "一名角色进入连环状态后", triggerType: 2 },
+            { id: 20, text: "你的体力值变化后", triggerType: 2 },
+            { id: 21, text: "每轮开始时", triggerType: 2 },
+            { id: 22, text: "一名角色造成伤害时", triggerType: 2 },
+            { id: 23, text: "一名角色受到伤害时", triggerType: 2 },
+            { id: 24, text: "一名角色进入濒死时", triggerType: 3 },
+            { id: 25, text: "你失去装备牌后", triggerType: 3 },
+            { id: 26, text: "一名其他角色死亡后", triggerType: 3 },
+            { id: 27, text: "【南蛮入侵】或【万箭齐发】结算后", triggerType: 3 },
+            { id: 28, text: "你使用【杀】造成伤害后", triggerType: 3 },
+            { id: 29, text: "一名角色受到属性伤害后", triggerType: 3 },
+            { id: 30, text: "一名角色失去最后的手牌后", triggerType: 3 }
+        ];
+
+        const effectData = [
+            { id: 1, text: "你可以摸一张牌", effectType: 1 },
+            { id: 2, text: "你可以弃置一名角色区域内的一张牌", effectType: 1 },
+            { id: 3, text: "你可以观看牌堆顶的3张牌，以任意顺序置于牌堆顶或牌堆底", effectType: 1 },
+            { id: 4, text: "你可以弃置任意张牌，摸等量的牌", effectType: 1 },
+            { id: 5, text: "你可以视为使用一张无距离次数限制的【杀】", effectType: 1 },
+            { id: 6, text: "你可以令一名角色的手牌上限+2直到其回合结束", effectType: 1 },
+            { id: 7, text: "你可以获得一名角色区域内的一张牌", effectType: 2 },
+            { id: 8, text: "你可以回复1点体力", effectType: 2 },
+            { id: 9, text: "你可以令一名其他角色判定，若结果为黑桃，你对其造成2点雷电伤害", effectType: 2 },
+            { id: 10, text: "若你不是体力上限最高的角色，你可增加1点体力上限", effectType: 2 },
+            { id: 11, text: "你可与一名已受伤角色拼点，若你赢，你获得其两张牌", effectType: 2 },
+            { id: 12, text: "你可令至多两名角色各摸一张牌", effectType: 2 },
+            { id: 13, text: "你可以弃置两张牌，令你和一名其他角色回复1点体力", effectType: 2 },
+            { id: 14, text: "你可以失去1点体力，摸3张牌", effectType: 2 },
+            { id: 15, text: "你可以获得造成伤害的牌", effectType: 0 },
+            { id: 16, text: "你可令此牌对你无效", effectType: 0 },
+            { id: 17, text: "你可以用一张手牌替换判定牌", effectType: 0 },
+            { id: 18, text: "你可以获得此判定牌", effectType: 0 },
+            { id: 19, text: "你可令此伤害值+1", effectType: 0 },
+            { id: 20, text: "你可防止此伤害，令伤害来源摸3张牌", effectType: 0 },
+            { id: 21, text: "你可以摸3张牌并翻面", effectType: 3 },
+            { id: 22, text: "你可以摸3张牌，弃置1张牌", effectType: 3 },
+            { id: 23, text: "你可以摸牌至体力上限(至多摸5张)", effectType: 3 },
+            { id: 24, text: "你可令一名角色非锁定技失效直到其下个回合开始", effectType: 3 },
+            { id: 25, text: "你可令一名角色摸2张牌并翻面", effectType: 3 },
+            { id: 26, text: "你可获得两张非基本牌", effectType: 3 },
+            { id: 27, text: "你可获得两张锦囊牌", effectType: 3 },
+            { id: 28, text: "你可令你对一名角色使用牌无次数或距离限制直到你的回合结束", effectType: 3 },
+            { id: 29, text: "你可交换两名角色装备区的牌", effectType: 3 },
+            { id: 30, text: "你可交换两名角色手牌区的牌", effectType: 3 }
+        ];
+
+        // 特殊匹配规则：特定时点可以额外匹配的特殊效果
+        const specialMatches = {
+            "一名角色受到【杀】的伤害后": [15],
+            "你使用【杀】造成伤害后": [15],
+            "你成为【杀】的目标时": [16],
+            "你成为普通锦囊牌的目标后": [16],
+            "一张判定牌生效前": [17],
+            "一张判定牌生效后": [18],
+            "一名角色造成伤害时": [19, 20],
+            "一名角色受到伤害时": [19, 20]
+        };
+
+        // 应用状态
+        let state = {
+            currentStep: 'idle', // idle, timingSelected, effectSelected
+            selectedTiming: null,
+            selectedEffect: null,
+            ownTianshu: [],
+            otherTianshu: [],
+            currentTianshuId: 0,
+            assignModalTarget: null,
+            version: 'current', 
+            nearDeath: false
+        };
+
+        // DOM 元素
+        const drawBtn = document.getElementById('drawBtn');
+        const timingSection = document.getElementById('timingSection');
+        const effectSection = document.getElementById('effectSection');
+        const timingOptions = document.getElementById('timingOptions');
+        const effectOptions = document.getElementById('effectOptions');
+        const status = document.getElementById('status');
+        const ownTianshu = document.getElementById('ownTianshu');
+        const otherTianshu = document.getElementById('otherTianshu');
+        const assignModal = document.getElementById('assignModal');
+        const characterName = document.getElementById('characterName');
+        const confirmAssign = document.getElementById('confirmAssign');
+        const cancelAssign = document.getElementById('cancelAssign');
+        const replaceModal = document.getElementById('replaceModal');
+        const replaceOptions = document.getElementById('replaceOptions');
+        const cancelReplace = document.getElementById('cancelReplace');
+        const currentVersion = document.getElementById('currentVersion');
+        const nearDeathBtn = document.getElementById('nearDeathBtn');
+        const ownLimit = document.getElementById('ownLimit');
+        const ownMax = document.getElementById('ownMax');
+
+        // 初始化
+        function init() {
+            loadFromStorage();
+            renderTianshuLists();
+            updateVersionDisplay();
+            
+            drawBtn.addEventListener('click', startDrawing);
+            confirmAssign.addEventListener('click', confirmAssignment);
+            cancelAssign.addEventListener('click', closeAssignModal);
+            cancelReplace.addEventListener('click', closeReplaceModal);
+            
+            // 濒死按钮事件
+            nearDeathBtn.addEventListener('click', toggleNearDeath);
+        }
+
+        // 切换濒死状态
+        function toggleNearDeath() {
+            state.nearDeath = !state.nearDeath;
+            nearDeathBtn.classList.toggle('active', state.nearDeath);
+            updateVersionDisplay();
+            saveToStorage();
+        }
+
+        // 更新版本显示信息
+        function updateVersionDisplay() {
+            const baseLimit = 2;
+            const actualLimit = state.nearDeath ? baseLimit + 1 : baseLimit;
+            ownLimit.textContent = state.ownTianshu.length;
+            ownMax.textContent = actualLimit;
+
+            nearDeathBtn.textContent = state.nearDeath ? '已濒死（天书上限+1）' : '未濒死（点击后上限+1）';
+}
+
+        // 获取当前天书上限
+        function getCurrentMaxTianshu() {
+            const baseLimit = 2; // 两版本基础上限都是2
+            return state.nearDeath ? baseLimit + 1 : baseLimit;
+        }
+
+        // 获取新天书的初始次数
+        function getInitialTianshuCount() {
+            return 2;
+        }
+
+        // 开始抽取天书
+        function startDrawing() {
+            // 重置状态
+            state.currentStep = 'idle';
+            state.selectedTiming = null;
+            state.selectedEffect = null;
+            
+            // 显示使用时机选择
+            timingSection.style.display = 'block';
+            effectSection.style.display = 'none';
+            
+            // 随机选择3个使用时机
+            const randomTimings = getRandomItems(timingData, 3);
+            renderTimingOptions(randomTimings);
+            
+            status.textContent = "请选择一个使用时机";
+            drawBtn.disabled = true;
+        }
+
+        // 渲染使用时机选项
+        function renderTimingOptions(timings) {
+            timingOptions.innerHTML = '';
+            
+            timings.forEach(timing => {
+                const option = document.createElement('div');
+                option.className = 'option';
+                option.textContent = timing.text;
+                option.dataset.id = timing.id;
+                
+                option.addEventListener('click', () => {
+                    // 移除其他选项的选中状态
+                    document.querySelectorAll('#timingOptions .option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // 设置当前选项为选中状态
+                    option.classList.add('selected');
+                    
+                    // 保存选择
+                    state.selectedTiming = timing;
+                    state.currentStep = 'timingSelected';
+                    
+                    // 显示效果选择
+                    showEffectOptions(timing);
+                });
+                
+                timingOptions.appendChild(option);
+            });
+        }
+
+        // 显示效果选项
+        function showEffectOptions(timing) {
+            effectSection.style.display = 'block';
+            
+            // 获取匹配的效果
+            let matchedEffects = [];
+            
+            // 首先获取对应类型的所有效果
+            const normalEffects = effectData.filter(effect => 
+                effect.effectType === timing.triggerType
+            );
+            
+            // 检查是否有特殊匹配
+            if (specialMatches[timing.text]) {
+                const specialEffectIds = specialMatches[timing.text];
+                const specialEffects = effectData.filter(effect => 
+                    specialEffectIds.includes(effect.id)
+                );
+                
+                // 合并普通效果和特殊效果
+                matchedEffects = [...normalEffects, ...specialEffects];
+            } else {
+                matchedEffects = normalEffects;
+            }
+            
+            // 随机选择3个效果
+            const selectedEffects = getRandomItems(matchedEffects, 3);
+            renderEffectOptions(selectedEffects);
+            
+            status.textContent = "请选择一个天书效果";
+        }
+
+        // 渲染效果选项
+        function renderEffectOptions(effects) {
+            effectOptions.innerHTML = '';
+            
+            effects.forEach(effect => {
+                const option = document.createElement('div');
+                option.className = 'option';
+                option.textContent = effect.text;
+                option.dataset.id = effect.id;
+                
+                option.addEventListener('click', () => {
+                    // 移除其他选项的选中状态
+                    document.querySelectorAll('#effectOptions .option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // 设置当前选项为选中状态
+                    option.classList.add('selected');
+                    
+                    // 保存选择
+                    state.selectedEffect = effect;
+                    state.currentStep = 'effectSelected';
+                    
+                    // 完成天书组合
+                    completeTianshu();
+                });
+                
+                effectOptions.appendChild(option);
+            });
+        }
+
+        // 完成天书组合
+        function completeTianshu() {
+            const timingText = state.selectedTiming.text;
+            const effectText = state.selectedEffect.text;
+            const tianshuText = `${timingText}，${effectText}`;
+            
+            // 检查是否需要替换天书
+            const currentMax = getCurrentMaxTianshu();
+            if (state.ownTianshu.length >= currentMax) {
+                showReplaceModal(tianshuText);
+            } else {
+                addTianshu(tianshuText);
+            }
+            
+            // 重置状态
+            resetDrawingState();
+        }
+
+        // 显示替换模态框
+        function showReplaceModal(tianshuText) {
+            replaceOptions.innerHTML = '';
+            
+            state.ownTianshu.forEach((tianshu, index) => {
+                const option = document.createElement('div');
+                option.className = 'option';
+                option.textContent = tianshu.text;
+                option.dataset.index = index;
+                
+                option.addEventListener('click', () => {
+                    // 替换天书
+                    state.ownTianshu.splice(index, 1);
+                    addTianshu(tianshuText);
+                    closeReplaceModal();
+                });
+                
+                replaceOptions.appendChild(option);
+            });
+            
+            replaceModal.style.display = 'flex';
+        }
+
+        // 关闭替换模态框
+        function closeReplaceModal() {
+            replaceModal.style.display = 'none';
+            resetDrawingState();
+        }
+
+        // 添加天书
+        function addTianshu(text, character = null) {
+            const tianshu = {
+                id: state.currentTianshuId++,
+                text: text,
+                count: character ? 1 : getInitialTianshuCount(),
+                character: character
+            };
+            
+            if (character) {
+                state.otherTianshu.push(tianshu);
+            } else {
+                state.ownTianshu.push(tianshu);
+            }
+            
+            saveToStorage();
+            renderTianshuLists();
+            updateVersionDisplay();
+        }
+
+        // 渲染天书列表
+        function renderTianshuLists() {
+            // 渲染自己的天书
+            ownTianshu.innerHTML = '';
+            if (state.ownTianshu.length === 0) {
+                ownTianshu.innerHTML = '<div class="status">暂无天书</div>';
+            } else {
+                state.ownTianshu.forEach(tianshu => {
+                    ownTianshu.appendChild(createTianshuElement(tianshu));
+                });
+            }
+            
+            // 渲染他人的天书
+            otherTianshu.innerHTML = '';
+            if (state.otherTianshu.length === 0) {
+                otherTianshu.innerHTML = '<div class="status">暂无天书</div>';
+            } else {
+                // 按角色姓名分组
+                const grouped = {};
+                state.otherTianshu.forEach(tianshu => {
+                    if (!grouped[tianshu.character]) {
+                        grouped[tianshu.character] = [];
+                    }
+                    grouped[tianshu.character].push(tianshu);
+                });
+                
+                // 渲染分组
+                Object.keys(grouped).forEach(character => {
+                    const groupHeader = document.createElement('div');
+                    groupHeader.className = 'tianshu-name';
+                    groupHeader.textContent = `${character}的天书`;
+                    otherTianshu.appendChild(groupHeader);
+                    
+                    grouped[character].forEach(tianshu => {
+                        otherTianshu.appendChild(createTianshuElement(tianshu));
+                    });
+                });
+            }
+        }
+
+        // 创建天书元素
+        function createTianshuElement(tianshu) {
+            const element = document.createElement('div');
+            element.className = 'tianshu-item';
+            element.dataset.id = tianshu.id;
+            
+            const header = document.createElement('div');
+            header.className = 'tianshu-header';
+            
+            const name = document.createElement('div');
+            name.className = 'tianshu-name';
+            name.textContent = tianshu.character ? tianshu.character : '自己的天书';
+            
+            const content = document.createElement('div');
+            content.className = 'tianshu-content';
+            content.textContent = tianshu.text;
+            
+            const actions = document.createElement('div');
+            actions.className = 'tianshu-actions';
+            
+            const countDiv = document.createElement('div');
+            countDiv.className = 'tianshu-count';
+            
+            const countText = document.createElement('span');
+            countText.textContent = `剩余次数: ${tianshu.count}`;
+            
+            const decreaseBtn = document.createElement('button');
+            decreaseBtn.className = 'count-btn';
+            decreaseBtn.textContent = '-';
+            decreaseBtn.addEventListener('click', () => {
+                decreaseTianshuCount(tianshu.id, tianshu.character ? 'other' : 'own');
+            });
+            
+            countDiv.appendChild(countText);
+            countDiv.appendChild(decreaseBtn);
+            
+            actions.appendChild(countDiv);
+            
+            // 如果是自己的天书，显示分配按钮
+            if (!tianshu.character) {
+                const assignBtn = document.createElement('button');
+                assignBtn.className = 'assign-btn';
+                assignBtn.textContent = '分配';
+                assignBtn.addEventListener('click', () => {
+                    showAssignModal(tianshu.id);
+                });
+                actions.appendChild(assignBtn);
+            }
+            
+            element.appendChild(header);
+            element.appendChild(name);
+            element.appendChild(content);
+            element.appendChild(actions);
+            
+            return element;
+        }
+
+        // 减少天书次数
+        function decreaseTianshuCount(id, type) {
+            const list = type === 'own' ? state.ownTianshu : state.otherTianshu;
+            const tianshu = list.find(t => t.id === id);
+            
+            if (tianshu) {
+                tianshu.count--;
+                
+                if (tianshu.count <= 0) {
+                    // 移除天书
+                    const index = list.findIndex(t => t.id === id);
+                    if (index !== -1) {
+                        list.splice(index, 1);
+                    }
+                }
+                
+                saveToStorage();
+                renderTianshuLists();
+                updateVersionDisplay();
+            }
+        }
+
+        // 显示分配模态框
+        function showAssignModal(id) {
+            state.assignModalTarget = id;
+            characterName.value = '';
+            assignModal.style.display = 'flex';
+        }
+
+        // 关闭分配模态框
+        function closeAssignModal() {
+            assignModal.style.display = 'none';
+            state.assignModalTarget = null;
+        }
+
+        // 确认分配
+        function confirmAssignment() {
+            const name = characterName.value.trim();
+            if (name) {
+                // 找到天书
+                const tianshuIndex = state.ownTianshu.findIndex(t => t.id === state.assignModalTarget);
+                if (tianshuIndex !== -1) {
+                    const tianshu = state.ownTianshu[tianshuIndex];
+                    
+                    // 从自己的天书中移除
+                    state.ownTianshu.splice(tianshuIndex, 1);
+                    
+                    // 添加到他人天书，次数设为1
+                    tianshu.character = name;
+                    tianshu.count = 1;
+                    state.otherTianshu.push(tianshu);
+                    
+                    saveToStorage();
+                    renderTianshuLists();
+                    updateVersionDisplay();
+                }
+            }
+            
+            closeAssignModal();
+        }
+
+        // 重置抽取状态
+        function resetDrawingState() {
+            state.currentStep = 'idle';
+            state.selectedTiming = null;
+            state.selectedEffect = null;
+            
+            timingSection.style.display = 'none';
+            effectSection.style.display = 'none';
+            
+            status.textContent = "";
+            drawBtn.disabled = false;
+        }
+
+        // 从数组中随机选择指定数量的元素
+        function getRandomItems(array, count) {
+            const shuffled = [...array].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        // 保存到本地存储
+        function saveToStorage() {
+            const data = {
+                ownTianshu: state.ownTianshu,
+                otherTianshu: state.otherTianshu,
+                currentTianshuId: state.currentTianshuId,
+                version: state.version,
+                nearDeath: state.nearDeath
+            };
+            localStorage.setItem('nhlxTianshuTool', JSON.stringify(data));
+        }
+
+        // 从本地存储加载
+        function loadFromStorage() {
+            const data = localStorage.getItem('nhlxTianshuTool');
+            if (data) {
+                const parsed = JSON.parse(data);
+                state.ownTianshu = parsed.ownTianshu || [];
+                state.otherTianshu = parsed.otherTianshu || [];
+                state.currentTianshuId = parsed.currentTianshuId || 0;
+                state.version = 'current'; 
+                state.nearDeath = parsed.nearDeath || false;
+            }
+        }
+
+        // 初始化应用
+        init();
+    </script>
+</body>
+</html>
