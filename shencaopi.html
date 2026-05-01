@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神曹丕技能程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #fdbb2d;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #fdbb2d;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            background: #fdbb2d;
+            color: #1a2a6c;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            min-width: 120px;
+        }
+        
+        button:hover {
+            background: #ffcc44;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        /* 技能卡片样式 */
+        .skill-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .skill-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .skill-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        
+        /* 技能描述：始终显示 */
+        .skill-description {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #aaa;
+            font-size: 1.2rem;
+            grid-column: 1 / -1;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 280px;
+            }
+            
+            .skills-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>神曹丕技能程序</h1>
+            <div class="subtitle">点击按钮随机获取技能</div>
+        </header>
+        
+        <div class="controls">
+            <button id="killBtn">刻名（受到伤害后）</button>
+            <button id="resetBtn">重置</button>
+        </div>
+    
+        <div class="skills-container" id="skillsContainer">
+            <div class="empty-state">点击上方按钮获取技能</div>
+        </div>
+        
+        <footer>
+            神曹丕技能程序 &copy; 2025 - 三国杀十周年
+        </footer>
+    </div>
+
+    <script>
+        const skillData = {
+            kill: [
+                { name: "奸雄", description: "当你受到伤害后，你可以摸1张牌，并获得造成此伤害的牌。" },
+                { name: "放逐", description: "每当你受到伤害后，你可以令一名其他角色摸X张牌（X为你已损失的体力值），然后其翻面。" },
+                { name: "归心", description: "你每受到1点伤害后，你可以获得每名其他角色区域里的随机一张牌，然后你翻面。" },
+                { name: "酒诗", description: "视为使用一张【酒】；若你因受到伤害而扣减体力前你的武将牌背面朝上，当此伤害结算结束后，你可以将你背面朝上的武将牌翻面。你每次使用【酒】后，你使用【杀】次数+1直到你的回合结束。" },
+                { name: "称象", description: "当你受到伤害后，你可以亮出牌堆顶的四张牌，然后获得其中的任意张点数之和小于等于13的牌。若获得的牌点数为13，则你复原武将牌。" },
+                { name: "恢拓", description: "每当你受到伤害后，你可以令一名角色进行一次判定，若结果为红色，该角色回复1点体力；若结果为黑色，该角色摸X张牌（X为此次伤害的伤害数。" },
+                { name: "隅泣", description: "当有角色受到伤害后，若你与其距离0或者更少，你可以观看牌堆顶的三张牌，将其中至多一张交给受伤角色，至多一张自己获得，剩余的牌放回牌堆顶（每回合限触发2次）。" },
+                { name: "潜龙", description: "当你受到伤害后，你可以展示牌堆顶的三张牌并获得其中至多X张牌（X为你已损失的体力值），然后将剩余的牌置于牌堆底。" },
+                { name: "妩艳", description: "出牌阶段或受到伤害后，你选择一名男性角色，令其可对你选择的另一名其他角色使用一张手牌，若其使用牌你摸两张牌，若其未使用牌或未造成伤害，你可令其流失一点体力，此技能本阶段失效。" }
+            ]
+        };
+
+        // 游戏状态
+        let currentSkills = [];
+
+        // DOM元素
+        const killBtn = document.getElementById('killBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const skillsContainer = document.getElementById('skillsContainer');
+
+        // 获取随机技能
+        function getRandomSkill(type) {
+            const skills = skillData[type];
+            if (skills && skills.length > 0) {
+                const randomIndex = Math.floor(Math.random() * skills.length);
+                return skills[randomIndex];
+            }
+            return null;
+        }
+
+        // 添加技能到展示区
+        function addSkillToDisplay(skill, type) {
+            if (currentSkills.length >= 1) {
+                alert("最多只能展示1个技能！");
+                return;
+            }
+            
+            if (currentSkills.some(s => s.name === skill.name && s.type === type)) {
+                alert("该技能已存在！");
+                return;
+            }
+            
+            const skillWithType = { ...skill, type };
+            currentSkills.push(skillWithType);
+            updateSkillsDisplay();
+        }
+
+        // 更新技能显示
+        function updateSkillsDisplay() {
+            skillsContainer.innerHTML = '';
+            
+            if (currentSkills.length === 0) {
+                skillsContainer.innerHTML = '<div class="empty-state">点击上方按钮获取技能</div>';
+                return;
+            }
+            
+            currentSkills.forEach(skill => {
+                const skillCard = document.createElement('div');
+                skillCard.className = 'skill-card';
+                
+                // 直接显示技能名和描述，无类型标签，无需点击事件
+                skillCard.innerHTML = `
+                    <div class="skill-name">${skill.name}</div>
+                    <div class="skill-description">${skill.description}</div>
+                `;
+                
+                skillsContainer.appendChild(skillCard);
+            });
+        }
+
+        // 重置所有技能
+        function resetSkills() {
+            currentSkills = [];
+            updateSkillsDisplay();
+        }
+
+        // 事件监听
+        killBtn.addEventListener('click', function() {
+            const skill = getRandomSkill('kill');
+            if (skill) addSkillToDisplay(skill, 'kill');
+        });
+
+        resetBtn.addEventListener('click', resetSkills);
+
+        // 初始化显示
+        updateSkillsDisplay();
+    </script>
+</body>
+</html>
