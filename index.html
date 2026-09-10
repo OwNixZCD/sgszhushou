@@ -1,136 +1,503 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>三国杀面杀小助手</title>
     <style>
-        /* 全局样式重置 */
+        /* ===== 全局样式 ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Microsoft YaHei', sans-serif;
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
         }
 
-        /* 页面主体样式 */
         body {
             background: linear-gradient(120deg, #2c3e50, #000000);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
+            padding: 30px 20px 50px;
+        }
+
+        /* ===== 顶部切换栏 ===== */
+        .tab-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 45px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 10px 20px;
+            border-radius: 60px;
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            flex-wrap: wrap;
             justify-content: center;
-            padding: 20px;
         }
 
-        /* 标题样式 */
-        h1 {
+        .tab-btn {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            border: 2px solid transparent;
+            border-radius: 40px;
+            padding: 14px 40px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
             color: #ffffff;
-            margin-bottom: 50px;
-            font-size: 2.2rem;
-            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
-            text-align: center;
+            background: rgba(52, 152, 219, 0.20);
+            border-color: rgba(52, 152, 219, 0.30);
+            transform: translateY(-2px);
         }
 
-        /* 按钮容器：6个按钮分2行3列布局 */
-        .buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 25px;
+        .tab-btn.active {
+            color: #ffffff;
+            background: #3498db;
+            border-color: #3498db;
+            box-shadow: 0 6px 25px rgba(52, 152, 219, 0.40);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active:hover {
+            background: #2e86c1;
+            border-color: #2e86c1;
+        }
+
+        /* ===== 整体容器 ===== */
+        .overall-wrapper {
             width: 100%;
-            max-width: 800px;
+            max-width: 1050px;
+            position: relative;
         }
 
-        /* 核心按钮样式 */
+        /* ===== 每个 "整体" 内容 ===== */
+        .overall {
+            display: none;
+            animation: fadeUp 0.45s ease forwards;
+        }
+
+        .overall.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(28px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== 整体标题 ===== */
+        .overall-title {
+            color: #ffffff;
+            font-size: 2.2rem;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+            word-break: break-word;
+        }
+
+        .overall-title small {
+            font-size: 1rem;
+            font-weight: 400;
+            opacity: 0.7;
+            display: block;
+            margin-top: 6px;
+            letter-spacing: 0;
+        }
+
+        /* ===== 分类组 ===== */
+        .group-container {
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 18px 20px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: border-color 0.3s;
+        }
+
+        .group-container:hover {
+            border-color: rgba(52, 152, 219, 0.25);
+        }
+
+        .group-title {
+            color: #ecf0f1;
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            padding-left: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /*-- 其他图标在 CSS 中新增 */
+        .group-container.version-guo .group-title {
+            border-left: 4px solid #95a5a6;   /* 换颜色 */
+        }
+        .version-guo .jump-button { border-color: #95a5a6; }
+        .version-guo .jump-button:hover { background: #95a5a6; border-color: #95a5a6; }
+
+        /* 图例加一个点 */
+        .dot-guo { background: #95a5a6; }
+
+        /* 每个版本独特的左侧色条 */
+        .group-container.version-mobile .group-title {
+            border-left: 4px solid #e67e22;
+        }
+        .group-container.version-mobile:hover {
+            border-color: rgba(230, 126, 34, 0.30);
+        }
+
+        .group-container.version-10th .group-title {
+            border-left: 4px solid #2ecc71;
+        }
+        .group-container.version-10th:hover {
+            border-color: rgba(46, 204, 113, 0.30);
+        }
+
+        .group-container.version-ol .group-title {
+            border-left: 4px solid #9b59b6;
+        }
+        .group-container.version-ol:hover {
+            border-color: rgba(155, 89, 182, 0.30);
+        }
+
+        /* ===== 按钮容器（flex 换行） ===== */
+        .group-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* ===== 单个按钮 ===== */
         .jump-button {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.07);
             color: #ffffff;
             border: 2px solid #3498db;
             border-radius: 12px;
-            padding: 25px 15px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            padding: 14px 22px;
+            font-size: 1rem;
+            font-weight: 600;
             text-align: center;
             text-decoration: none;
             cursor: pointer;
-            transition: all 0.4s ease;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 120px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.20);
+            flex: 0 1 auto;
+            min-width: 100px;
+            max-width: 170px;
+            word-break: break-word;
+            line-height: 1.3;
         }
 
-        /* 鼠标悬停效果 */
         .jump-button:hover {
             background: #3498db;
             color: #ffffff;
-            transform: translateY(-8px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.40);
+            border-color: #5faee3;
         }
 
-        /* 点击按钮的按压效果 */
         .jump-button:active {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px) scale(0.97);
         }
 
-        /* 响应式适配：手机端1列显示 */
+        /* 每个版本按钮的 hover 颜色微差（边框颜色保持一致） */
+        .version-mobile .jump-button {
+            border-color: #e67e22;
+        }
+        .version-mobile .jump-button:hover {
+            background: #e67e22;
+            border-color: #e67e22;
+        }
+
+        .version-10th .jump-button {
+            border-color: #2ecc71;
+        }
+        .version-10th .jump-button:hover {
+            background: #2ecc71;
+            border-color: #2ecc71;
+        }
+
+        .version-ol .jump-button {
+            border-color: #9b59b6;
+        }
+        .version-ol .jump-button:hover {
+            background: #9b59b6;
+            border-color: #9b59b6;
+        }
+
+        /* ===== 响应式 ===== */
         @media (max-width: 768px) {
-            .buttons-grid {
-                grid-template-columns: 1fr;
+            .tab-bar {
+                gap: 12px;
+                padding: 10px 16px;
+                max-width: 400px;
+                width: 100%;
+            }
+            .tab-btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+                flex: 1;
+                text-align: center;
+                min-width: 70px;
+            }
+            .overall-title {
+                font-size: 1.7rem;
+            }
+            .group-title {
+                font-size: 1.1rem;
             }
             .jump-button {
-                min-height: 100px;
-                padding: 20px 15px;
+                padding: 12px 16px;
+                font-size: 0.9rem;
+                min-width: 80px;
+                flex: 1 0 auto;
+                max-width: 100%;
             }
-            h1 {
-                font-size: 1.8rem;
+            .group-container {
+                padding: 14px 14px 16px;
             }
+        }
+
+        @media (max-width: 480px) {
+            .group-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .jump-button {
+                max-width: 100%;
+                min-height: 50px;
+                flex: 1 1 auto;
+            }
+            .overall-title {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* ===== 页脚 ===== */
+        .footer-tip {
+            margin-top: 50px;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.8rem;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        /* ===== 辅助说明（标记版本颜色） ===== */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+        }
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+        .dot-mobile {
+            background: #e67e22;
+        }
+        .dot-10th {
+            background: #2ecc71;
+        }
+        .dot-ol {
+            background: #9b59b6;
+        }
+        .dot-other  { 
+            background: #95a5a6; 
         }
     </style>
 </head>
 <body>
-    <h1>三国杀面杀小助手</h1>
+     <h1 class="overall-title">
+                三国杀面杀小助手
+            </h1>
 
-    <!-- 6个跳转按钮容器 -->
-    <div class="buttons-grid">
-        <!-- 按钮1：可修改href和按钮文字 -->
-        <a href="guanning.html" target="_blank" class="jump-button">关宁</a>
-        <!-- 按钮2 -->
-        <a href="shenjiangwei.html" target="_blank" class="jump-button">神姜维</a>
-        <!-- 按钮3 -->
-        <a href="mocaocao.html" target="_blank" class="jump-button">魔曹操</a>
-        <!-- 按钮4 -->
-        <a href="sguangning.html" target="_blank" class="jump-button">管宁</a>
-        <!-- 按钮5 -->
-        <a href="xunjiadayuan.html" target="_blank" class="jump-button">荀家大院</a>
-        <!-- 按钮6 -->
-        <a href="caojinyu.html" target="_blank" class="jump-button">曹金玉</a>
-        <!-- 按钮7 -->
-        <a href="liuhui.html" target="_blank" class="jump-button">刘徽</a>
-        <!-- 按钮8 -->
-        <a href="zhouqun.html" target="_blank" class="jump-button">周群</a>
-         <!-- 按钮9 -->
-        <a href="caoying.html" target="_blank" class="jump-button">曹婴</a>
-        <!-- 按钮10 -->
-        <a href="biaoji.html" target="_blank" class="jump-button">自调标记</a>
-        <!-- 按钮11 -->
-        <a href="quyuan.html" target="_blank" class="jump-button">屈原</a>
-        <!-- 按钮12 -->
-        <a href="yuecaohong.html" target="_blank" class="jump-button">乐曹洪</a>
-        <!-- 按钮13 -->
-        <a href="nanhualaoxian.html" target="_blank" class="jump-button">南华老仙OL</a>
-        <!-- 按钮14 -->
-        <a href="puyuan.html" target="_blank" class="jump-button">蒲元</a>
-        <!-- 按钮15 -->
-        <a href="shencaopi.html" target="_blank" class="jump-button">神曹丕</a>
+    <!-- ====== 顶部切换栏（只有两个标签） ====== -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="tab1">武将大全</button>
+        <button class="tab-btn" data-tab="tab2">站主自用</button>
     </div>
+
+    <!-- ====== 整体容器 ====== -->
+    <div class="overall-wrapper">
+        <!-- ============================================================= -->
+        <!-- 整体一：武将大全              -->
+        <!-- ============================================================= -->
+        <div id="tab1" class="overall active">
+            <!-- 图例 -->
+            <div class="legend">
+                <span><span class="dot dot-mobile"></span> 移动版</span>
+                <span><span class="dot dot-10th"></span> 十周年</span>
+                <span><span class="dot dot-ol"></span> OL</span>
+                <span><span class="dot dot-other"></span> 其他</span>
+            </div>
+
+            <!-- ===== 移动版 ===== -->
+            <div class="group-container version-mobile">
+                <div class="group-title">移动版</div>
+                <div class="group-buttons">
+                    <a href="lao-youzhuge.html" target="_blank" class="jump-button">友诸葛亮</a>
+                    
+                </div>
+            </div>
+
+            <!-- ===== 十周年 ===== -->
+            <div class="group-container version-10th">
+                <div class="group-title">十周年</div>
+                <div class="group-buttons">
+                    <a href="lao-guotisuo.html" target="_blank" class="jump-button">郭缇索</a>
+                    <a href="lao-guanning.html" target="_blank" class="jump-button">管宁</a>
+                    <a href="lao-sppuyuan.html" target="_blank" class="jump-button">sp蒲元</a>
+                    <a href="lao-shenjiangwei.html" target="_blank" class="jump-button">神姜维</a>
+                    <a href="lao-xvshao.html" target="_blank" class="jump-button">许邵</a>
+                </div>
+            </div>
+
+            <!-- ===== OL ===== -->
+            <div class="group-container version-ol">
+                <div class="group-title">OL</div>
+                <div class="group-buttons">
+                    <a href="lao-mocaocao.html" target="_blank" class="jump-button">魔曹操</a>
+                    <a href="lao-nanhualaoxian.html" target="_blank" class="jump-button">南华老仙</a>
+                    <a href="lao-peixiu.html" target="_blank" class="jump-button">裴秀</a>
+                    <a href="lao-xunjiadayuan.html" target="_blank" class="jump-button">荀家大院</a>
+                    <a href="lao-yuecaohong.html" target="_blank" class="jump-button">乐曹洪</a>
+                    <a href="lao-yuezhugeliang.html" target="_blank" class="jump-button">乐诸葛亮</a>
+                </div>
+            </div>
+
+            <div class="group-container version-guo">
+                <div class="group-title">其它</div>
+                <div class="group-buttons">
+                    <a href="lao-chenshou.html" target="_blank" class="jump-button">陈寿(伪全扩)</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- 整体二：站主自用（按 移动版 / 十周年 / OL 分类）              -->
+        <!-- ============================================================= -->
+        <div id="tab2" class="overall">
+
+            <!-- 图例 -->
+            <div class="legend">
+                <span><span class="dot dot-mobile"></span> 移动版</span>
+                <span><span class="dot dot-10th"></span> 十周年</span>
+                <span><span class="dot dot-ol"></span> OL</span>
+                <span><span class="dot dot-other"></span> 其他</span>
+            </div>
+
+            <!-- ===== 移动版 ===== -->
+            <div class="group-container version-mobile">
+                <div class="group-title">移动版</div>
+                <div class="group-buttons">
+                    <a href="caoying.html" target="_blank" class="jump-button">曹婴</a>
+                </div>
+            </div>
+
+            <!-- ===== 十周年 ===== -->
+            <div class="group-container version-10th">
+                <div class="group-title">十周年</div>
+                <div class="group-buttons">
+                    <a href="shenjiangwei.html" target="_blank" class="jump-button">神姜维</a>
+                    <a href="sguangning.html" target="_blank" class="jump-button">管宁</a>
+                    <a href="liuhui.html" target="_blank" class="jump-button">刘徽</a>
+                    <a href="puyuan.html" target="_blank" class="jump-button">蒲元</a>
+                    <a href="shencaopi.html" target="_blank" class="jump-button">神曹丕</a>
+                    <a href="caojinyu.html" target="_blank" class="jump-button">曹金玉</a>
+                    <a href="guanning.html" target="_blank" class="jump-button">关宁</a>
+                    <a href="quyuan.html" target="_blank" class="jump-button">屈原</a>
+
+                </div>
+            </div>
+
+            <!-- ===== OL ===== -->
+            <div class="group-container version-ol">
+                <div class="group-title">OL</div>
+                <div class="group-buttons">
+                    <a href="nanhualaoxian.html" target="_blank" class="jump-button">南华老仙 OL</a>
+                    <a href="zhouqun.html" target="_blank" class="jump-button">周群</a>
+                    <a href="yuecaohong.html" target="_blank" class="jump-button">乐曹洪</a>
+                    <a href="mocaocao.html" target="_blank" class="jump-button">魔曹操</a>
+                    <a href="xunjiadayuan.html" target="_blank" class="jump-button">荀家大院</a>
+
+                </div>
+            </div>
+
+            <!-- 在 HTML 中添加 -->
+            <div class="group-container version-guo">
+                <div class="group-title">其它</div>
+                <div class="group-buttons">
+                    <a href="biaoji.html" target="_blank" class="jump-button">自调标记</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- ====== JavaScript 切换逻辑 ====== -->
+    <script>
+        (function() {
+            function switchTab(tabId) {
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+                });
+                document.querySelectorAll('.overall').forEach(overall => {
+                    overall.classList.toggle('active', overall.id === tabId);
+                });
+            }
+            window.switchTab = switchTab;
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    if (tabId) switchTab(tabId);
+                });
+            });
+
+            // 默认激活第一个
+            const firstActive = document.querySelector('.tab-btn.active');
+            if (firstActive) {
+                const defaultTab = firstActive.getAttribute('data-tab');
+                if (defaultTab) switchTab(defaultTab);
+            } else {
+                const firstBtn = document.querySelector('.tab-btn');
+                if (firstBtn) {
+                    const firstTab = firstBtn.getAttribute('data-tab');
+                    if (firstTab) switchTab(firstTab);
+                }
+            }
+        })();
+    </script>
+
 </body>
-
 </html>
-
-
-
-
