@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>乐诸葛亮 · 虎符战法</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: #2b261e;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+        .phone-frame {
+            width: 100%;
+            max-width: 430px;
+            background: #f0e7d4;
+            border-radius: 40px 40px 28px 28px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.7), 0 0 0 6px #a08d70;
+            overflow: hidden;
+            padding: 20px 14px 24px 14px;
+            border: 2px solid #d4b58c;
+        }
+        /* 顶部虎符行 */
+        .hufu-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #d6c5aa;
+            border-radius: 60px;
+            padding: 6px 12px 6px 20px;
+            margin-bottom: 16px;
+            border: 2px solid #836e4e;
+            box-shadow: inset 0 2px 5px #fff2d8, 0 5px 0 #5f513a;
+        }
+        .hufu-label {
+            font-weight: 800;
+            color: #2f2419;
+            font-size: 1.3rem;
+        }
+        .hufu-ctrl {
+            display: flex;
+            align-items: center;
+            background: #b7a384;
+            border-radius: 50px;
+            padding: 4px;
+            gap: 8px;
+        }
+        .hufu-btn {
+            width: 48px;
+            height: 48px;
+            background: #f0e0ca;
+            border: none;
+            border-radius: 50%;
+            font-size: 2.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #362915;
+            box-shadow: 0 3px 0 #7b613f;
+            cursor: pointer;
+            line-height: 1;
+            padding-bottom: 6px;
+        }
+        .hufu-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+        .hufu-value {
+            min-width: 50px;
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1f160b;
+        }
+        /* 操作按钮行 */
+        .action-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .action-btn {
+            flex: 1;
+            background: #7c684b;
+            border: none;
+            border-radius: 50px;
+            padding: 16px 0;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #fff2db;
+            box-shadow: 0 6px 0 #4f3d2a;
+            cursor: pointer;
+        }
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #4f3d2a;
+        }
+        .action-btn.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        /* 战法展示区 - 两行三列 */
+        .draw-section {
+            background: #cdba9b;
+            border-radius: 36px;
+            padding: 20px 12px;
+            margin-bottom: 16px;
+            border: 3px solid #7a6445;
+            box-shadow: inset 0 0 0 2px #f2e2ca, 0 6px 0 #5f4e34;
+        }
+        .draw-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 0 8px;
+        }
+        .draw-title {
+            font-weight: 700;
+            color: #2e2316;
+            font-size: 1.1rem;
+        }
+        .free-indicator {
+            background: #5d4f39;
+            color: #ffeecb;
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .draw-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .draw-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .draw-card {
+            background: #f8ecda;
+            border-radius: 24px;
+            padding: 12px 4px;
+            text-align: center;
+            border: 2px solid #9b835f;
+            box-shadow: 0 5px 0 #6a543a;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+        }
+        .draw-card .name {
+            cursor: pointer;
+            padding: 8px 4px;
+            width: 100%;
+        }
+        .draw-card .name:active {
+            background: #e6d2b5;
+            border-radius: 20px;
+        }
+        .cost-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #3d2f1d;
+            color: #ffd98c;
+            border-radius: 30px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 2px solid #b18b4b;
+        }
+        .buy-btn {
+            background: #9b864c;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            margin: 8px 8px 4px 8px;
+            font-weight: 700;
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 0 #5b472a;
+            cursor: pointer;
+            width: calc(100% - 16px);
+        }
+        .buy-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #5b472a;
+        }
+        .buy-btn.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .draw-card.disabled {
+            opacity: 0.4;
+            background: #d4c2aa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+        }
+        /* 已获得战法区域 */
+        .owned-area {
+            background: #c1af92;
+            border-radius: 36px;
+            padding: 16px 12px;
+            margin-bottom: 16px;
+            border: 3px solid #6b5438;
+            min-height: 150px;
+        }
+        .owned-title {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #281e12;
+        }
+        .owned-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .owned-tag {
+            background: #f0ddc2;
+            border: 2px solid #7a6240;
+            border-radius: 40px;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #2b1d0b;
+            box-shadow: 0 3px 0 #5f4a30;
+            cursor: pointer;
+        }
+        .owned-tag:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #5f4a30;
+        }
+        /* 专属区 */
+        .special-box {
+            background: #9f8b6b;
+            border-radius: 28px;
+            padding: 14px;
+            margin-bottom: 16px;
+            border: 2px solid #52412b;
+        }
+        .special-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .special-item {
+            background: #493e2d;
+            color: #ffeac2;
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .special-desc {
+            background: #eadbc2;
+            border-radius: 16px;
+            padding: 12px;
+            font-size: 0.8rem;
+            margin: 8px 0;
+        }
+        /* 底部撤回刷新 */
+        .bottom-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .bottom-row button {
+            flex: 1;
+            background: #bcab92;
+            border: none;
+            border-radius: 40px;
+            padding: 16px 0;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #2f2519;
+            box-shadow: 0 4px 0 #776445;
+            cursor: pointer;
+        }
+        .bottom-row button:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+        /* 弹窗 */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.hidden {
+            display: none;
+        }
+        .modal-content {
+            background: #f7ecd9;
+            border-radius: 48px;
+            padding: 24px 20px;
+            max-width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            text-align: center;
+            border: 5px solid #aa8b5f;
+            box-shadow: 0 15px 30px black;
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: #352915;
+        }
+        .modal-effect {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: #4c3a21;
+            line-height: 1.5;
+        }
+        .modal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .modal-list-item {
+            background: #e9dccb;
+            border: 2px solid #8e7a5b;
+            border-radius: 40px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .modal-list-item.selected {
+            background: #ffdba5;
+            border: 4px solid #c98f2e;
+            padding: 10px 14px;
+        }
+        .modal-list-item:active {
+            transform: scale(0.98);
+        }
+        .modal-item-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #2f2519;
+        }
+        .modal-item-effect {
+            font-size: 0.85rem;
+            color: #5f4e34;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .modal-btn {
+            background: #9b864c;
+            border: none;
+            border-radius: 60px;
+            padding: 14px 24px;
+            font-weight: 700;
+            color: white;
+            font-size: 1rem;
+            box-shadow: 0 4px 0 #5b472a;
+            cursor: pointer;
+            flex: 1;
+        }
+        .modal-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+        .modal-btn.secondary {
+            background: #7c6b52;
+        }
+        .hint-text {
+            color: #5f4e34;
+            font-size: 0.8rem;
+            margin-top: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="phone-frame" id="app">
+    <!-- 虎符行 -->
+    <div class="hufu-bar">
+        <span class="hufu-label">🪭 虎符</span>
+        <div class="hufu-ctrl">
+            <button class="hufu-btn" id="hufuMinus">−</button>
+            <span class="hufu-value" id="hufuDisplay">0</span>
+            <button class="hufu-btn" id="hufuPlus">+</button>
+        </div>
+    </div>
+
+    <!-- 抽取战法 & 兴汉 按钮 -->
+    <div class="action-row">
+        <button class="action-btn" id="drawBtn">⚔️ 抽取战法</button>
+        <button class="action-btn" id="xinghanBtn">🔥 兴汉</button>
+    </div>
+
+    <!-- 六格战法展示区 - 每个战法自带确认按钮 -->
+    <div class="draw-section" id="drawSection">
+        <div class="draw-header">
+            <span class="draw-title">📋 本次可获得战法</span>
+            <span class="free-indicator" id="freeDisplay">0次免费</span>
+        </div>
+        <div class="draw-grid" id="drawGrid">
+            <div class="draw-col" id="col1"></div>
+            <div class="draw-col" id="col2"></div>
+            <div class="draw-col" id="col3"></div>
+        </div>
+        <div class="hint-text" id="selectHint">点击"抽取战法"获取新的战法</div>
+    </div>
+
+    <!-- 已获得战法区 -->
+    <div class="owned-area">
+        <div class="owned-title">
+            <span>📚 已获战法</span>
+            <span id="ownedCount">0/47</span>
+        </div>
+        <div class="owned-grid" id="ownedContainer"></div>
+    </div>
+
+    <!-- 专属战法区域 -->
+    <div class="special-box">
+        <div class="special-header">
+            <span class="special-item" id="sp1Display">东风(未获)</span>
+            <span class="special-item" id="sp2Display">巧器(未获)</span>
+        </div>
+        <div class="special-desc">
+            <p>🔒 东风：造成属性伤害后，本轮属性伤害+1</p>
+            <p>🔒 巧器：首张普通锦囊额外结算一次</p>
+        </div>
+    </div>
+
+    <!-- 撤回 & 刷新 -->
+    <div class="bottom-row">
+        <button id="undoBtn">↩ 撤回</button>
+        <button id="resetBtn">⟲ 刷新</button>
+    </div>
+</div>
+
+<!-- 效果查看弹窗 -->
+<div class="modal hidden" id="effectModal">
+    <div class="modal-content">
+        <div class="modal-title" id="effectTitle">战法效果</div>
+        <div class="modal-effect" id="effectText">效果描述</div>
+        <div class="modal-buttons">
+            <button class="modal-btn" id="closeEffectBtn">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 兴汉选择弹窗 -->
+<div class="modal hidden" id="xinghanModal">
+    <div class="modal-content">
+        <div class="modal-title">🔥 兴汉</div>
+        <div class="modal-effect">选择要失去的战法</div>
+        <div class="modal-list" id="xinghanList"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn" id="xinghanConfirmBtn">确认失去</button>
+            <button class="modal-btn secondary" id="xinghanCancelBtn">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // 全部45个战法
+        const allAbilities = [
+            // 一类15个
+            { name: '草船借箭', cost: 1, effect: '【无懈可击】获得抵消的锦囊牌', class: 1, id: 'c1' },
+            { name: '偷袭', cost: 1, effect: '黑桃【杀】无数次限制', class: 1, id: 'c2' },
+            { name: '强取豪夺', cost: 1, effect: '【顺手牵羊】时目标手牌可见', class: 1, id: 'c3' },
+            { name: '好身法', cost: 1, effect: '【闪】不计入手牌上限', class: 1, id: 'c4' },
+            { name: '衡锋I', cost: 1, effect: '回合内首次伤害+1，回合外首次受到伤害+1', class: 1, id: 'c5' },
+            { name: '博闻I', cost: 1, effect: '回合开始，获得1张随机锦囊', class: 1, id: 'c6' },
+            { name: '神龙摆尾II', cost: 1, effect: '每摸6张牌，对随机敌方1点伤害', class: 1, id: 'c7' },
+            { name: '雷火势I', cost: 1, effect: '每回合第1张属性【杀】伤害+1', class: 1, id: 'c8' },
+            { name: '拂衣去·杀', cost: 1, effect: '回合开始获得1张【杀】', class: 1, id: 'c9' },
+            { name: '三板斧', cost: 1, effect: '每第3张【杀】伤害+1', class: 1, id: 'c10' },
+            { name: '虚焰', cost: 1, effect: '【火攻】弃置改为展示', class: 1, id: 'c11' },
+            { name: '战斗学习', cost: 1, effect: '第3轮开始，出杀+1', class: 1, id: 'c12' },
+            { name: '狂暴', cost: 1, effect: '体力≤2时伤害+1', class: 1, id: 'c13' },
+            { name: '重击技', cost: 1, effect: '对敌方伤害≥3时摸1', class: 1, id: 'c14' },
+            { name: '及时雨', cost: 1, effect: '回合外失去最后手牌后摸2', class: 1, id: 'c15' },
+            // 二类15个
+            { name: '妙技I', cost: 2, effect: '每回合首张锦囊伤害+1', class: 2, id: 'd1' },
+            { name: '淬血', cost: 2, effect: '每轮【杀】首次伤害后摸1', class: 2, id: 'd2' },
+            { name: '摸牌I', cost: 2, effect: '摸牌阶段摸牌数+1', class: 2, id: 'd3' },
+            { name: '拂衣去·桃', cost: 2, effect: '回合开始获得1张【桃】', class: 2, id: 'd4' },
+            { name: '双刃', cost: 2, effect: '首张【杀】至多额外选1目标', class: 2, id: 'd5' },
+            { name: '木牛流马', cost: 2, effect: '摸牌阶段额外摸2，手牌上限-1', class: 2, id: 'd6' },
+            { name: '应急方案', cost: 2, effect: '回合外成为基本牌唯一目标，弃来源1牌', class: 2, id: 'd7' },
+            { name: '布阵', cost: 2, effect: '第3轮开始摸牌数+1', class: 2, id: 'd8' },
+            { name: '拂衣去·火', cost: 2, effect: '回合开始获得1张【火攻】', class: 2, id: 'd9' },
+            { name: '阴阳术法', cost: 2, effect: '敌方无法响应你的伤害型锦囊', class: 2, id: 'd10' },
+            { name: '搏命', cost: 2, effect: '手牌上限-2，出杀次数+1', class: 2, id: 'd11' },
+            { name: '皮囊ⅡI', cost: 2, effect: '手牌上限+2', class: 2, id: 'd12' },
+            { name: '双掠', cost: 2, effect: '“顺手牵羊”可额外结算一次', class: 2, id: 'd13' },
+            { name: '烈变', cost: 2, effect: '第6轮开始锦囊和技能伤害+1', class: 2, id: 'd14' },
+            { name: '体魄', cost: 2, effect: '增加1点体力上限并回复等量体力', class: 2, id: 'd15' },
+            // 三类15个
+            { name: '援助ⅡI', cost: 3, effect: '回合结束时，你摸2张牌', class: 3, id: 'e1' },
+            { name: '淬血ⅡI', cost: 3, effect: '每轮【杀】首次伤害后摸2', class: 3, id: 'e2' },
+            { name: '策定天下ⅡI', cost: 3, effect: '出牌阶段限1次，锦囊伤害后摸2', class: 3, id: 'e3' },
+            { name: '偏转甲', cost: 3, effect: '每次受到伤害后对随机敌方造成1伤害', class: 3, id: 'e4' },
+            { name: '多多益善ⅢI', cost: 3, effect: '每回合第3次摸牌后，你摸2张', class: 3, id: 'e5' },
+            { name: '拂衣去·顺', cost: 3, effect: '回合开始获得1张【顺手牵羊】', class: 3, id: 'e6' },
+            { name: '博闻ⅡI', cost: 3, effect: '回合开始，从牌堆获得2张随机锦囊', class: 3, id: 'e7' },
+            { name: '铁布衫II', cost: 3, effect: '获得2点护甲', class: 3, id: 'e8' },
+            { name: '铸刀ⅡI', cost: 3, effect: '使用【杀】后可重铸2张牌', class: 3, id: 'e9' },
+            { name: '后发先至', cost: 3, effect: '摸牌-1，回合结束时摸3张', class: 3, id: 'e10' },
+            { name: '反刺', cost: 3, effect: '每回合首次受伤后对所有敌方造成1伤', class: 3, id: 'e11' },
+            { name: '愈战愈勇', cost: 3, effect: '第3轮开始【杀】伤害+1', class: 3, id: 'e12' },
+            { name: '摸牌ⅡI', cost: 3, effect: '摸牌阶段摸牌数+2', class: 3, id: 'e13' },
+            { name: '应急战术', cost: 3, effect: '回合外成为锦囊唯一目标，弃来源1牌', class: 3, id: 'e14' },
+            { name: '博闻II(同)', cost: 3, effect: '回合开始获得2张随机锦囊', class: 3, id: 'e15' }
+        ];
+
+        const specials = [
+            { name: '东风', effect: '锁定技，当你造成属性伤害后，本轮你造成的属性伤害+1。' },
+            { name: '巧器', effect: '锁定技，你每回合使用的首张普通锦囊牌额外结算一次。' }
+        ];
+
+        // 状态
+        let availablePool = allAbilities.map(a => ({ ...a }));
+        let ownedIds = [];
+        let specialStatus = [false, false];
+        let hufu = 0;
+        let freeTimes = 0;
+        let currentDraw = [null, null, null, null, null, null]; // 索引0-1:类1, 2-3:类2, 4-5:类3
+        
+        // 首次抽取标记
+        let isFirstDraw = true;
+        
+        // 兴汉使用标记
+        let xinghanUsed = false;
+
+        // 历史栈
+        let historyStack = [];
+
+        // DOM
+        const hufuDisplay = document.getElementById('hufuDisplay');
+        const freeDisplay = document.getElementById('freeDisplay');
+        const col1 = document.getElementById('col1');
+        const col2 = document.getElementById('col2');
+        const col3 = document.getElementById('col3');
+        const ownedContainer = document.getElementById('ownedContainer');
+        const ownedCount = document.getElementById('ownedCount');
+        const sp1Display = document.getElementById('sp1Display');
+        const sp2Display = document.getElementById('sp2Display');
+        const drawBtn = document.getElementById('drawBtn');
+        const xinghanBtn = document.getElementById('xinghanBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const hufuMinus = document.getElementById('hufuMinus');
+        const hufuPlus = document.getElementById('hufuPlus');
+        const selectHint = document.getElementById('selectHint');
+        
+        // 弹窗
+        const effectModal = document.getElementById('effectModal');
+        const effectTitle = document.getElementById('effectTitle');
+        const effectText = document.getElementById('effectText');
+        const closeEffectBtn = document.getElementById('closeEffectBtn');
+        
+        const xinghanModal = document.getElementById('xinghanModal');
+        const xinghanList = document.getElementById('xinghanList');
+        const xinghanConfirmBtn = document.getElementById('xinghanConfirmBtn');
+        const xinghanCancelBtn = document.getElementById('xinghanCancelBtn');
+
+        // 保存快照
+        function saveSnapshot() {
+            historyStack.push({
+                pool: availablePool.map(a => ({ ...a })),
+                owned: [...ownedIds],
+                special: [...specialStatus],
+                hufu: hufu,
+                free: freeTimes,
+                draw: currentDraw.map(d => d ? { ...d } : null),
+                isFirst: isFirstDraw,
+                xinghanUsed: xinghanUsed
+            });
+        }
+
+        // 撤回
+        function undo() {
+            if (historyStack.length === 0) return;
+            const snap = historyStack.pop();
+            availablePool = snap.pool.map(a => ({ ...a }));
+            ownedIds = [...snap.owned];
+            specialStatus = [...snap.special];
+            hufu = snap.hufu;
+            freeTimes = snap.free;
+            currentDraw = snap.draw.map(d => d ? { ...d } : null);
+            isFirstDraw = snap.isFirst;
+            xinghanUsed = snap.xinghanUsed;
+            renderAll();
+        }
+
+        // 刷新重置
+        function reset() {
+            if (!confirm('确定刷新？所有进度将清空。')) return;
+            historyStack = [];
+            availablePool = allAbilities.map(a => ({ ...a }));
+            ownedIds = [];
+            specialStatus = [false, false];
+            hufu = 0;
+            freeTimes = 0;
+            currentDraw = [null, null, null, null, null, null];
+            isFirstDraw = true;
+            xinghanUsed = false;
+            renderAll();
+        }
+
+        // 刷新预览 (生成新的6个战法) - 只在点击抽取战法时调用
+        function refreshDraw() {
+            let newDraw = [null, null, null, null, null, null];
+            for (let cls = 1; cls <= 3; cls++) {
+                let candidates = availablePool.filter(a => a.class === cls);
+                let shuffled = [...candidates].sort(() => Math.random() - 0.5);
+                let count = 0;
+                for (let i = 0; i < shuffled.length && count < 2; i++) {
+                    let ab = shuffled[i];
+                    if (!ownedIds.includes(ab.id)) {
+                        let idx = (cls-1)*2 + count;
+                        newDraw[idx] = { ...ab };
+                        count++;
+                    }
+                }
+            }
+            currentDraw = newDraw;
+        }
+
+        // 清空当前预览
+        function clearDraw() {
+            currentDraw = [null, null, null, null, null, null];
+        }
+
+        // 显示效果弹窗
+        function showEffect(ability) {
+            effectTitle.innerText = ability.name;
+            effectText.innerText = ability.effect;
+            effectModal.classList.remove('hidden');
+        }
+
+        // 检查该类是否已经有战法被获得（首次抽取用）
+        function isClassAlreadyObtained(cls) {
+            for (let i = 0; i < 6; i++) {
+                if (i === 0 || i === 1) { // 类1
+                    if (cls === 1 && currentDraw[i] === null && ownedIds.includes(currentDraw[i]?.id)) return true;
+                } else if (i === 2 || i === 3) { // 类2
+                    if (cls === 2 && currentDraw[i] === null && ownedIds.includes(currentDraw[i]?.id)) return true;
+                } else if (i === 4 || i === 5) { // 类3
+                    if (cls === 3 && currentDraw[i] === null && ownedIds.includes(currentDraw[i]?.id)) return true;
+                }
+            }
+            return false;
+        }
+
+        // 购买战法
+        function buyAbility(index) {
+            let ab = currentDraw[index];
+            if (!ab) return;
+            
+            // 检查是否已拥有
+            if (ownedIds.includes(ab.id)) {
+                alert('已经拥有该战法');
+                return;
+            }
+
+            // 首次抽取特殊逻辑
+            if (isFirstDraw) {
+                // 检查同类是否已经获得过
+                for (let i = 0; i < 6; i++) {
+                    if (i !== index && currentDraw[i] && currentDraw[i].class === ab.class) {
+                        // 检查这个同类的战法是否已经被获得（即已经为null）
+                        if (currentDraw[i] === null) {
+                            alert('首次抽取每类只能选择1个战法');
+                            return;
+                        }
+                    }
+                }
+
+                // 检查是否已经获得过同类战法（从ownedIds中检查）
+                for (let id of ownedIds) {
+                    let ownedAb = allAbilities.find(a => a.id === id);
+                    if (ownedAb && ownedAb.class === ab.class) {
+                        alert('首次抽取每类只能选择1个战法');
+                        return;
+                    }
+                }
+                
+                // 直接获得，不消耗虎符
+                saveSnapshot();
+                ownedIds.push(ab.id);
+                availablePool = availablePool.filter(a => a.id !== ab.id);
+                
+                // 移除已购买的战法（设为null）
+                currentDraw[index] = null;
+                
+                // 检查是否三类都已获得
+                let classesObtained = new Set();
+                ownedIds.forEach(id => {
+                    let a = allAbilities.find(ab => ab.id === id);
+                    if (a) classesObtained.add(a.class);
+                });
+                
+                if (classesObtained.size === 3) {
+                    isFirstDraw = false;
+                }
+                
+                renderAll();
+                return;
+            }
+
+            // 后续抽取
+            let cost = ab.cost;
+            
+            // 检查是否有免费次数
+            if (freeTimes > 0) {
+                // 使用免费次数
+                saveSnapshot();
+                freeTimes--;
+                ownedIds.push(ab.id);
+                availablePool = availablePool.filter(a => a.id !== ab.id);
+                // 移除已购买的战法（设为null），不清空其他
+                currentDraw[index] = null;
+                renderAll();
+            } else {
+                // 检查虎符
+                if (hufu < cost) {
+                    alert(`虎符不足，需要${cost}个虎符`);
+                    return;
+                }
+                saveSnapshot();
+                hufu -= cost;
+                ownedIds.push(ab.id);
+                availablePool = availablePool.filter(a => a.id !== ab.id);
+                // 移除已购买的战法（设为null），不清空其他
+                currentDraw[index] = null;
+                renderAll();
+            }
+        }
+
+        // 抽取战法按钮点击
+        function handleDrawClick() {
+            saveSnapshot();
+            refreshDraw(); // 生成全新的6个战法
+            renderAll();
+        }
+
+        // 渲染战法列
+        function renderDrawColumns() {
+            let col1Html = '';
+            let col2Html = '';
+            let col3Html = '';
+
+            for (let i = 0; i < 6; i++) {
+                let ab = currentDraw[i];
+                
+                if (ab) {
+                    // 检查首次抽取时，该类是否已经有战法被获得
+                    let isClassDisabled = false;
+                    if (isFirstDraw) {
+                        // 检查ownedIds中是否有同类的战法
+                        for (let id of ownedIds) {
+                            let ownedAb = allAbilities.find(a => a.id === id);
+                            if (ownedAb && ownedAb.class === ab.class) {
+                                isClassDisabled = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    let buyBtnClass = isClassDisabled ? 'buy-btn disabled' : 'buy-btn';
+                    
+                    let cardHtml = `
+                        <div class="draw-card" data-index="${i}">
+                            <span class="cost-badge">⚡${ab.cost}</span>
+                            <div class="name">${ab.name}</div>
+                            <button class="${buyBtnClass}" data-index="${i}" ${isClassDisabled ? 'disabled' : ''}>确认</button>
+                        </div>
+                    `;
+
+                    if (ab.cost === 1) {
+                        col1Html += cardHtml;
+                    } else if (ab.cost === 2) {
+                        col2Html += cardHtml;
+                    } else if (ab.cost === 3) {
+                        col3Html += cardHtml;
+                    }
+                }
+            }
+
+            // 补全空位 - 显示"已获得"或"空"
+            if (col1Html === '') col1Html = '<div class="draw-card disabled">空</div>';
+            if (col2Html === '') col2Html = '<div class="draw-card disabled">空</div>';
+            if (col3Html === '') col3Html = '<div class="draw-card disabled">空</div>';
+
+            col1.innerHTML = col1Html;
+            col2.innerHTML = col2Html;
+            col3.innerHTML = col3Html;
+
+            // 绑定点击事件
+            document.querySelectorAll('.draw-card .name').forEach(nameEl => {
+                let card = nameEl.closest('.draw-card');
+                let idx = card.dataset.index;
+                let ab = currentDraw[idx];
+                if (ab) {
+                    nameEl.addEventListener('click', () => showEffect(ab));
+                }
+            });
+
+            document.querySelectorAll('.buy-btn:not(.disabled)').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    let idx = btn.dataset.index;
+                    buyAbility(parseInt(idx));
+                });
+            });
+        }
+
+        // 渲染
+        function renderAll() {
+            hufuDisplay.innerText = hufu;
+            freeDisplay.innerText = freeTimes + '次免费';
+
+            renderDrawColumns();
+
+            // 更新提示
+            if (isFirstDraw) {
+                selectHint.innerText = '首次抽取：每类只能选择1个战法';
+            } else {
+                selectHint.innerText = '点击战法名字查看效果，点击确认按钮购买';
+            }
+
+            // 兴汉按钮状态
+            if (xinghanUsed) {
+                xinghanBtn.classList.add('disabled');
+            } else {
+                xinghanBtn.classList.remove('disabled');
+            }
+
+            // 渲染已获得战法
+            let ownedHtml = '';
+            ownedIds.forEach(id => {
+                let ab = allAbilities.find(a => a.id === id);
+                if (ab) {
+                    ownedHtml += `<div class="owned-tag" data-id="${ab.id}">${ab.name}</div>`;
+                }
+            });
+            if (specialStatus[0]) ownedHtml += `<div class="owned-tag" data-special="0">东风(专)</div>`;
+            if (specialStatus[1]) ownedHtml += `<div class="owned-tag" data-special="1">巧器(专)</div>`;
+            ownedContainer.innerHTML = ownedHtml || '<div style="color:#5b4c38;">暂无战法</div>';
+
+            document.querySelectorAll('.owned-tag').forEach(tag => {
+                tag.addEventListener('click', () => {
+                    let id = tag.dataset.id;
+                    if (id) {
+                        let ab = allAbilities.find(a => a.id === id);
+                        if (ab) showEffect(ab);
+                    } else if (tag.dataset.special === '0') {
+                        showEffect({ name: '东风', effect: specials[0].effect });
+                    } else if (tag.dataset.special === '1') {
+                        showEffect({ name: '巧器', effect: specials[1].effect });
+                    }
+                });
+            });
+
+            let total = ownedIds.length + (specialStatus[0]?1:0) + (specialStatus[1]?1:0);
+            ownedCount.innerText = `${total}/47`;
+
+            sp1Display.innerText = specialStatus[0] ? '东风(已获)' : '东风(未获)';
+            sp2Display.innerText = specialStatus[1] ? '巧器(已获)' : '巧器(未获)';
+        }
+
+        // 兴汉
+        function handleXinghan() {
+            if (xinghanUsed) {
+                alert('兴汉在本轮重置前只能使用一次');
+                return;
+            }
+            if (ownedIds.length === 0) {
+                alert('没有已拥有战法可以失去');
+                return;
+            }
+
+            // 构建已拥有战法列表
+            let ownedAbilities = ownedIds.map(id => allAbilities.find(a => a.id === id));
+            
+            let listHtml = '';
+            ownedAbilities.forEach((ab, index) => {
+                listHtml += `
+                    <div class="modal-list-item" data-index="${index}">
+                        <span class="modal-item-name">${ab.name}</span>
+                        <span class="modal-item-effect">${ab.effect}</span>
+                    </div>
+                `;
+            });
+            xinghanList.innerHTML = listHtml;
+
+            let selectedToLose = new Set();
+
+            // 绑定列表项点击事件
+            xinghanList.querySelectorAll('.modal-list-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    let index = parseInt(item.dataset.index);
+                    if (selectedToLose.has(index)) {
+                        selectedToLose.delete(index);
+                        item.classList.remove('selected');
+                    } else {
+                        if (selectedToLose.size < 2) {
+                            selectedToLose.add(index);
+                            item.classList.add('selected');
+                        } else {
+                            alert('最多只能选择2个战法失去');
+                        }
+                    }
+                });
+            });
+
+            // 显示弹窗
+            xinghanModal.classList.remove('hidden');
+
+            // 确认按钮
+            xinghanConfirmBtn.onclick = () => {
+                if (selectedToLose.size === 0) {
+                    alert('请选择要失去的战法');
+                    return;
+                }
+
+                saveSnapshot();
+
+                // 失去选中的战法
+                let loseCount = selectedToLose.size;
+                let indicesToRemove = Array.from(selectedToLose).sort((a,b) => b - a);
+                
+                for (let idx of indicesToRemove) {
+                    let ab = ownedAbilities[idx];
+                    let indexInOwned = ownedIds.indexOf(ab.id);
+                    if (indexInOwned !== -1) {
+                        ownedIds.splice(indexInOwned, 1);
+                        availablePool.push({ ...ab });
+                    }
+                }
+
+                // 获得专属
+                for (let i = 0; i < specials.length; i++) {
+                    if (!specialStatus[i] && loseCount > 0) {
+                        specialStatus[i] = true;
+                        loseCount--;
+                    }
+                }
+
+                // 增加免费次数（失去几个就加几次）
+                freeTimes += selectedToLose.size;
+                xinghanUsed = true;
+
+                // 关闭弹窗
+                xinghanModal.classList.add('hidden');
+                
+                // 清空当前预览（兴汉后清空）
+                clearDraw();
+                renderAll();
+            };
+
+            // 取消按钮
+            xinghanCancelBtn.onclick = () => {
+                xinghanModal.classList.add('hidden');
+            };
+        }
+
+        // 事件绑定
+        hufuMinus.addEventListener('click', () => { saveSnapshot(); hufu = Math.max(0, hufu-1); renderAll(); });
+        hufuPlus.addEventListener('click', () => { saveSnapshot(); hufu++; renderAll(); });
+        drawBtn.addEventListener('click', handleDrawClick);
+        xinghanBtn.addEventListener('click', handleXinghan);
+        undoBtn.addEventListener('click', undo);
+        resetBtn.addEventListener('click', reset);
+        closeEffectBtn.addEventListener('click', () => effectModal.classList.add('hidden'));
+        effectModal.addEventListener('click', (e) => {
+            if (e.target === effectModal) effectModal.classList.add('hidden');
+        });
+
+        // 初始渲染
+        renderAll();
+    })();
+</script>
+</body>
+</html>
