@@ -340,72 +340,9 @@
                 三国杀面杀小助手
             </h1>
 
-    <!-- ====== 顶部切换栏（只有两个标签） ====== -->
-    <div class="tab-bar">
-        <button class="tab-btn active" data-tab="tab1">武将大全</button>
-        <button class="tab-btn" data-tab="tab2">站长自用</button>
-    </div>
-
     <!-- ====== 整体容器 ====== -->
     <div class="overall-wrapper">
-        <!-- ============================================================= -->
-        <!-- 整体一：武将大全              -->
-        <!-- ============================================================= -->
-        <div id="tab1" class="overall active">
-            <!-- 图例 -->
-            <div class="legend">
-                <span><span class="dot dot-mobile"></span> 移动版</span>
-                <span><span class="dot dot-10th"></span> 十周年</span>
-                <span><span class="dot dot-ol"></span> OL</span>
-                <span><span class="dot dot-other"></span> 其他</span>
-            </div>
-
-            <!-- ===== 移动版 ===== -->
-            <div class="group-container version-mobile">
-                <div class="group-title">移动版</div>
-                <div class="group-buttons">
-                    <a href="lao-youzhuge.html" target="_blank" class="jump-button">友诸葛亮</a>
-                    
-                </div>
-            </div>
-
-            <!-- ===== 十周年 ===== -->
-            <div class="group-container version-10th">
-                <div class="group-title">十周年</div>
-                <div class="group-buttons">
-                    <a href="lao-guotisuo.html" target="_blank" class="jump-button">郭缇索</a>
-                    <a href="lao-guanning.html" target="_blank" class="jump-button">管宁</a>
-                    <a href="lao-sppuyuan.html" target="_blank" class="jump-button">sp蒲元</a>
-                    <a href="lao-shenjiangwei.html" target="_blank" class="jump-button">神姜维</a>
-                    <a href="lao-xvshao.html" target="_blank" class="jump-button">许邵</a>
-                </div>
-            </div>
-
-            <!-- ===== OL ===== -->
-            <div class="group-container version-ol">
-                <div class="group-title">OL</div>
-                <div class="group-buttons">
-                    <a href="lao-mocaocao.html" target="_blank" class="jump-button">魔曹操</a>
-                    <a href="lao-nanhualaoxian.html" target="_blank" class="jump-button">南华老仙</a>
-                    <a href="lao-peixiu.html" target="_blank" class="jump-button">裴秀</a>
-                    <a href="lao-xunjiadayuan.html" target="_blank" class="jump-button">荀家大院</a>
-                    <a href="lao-yuecaohong.html" target="_blank" class="jump-button">乐曹洪</a>
-                    <a href="lao-yuezhugeliang.html" target="_blank" class="jump-button">乐诸葛亮</a>
-                </div>
-            </div>
-
-            <div class="group-container version-guo">
-                <div class="group-title">其它</div>
-                <div class="group-buttons">
-                    <a href="lao-chenshou.html" target="_blank" class="jump-button">陈寿(伪全扩)</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- ============================================================= -->
-        <!-- 整体二：站主自用（按 移动版 / 十周年 / OL 分类）              -->
-        <!-- ============================================================= -->
-        <div id="tab2" class="overall">
+        <div id="tab2" class="overall active">
 
             <!-- 图例 -->
             <div class="legend">
@@ -462,42 +399,6 @@
         </div>
 
     </div>
-
-
-    <!-- ====== JavaScript 切换逻辑 ====== -->
-    <script>
-        (function() {
-            function switchTab(tabId) {
-                document.querySelectorAll('.tab-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
-                });
-                document.querySelectorAll('.overall').forEach(overall => {
-                    overall.classList.toggle('active', overall.id === tabId);
-                });
-            }
-            window.switchTab = switchTab;
-
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    if (tabId) switchTab(tabId);
-                });
-            });
-
-            // 默认激活第一个
-            const firstActive = document.querySelector('.tab-btn.active');
-            if (firstActive) {
-                const defaultTab = firstActive.getAttribute('data-tab');
-                if (defaultTab) switchTab(defaultTab);
-            } else {
-                const firstBtn = document.querySelector('.tab-btn');
-                if (firstBtn) {
-                    const firstTab = firstBtn.getAttribute('data-tab');
-                    if (firstTab) switchTab(firstTab);
-                }
-            }
-        })();
-    </script>
 
 </body>
 </html>
