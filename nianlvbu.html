@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>念吕布 · 踏阵</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: radial-gradient(circle at 50% 10%, #2e1c11 0%, #0b0705 68%);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: #e9d9c0;
+    padding: 26px 20px 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ================= 选位遮罩 ================= */
+  .seat-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 4, 3, .94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+    padding: 24px;
+  }
+  .seat-overlay.show { opacity: 1; pointer-events: auto; }
+
+  .seat-card {
+    background: rgba(0, 0, 0, .5);
+    border: 1px solid rgba(200, 150, 80, .25);
+    border-radius: 20px;
+    padding: 34px 30px 30px;
+    max-width: 540px;
+    width: 100%;
+    box-shadow: 0 0 70px rgba(0, 0, 0, .75), inset 0 0 60px rgba(0, 0, 0, .5);
+    text-align: center;
+    animation: seatIn .4s cubic-bezier(.34, 1.4, .64, 1) both;
+  }
+
+  @keyframes seatIn {
+    from { opacity: 0; transform: translateY(18px) scale(.96); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .seat-title {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 8px;
+    color: #f0c060;
+    text-shadow: 0 0 24px rgba(240, 192, 96, .55);
+    margin-bottom: 10px;
+    text-indent: 8px;
+  }
+
+  .seat-sub {
+    font-size: 11.5px;
+    color: #8a7256;
+    letter-spacing: 1.5px;
+    margin-bottom: 26px;
+    line-height: 1.7;
+  }
+  .seat-sub em {
+    font-style: normal;
+    color: #c9a05a;
+  }
+
+  .seat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 11px;
+  }
+
+  .seat-btn {
+    padding: 16px 4px 14px;
+    border-radius: 13px;
+    border: 1px solid rgba(200, 150, 80, .32);
+    background: linear-gradient(180deg, rgba(240, 192, 96, .1), rgba(240, 192, 96, .03));
+    color: #e9d9c0;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .seat-btn .seat-num {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+    color: #f0c060;
+    text-shadow: 0 0 12px rgba(240, 192, 96, .5);
+    transition: all .2s;
+  }
+
+  .seat-btn .seat-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #8a7256;
+    transition: color .2s;
+  }
+
+  .seat-btn:hover {
+    border-color: rgba(240, 192, 96, .9);
+    background: linear-gradient(180deg, rgba(240, 192, 96, .3), rgba(240, 192, 96, .1));
+    box-shadow: 0 0 22px rgba(240, 192, 96, .4);
+    transform: translateY(-3px);
+  }
+  .seat-btn:hover .seat-num {
+    color: #ffe08a;
+    text-shadow: 0 0 18px rgba(240, 192, 96, .95);
+  }
+  .seat-btn:hover .seat-label { color: #c9a05a; }
+
+  .seat-btn:active { transform: translateY(-1px) scale(.98); }
+
+  /* ================= 主布局 ================= */
+  .app {
+    max-width: 1140px;
+    margin: 0 auto;
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .card {
+    background: rgba(0, 0, 0, .34);
+    border: 1px solid rgba(200, 150, 80, .18);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, .5);
+  }
+
+  .card-title {
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: #f0c060;
+    margin-bottom: 12px;
+    text-shadow: 0 0 14px rgba(240, 192, 96, .4);
+  }
+
+  /* ================= 左侧配置 ================= */
+  .config { width: 330px; flex: 0 0 auto; }
+
+  /* 我的座位行 */
+  .my-seat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    background: rgba(240, 192, 96, .08);
+    border: 1px solid rgba(240, 192, 96, .3);
+    margin-bottom: 14px;
+    font-size: 12px;
+  }
+  .my-seat .ms-label {
+    color: #8a7256;
+    letter-spacing: 2px;
+    flex: 0 0 auto;
+  }
+  .my-seat .ms-name {
+    flex: 1;
+    color: #f0c060;
+    font-weight: 700;
+    font-size: 13.5px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 12px rgba(240, 192, 96, .55);
+  }
+  .seat-change {
+    flex: 0 0 auto;
+    padding: 4px 10px;
+    border-radius: 7px;
+    border: 1px solid rgba(240, 192, 96, .45);
+    background: rgba(240, 192, 96, .1);
+    color: #f0c060;
+    font-family: inherit;
+    font-size: 10.5px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all .18s;
+  }
+  .seat-change:hover {
+    background: rgba(240, 192, 96, .28);
+    box-shadow: 0 0 12px rgba(240, 192, 96, .35);
+  }
+
+  .roster {
+    max-height: 232px;
+    overflow-y: auto;
+    margin-bottom: 8px;
+    padding-right: 2px;
+  }
+  .roster::-webkit-scrollbar { width: 4px; }
+  .roster::-webkit-scrollbar-thumb {
+    background: rgba(200, 150, 80, .3); border-radius: 2px;
+  }
+
+  .rrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .035);
+    border: 1px solid rgba(200, 150, 80, .12);
+    margin-bottom: 6px;
+    font-size: 13px;
+    animation: fadeIn .2s ease;
+    transition: border-color .2s, background .2s;
+  }
+  .rrow:hover {
+    border-color: rgba(240, 192, 96, .28);
+    background: rgba(240, 192, 96, .04);
+  }
+
+  .rname {
+    color: #e2c9a4;
+    font-weight: 700;
+    letter-spacing: 1px;
+    min-width: 52px;
+    flex: 0 0 auto;
+  }
+
+  .rhp {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3px;
+    min-width: 0;
+  }
+  .rhp i {
+    width: 16px; height: 16px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: rgba(224, 85, 74, .08);
+    border: 2px solid rgba(224, 85, 74, .3);
+    cursor: pointer;
+    display: block;
+    transition: transform .14s ease, background .14s ease,
+                box-shadow .14s ease, border-color .14s ease;
+  }
+  .rhp i.on {
+    background: #e0554a;
+    border-color: #e0554a;
+    box-shadow: 0 0 8px rgba(224, 85, 74, .9);
+  }
+  .rhp i:hover {
+    transform: scale(1.22);
+    border-color: #f0c060;
+    background: rgba(240, 192, 96, .3);
+    box-shadow: 0 0 12px rgba(240, 192, 96, .85);
+  }
+  .rhp i.on:hover {
+    background: #f0c060;
+    border-color: #f0c060;
+    box-shadow: 0 0 14px rgba(240, 192, 96, 1);
+  }
+
+  /* 删除按钮 */
+  .rdel {
+    width: 24px; height: 24px;
+    flex: 0 0 auto;
+    border-radius: 7px;
+    border: 1px solid rgba(224, 85, 74, .3);
+    background: transparent;
+    color: #e0554a;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all .18s;
+  }
+  .rdel:hover {
+    background: rgba(224, 85, 74, .18);
+    border-color: rgba(224, 85, 74, .6);
+    box-shadow: 0 0 10px rgba(224, 85, 74, .35);
+  }
+  .rdel:active { transform: scale(.9); }
+
+  .roster-tip {
+    font-size: 10.5px;
+    color: #6b5b48;
+    letter-spacing: .5px;
+    margin-bottom: 12px;
+    padding-left: 2px;
+    line-height: 1.6;
+  }
+  .roster-tip b { color: #9c8a74; font-weight: 500; }
+  .roster-tip .rdel-hint { color: #c9664a; }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200, 150, 80, .25), transparent);
+    margin: 14px 0;
+  }
+
+  .field { margin-bottom: 12px; }
+  .flabel {
+    font-size: 11px;
+    color: #8a7256;
+    letter-spacing: 2px;
+    margin-bottom: 7px;
+    overflow: hidden;
+  }
+  .flabel em {
+    font-style: normal;
+    float: right;
+    color: #f0c060;
+  }
+
+  .inp {
+    width: 100%;
+    background: rgba(0, 0, 0, .4);
+    border: 1px solid rgba(200, 150, 80, .22);
+    border-radius: 8px;
+    color: #e9d9c0;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .inp:focus {
+    border-color: rgba(240, 192, 96, .65);
+    box-shadow: 0 0 12px rgba(240, 192, 96, .18);
+  }
+  input[type=number]::-webkit-inner-spin-button { opacity: .4; }
+
+  .btn {
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid rgba(240, 192, 96, .4);
+    background: linear-gradient(180deg, rgba(240, 192, 96, .14), rgba(240, 192, 96, .04));
+    color: #f0c060;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn:hover {
+    background: linear-gradient(180deg, rgba(240, 192, 96, .28), rgba(240, 192, 96, .1));
+    box-shadow: 0 0 22px rgba(240, 192, 96, .3);
+  }
+  .btn:active { transform: scale(.985); }
+
+  .btn.primary {
+    margin-top: 4px;
+    border-color: rgba(240, 192, 96, .7);
+    background: linear-gradient(180deg, rgba(240, 192, 96, .28), rgba(240, 192, 96, .08));
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-indent: 5px;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-row .btn {
+    flex: 1;
+    padding: 11px 6px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-indent: 2px;
+  }
+
+  .btn:disabled {
+    opacity: .38;
+    cursor: not-allowed;
+    border-color: rgba(200, 150, 80, .12);
+    color: #6b5b48;
+    background: rgba(255, 255, 255, .02);
+    box-shadow: none;
+  }
+  .btn:disabled:hover {
+    box-shadow: none;
+    background: rgba(255, 255, 255, .02);
+  }
+
+  .btn.end-ready {
+    border-color: rgba(95, 211, 122, .6);
+    color: #5fd37a;
+    background: linear-gradient(180deg, rgba(95, 211, 122, .18), rgba(95, 211, 122, .05));
+    animation: endPulse 1.7s ease-in-out infinite;
+  }
+  .btn.end-ready:hover {
+    background: linear-gradient(180deg, rgba(95, 211, 122, .32), rgba(95, 211, 122, .12));
+    box-shadow: 0 0 22px rgba(95, 211, 122, .45);
+  }
+
+  @keyframes endPulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(95, 211, 122, .25); }
+    50%      { box-shadow: 0 0 18px rgba(95, 211, 122, .6); }
+  }
+
+  .tip {
+    font-size: 11px;
+    color: #c9664a;
+    margin-top: 9px;
+    min-height: 15px;
+    line-height: 1.6;
+    letter-spacing: .5px;
+  }
+
+  /* ================= 主区 ================= */
+  .main {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .board-wrap {
+    position: relative;
+    --cs: 100px;
+    flex: 0 0 auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, var(--cs));
+    grid-template-rows: repeat(3, var(--cs));
+    gap: 10px;
+    padding: 14px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, .38);
+    border: 1px solid rgba(200, 150, 80, .22);
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, .65), 0 0 50px rgba(0, 0, 0, .5);
+  }
+
+  .cell {
+    position: relative;
+    border-radius: 14px;
+    background: linear-gradient(160deg, #3a2519, #1a0f0a);
+    border: 1px solid #5b3a22;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    user-select: none;
+    overflow: hidden;
+    transition: transform .16s ease, box-shadow .2s ease,
+                border-color .2s ease, background .2s ease;
+  }
+
+  .cell.reachable {
+    cursor: pointer;
+    border-color: #d9a441;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  .cell.reachable:hover {
+    transform: translateY(-3px) scale(1.035);
+    background: linear-gradient(160deg, #4d3220, #241509);
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(217, 164, 65, .45), 0 0 12px rgba(217, 164, 65, .22); }
+    50%      { box-shadow: 0 0 0 1px rgba(217, 164, 65, .95), 0 0 24px rgba(217, 164, 65, .55); }
+  }
+
+  .cell.current {
+    background: linear-gradient(160deg, #5d3d1d, #2c1b0d);
+    border-color: #f0c060;
+    box-shadow: inset 0 0 22px rgba(240, 192, 96, .32), 0 0 22px rgba(240, 192, 96, .45);
+    animation: none;
+  }
+
+  .cell.visited:not(.current) {
+    opacity: .42;
+    background: linear-gradient(160deg, #241812, #140c08);
+    cursor: default;
+  }
+
+  .cell.obstacle {
+    background:
+      repeating-linear-gradient(45deg,
+        rgba(90, 80, 70, .22) 0 8px,
+        rgba(40, 34, 30, .22) 8px 16px),
+      linear-gradient(160deg, #2a2320, #16110f);
+    border-color: #4a4038;
+    cursor: default;
+  }
+
+  .cell .ename {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e0554a;
+    letter-spacing: 1px;
+    text-shadow: 0 0 12px rgba(224, 85, 74, .55);
+    line-height: 1.1;
+    padding: 0 4px;
+    text-align: center;
+  }
+
+  .cell .ehp {
+    display: flex;
+    gap: 3px;
+    margin-top: 6px;
+  }
+  .cell .ehp i {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #e0554a;
+    box-shadow: 0 0 7px rgba(224, 85, 74, .85);
+    display: block;
+  }
+
+  .cell .icon {
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+  .cell .icon.sha  { color: #f0c060; text-shadow: 0 0 14px rgba(240, 192, 96, .55); }
+  .cell .icon.jiu  { color: #b58cf0; text-shadow: 0 0 14px rgba(181, 140, 240, .55); }
+  .cell .icon.ma   { color: #5fd3c4; text-shadow: 0 0 14px rgba(95, 211, 196, .55); }
+  .cell .icon.defeated { color: #55483c; font-size: 21px; }
+  .cell .icon.rock { color: #6b6055; font-size: 23px; }
+
+  .cell .elabel {
+    margin-top: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    line-height: 1.15;
+    text-align: center;
+    padding: 0 3px;
+    white-space: nowrap;
+  }
+  .cell .elabel.jiu {
+    color: #b58cf0;
+    text-shadow: 0 0 9px rgba(181, 140, 240, .55);
+  }
+  .cell .elabel.ma {
+    color: #5fd3c4;
+    text-shadow: 0 0 9px rgba(95, 211, 196, .55);
+  }
+
+  .cell .order {
+    position: absolute;
+    top: 5px; left: 7px;
+    font-size: 10px;
+    color: #8a7256;
+    letter-spacing: 1px;
+  }
+
+  /* ================= 结算浮层 ================= */
+  .banner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    background: rgba(10, 6, 4, .92);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+    z-index: 10;
+    padding: 20px;
+  }
+  .banner.show { opacity: 1; pointer-events: auto; }
+
+  .banner .b-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 7px;
+    text-indent: 7px;
+    margin-bottom: 12px;
+  }
+  .banner.win  .b-title { color: #5fd37a; text-shadow: 0 0 28px rgba(95, 211, 122, .85); }
+  .banner.lose .b-title { color: #7d6e60; }
+
+  .banner .b-sub {
+    font-size: 11px;
+    color: #a08a72;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+
+  .banner .b-kills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    justify-content: center;
+    max-width: 300px;
+    margin-bottom: 6px;
+  }
+
+  .banner .kill-chip {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #f5c451;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(245, 196, 81, .18), rgba(245, 196, 81, .05));
+    border: 1px solid rgba(245, 196, 81, .5);
+    box-shadow: 0 0 12px rgba(245, 196, 81, .28), inset 0 0 8px rgba(245, 196, 81, .1);
+    text-shadow: 0 0 10px rgba(245, 196, 81, .6);
+    animation: chipIn .35s cubic-bezier(.34, 1.56, .64, 1) both;
+  }
+
+  @keyframes chipIn {
+    from { opacity: 0; transform: scale(.6) translateY(6px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .banner .b-kill-label {
+    font-size: 10.5px;
+    color: #8a7256;
+    letter-spacing: 3px;
+    margin-top: 6px;
+  }
+
+  .banner .b-detail {
+    font-size: 10.5px;
+    color: #7d8f81;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    text-align: center;
+    line-height: 1.8;
+    max-width: 300px;
+  }
+  .banner .b-detail .green { color: #5fd37a; }
+
+  /* ================= 右侧状态 ================= */
+  .side {
+    width: 252px;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat {
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid rgba(200, 150, 80, .16);
+    border-radius: 10px;
+    padding: 9px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .stat span { font-size: 10px; color: #8a7256; letter-spacing: 2px; }
+  .stat b {
+    font-size: 17px;
+    color: #e9d9c0;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .stat b.hot { color: #f0c060; text-shadow: 0 0 12px rgba(240, 192, 96, .5); }
+  .stat b.on  { color: #b58cf0; text-shadow: 0 0 12px rgba(181, 140, 240, .6); }
+  .stat b.on-idle { color: #6b5b48; }
+  .stat b.safe { color: #5fd37a; text-shadow: 0 0 12px rgba(95, 211, 122, .55); }
+  .stat b.zero { color: #6b5b48; }
+
+  .stat.wide { grid-column: 1 / -1; }
+  .stat.wide b {
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  .stat.wide b i {
+    font-style: normal;
+    font-size: 10.5px;
+    color: #6b5b48;
+    letter-spacing: 1px;
+    margin-left: 6px;
+  }
+  .stat.wide.on b i { color: #8a7256; }
+
+  .log {
+    height: 128px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, .34);
+    border: 1px solid rgba(200, 150, 80, .14);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #9c8a74;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .log::-webkit-scrollbar { width: 4px; }
+  .log::-webkit-scrollbar-thumb {
+    background: rgba(200, 150, 80, .3); border-radius: 2px;
+  }
+
+  .log-line { animation: fadeIn .25s ease; }
+  .log-line:last-child { color: #e2c9a4; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ============ 踏阵效果判定 ============ */
+  .effects {
+    background: rgba(0, 0, 0, .34);
+    border: 1px solid rgba(200, 150, 80, .18);
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .effects-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .effects-head .eh-title {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: #f0c060;
+    text-shadow: 0 0 12px rgba(240, 192, 96, .4);
+  }
+  .effects-head .eh-tag {
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: #6b5b48;
+    transition: color .3s;
+  }
+  .effects-head .eh-tag.live {
+    color: #5fd37a;
+    text-shadow: 0 0 10px rgba(95, 211, 122, .5);
+  }
+
+  .cond {
+    display: flex;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .025);
+    border: 1px solid rgba(200, 150, 80, .1);
+    margin-bottom: 6px;
+    transition: all .3s ease;
+  }
+  .cond:last-child { margin-bottom: 0; }
+
+  .cond .dot {
+    width: 8px; height: 8px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: #4a3f33;
+    margin-top: 4px;
+    transition: all .3s ease;
+  }
+
+  .cond .ctext { min-width: 0; }
+  .cond .ctitle {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #857258;
+    margin-bottom: 3px;
+    transition: color .3s ease, text-shadow .3s ease;
+  }
+  .cond .cdesc {
+    font-size: 10.5px;
+    line-height: 1.55;
+    color: #5f5244;
+    letter-spacing: .3px;
+    transition: color .3s ease;
+  }
+
+  .cond.ok {
+    background: rgba(80, 200, 120, .06);
+    border-color: rgba(80, 200, 120, .22);
+  }
+  .cond.ok .dot {
+    background: rgba(95, 211, 122, .55);
+    box-shadow: 0 0 6px rgba(95, 211, 122, .45);
+  }
+  .cond.ok .ctitle { color: rgba(105, 205, 130, .8); }
+  .cond.ok .cdesc  { color: #7d8f81; }
+
+  .cond.ok.final {
+    background: rgba(80, 200, 120, .16);
+    border-color: rgba(80, 200, 120, .6);
+    box-shadow: 0 0 18px rgba(95, 211, 122, .22), inset 0 0 14px rgba(95, 211, 122, .08);
+  }
+  .cond.ok.final .dot {
+    background: #5fd37a;
+    box-shadow: 0 0 12px rgba(95, 211, 122, 1);
+    animation: condPulse 1.6s ease-in-out infinite;
+  }
+  .cond.ok.final .ctitle {
+    color: #5fd37a;
+    text-shadow: 0 0 12px rgba(95, 211, 122, .65);
+  }
+  .cond.ok.final .cdesc { color: #9ac3a2; }
+
+  @keyframes condPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(95, 211, 122, .7); }
+    50%      { box-shadow: 0 0 16px rgba(95, 211, 122, 1); }
+  }
+
+  .hint {
+    font-size: 11px;
+    line-height: 1.9;
+    color: #6b5b48;
+    letter-spacing: .5px;
+  }
+  .hint b { color: #9c8a74; font-weight: 500; }
+  .hint .hl { color: #5fd37a; }
+  .hint .hl-purple { color: #b58cf0; }
+  .hint .hl-gold { color: #f0c060; }
+  .hint .hl-warn { color: #c9664a; }
+
+  @media (max-width: 1020px) {
+    .config { width: 100%; max-width: 440px; }
+    .app { flex-direction: column; align-items: center; }
+    .main { width: 100%; }
+  }
+  @media (max-width: 720px) {
+    .board-wrap { --cs: 84px; }
+    .side { width: 300px; }
+    .banner .b-title { font-size: 24px; }
+    .seat-grid { grid-template-columns: repeat(2, 1fr); }
+    .seat-card { padding: 26px 20px 22px; }
+    .seat-title { font-size: 16px; letter-spacing: 5px; text-indent: 5px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 选位遮罩 ================= -->
+<div class="seat-overlay" id="seatOverlay">
+  <div class="seat-card">
+    <div class="seat-title">选 择 号 位</div>
+    <div class="seat-sub">
+      你选择的号位 <em>不会出现</em> 在敌将之中<br>
+    </div>
+    <div class="seat-grid" id="seatGrid"></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ============ 左：配置 ============ -->
+  <aside class="card config">
+    <div class="card-title">敌 将 号 位</div>
+
+    <div class="my-seat">
+      <span class="ms-label">你的座位</span>
+      <span class="ms-name" id="mySeatName">—</span>
+      <button class="seat-change" id="changeSeatBtn">换位</button>
+    </div>
+
+    <div class="roster" id="rosterList"></div>
+    <div class="roster-tip">
+      <b>血量调整：</b>点击圆点即设为该血量（1–9）<br>
+      <span class="rdel-hint">点 × 可移除该敌将</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <div class="flabel">抽取敌将数量 <em id="pickMaxLabel">最多 7</em></div>
+      <input class="inp" id="pickCount" type="number" min="1" max="7" value="2">
+    </div>
+
+    <div class="field">
+      <div class="flabel">初始步数</div>
+      <input class="inp" id="initSteps" type="number" min="3" max="12" value="5">
+    </div>
+
+    <button class="btn primary" id="startBtn">开 始 踏 阵</button>
+    <div class="tip" id="configTip"></div>
+  </aside>
+
+  <!-- ============ 右：游戏 ============ -->
+  <main class="main">
+    <div class="board-wrap">
+      <div class="grid" id="grid"></div>
+      <div class="banner" id="banner"></div>
+    </div>
+
+    <div class="side">
+      <div class="stats">
+        <div class="stat"><span>剩余步数</span><b id="stepsEl">5</b></div>
+        <div class="stat"><span>杀 加成</span><b id="dmgEl">+0</b></div>
+        <div class="stat"><span>已斩敌将</span><b id="killsEl">0/0</b></div>
+        <div class="stat"><span>下次伤害</span><b id="nextDmgEl">0</b></div>
+        <div class="stat wide" id="jiuStat">
+          <span>酒</span>
+          <b id="jiuEl">—<i>未持有</i></b>
+        </div>
+      </div>
+
+      <div class="log" id="log"></div>
+
+      <!-- 踏阵效果判定 -->
+      <div class="effects">
+        <div class="effects-head">
+          <span class="eh-title">踏 阵 效 果</span>
+          <span class="eh-tag" id="effTag">待判定</span>
+        </div>
+
+        <div class="cond" id="condCol">
+          <span class="dot"></span>
+          <div class="ctext">
+            <div class="ctitle">未经过一整列</div>
+            <div class="cdesc">令被你击败的角色各交给你一张牌</div>
+          </div>
+        </div>
+
+        <div class="cond" id="condRow">
+          <span class="dot"></span>
+          <div class="ctext">
+            <div class="ctitle">未经过一整行</div>
+            <div class="cdesc">视为对被击败的角色使用一张无距离、无次数限制的【杀】</div>
+          </div>
+        </div>
+
+        <div class="cond" id="condCenter">
+          <span class="dot"></span>
+          <div class="ctext">
+            <div class="ctitle">未经过中心格</div>
+            <div class="cdesc">直到下回合开始，被击败的角色不能对你使用【杀】</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="restartBtn">重 新 布 阵</button>
+        <button class="btn" id="endBtn" disabled>结 束 踏 阵</button>
+      </div>
+
+      <div class="hint">
+        <b>踏阵规则</b><br>
+        · 点击任意非障碍格作为起点<br>
+        · 每步可走周围 8 格（含斜向）<br>
+        · 格子不可重复经过<br>
+        · <span class="hl-gold">基础伤害 0，全靠加成</span><br>
+        · <span class="hl-gold">【杀】永久 +1 伤害（可累积）</span><br>
+        · <span class="hl-purple">【酒】仅对下一次伤害 +2</span><br>
+        · <span class="hl-warn">【酒】必须配合【杀】才能生效</span><br>
+        · 【马】步数 +2（最多 1 个）<br>
+        · <span class="hl">击败任意敌将后即可结束踏阵</span><br>
+        · 步数耗尽且未斩敌将则踏阵失败
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+/* ============================================================
+   座位配置
+   ============================================================ */
+const ALL_SEATS = ['一号位', '二号位', '三号位', '四号位', '五号位', '六号位', '七号位', '八号位'];
+
+/* 障碍生成概率：固定 50% */
+const OBSTACLE_CHANCE = 0.5;
+
+let mySeatIdx = null;   /* 玩家所选号位索引 0-7 */
+let roster = [];        /* 敌将池：除自己外的号位，可删除 */
+
+let state = null;
+let logs = [];
+const cellEls = [];
+
+/* ---------- DOM ---------- */
+const seatOverlay = document.getElementById('seatOverlay');
+const seatGrid    = document.getElementById('seatGrid');
+const mySeatName  = document.getElementById('mySeatName');
+const changeSeatBtn = document.getElementById('changeSeatBtn');
+
+const gridEl      = document.getElementById('grid');
+const bannerEl    = document.getElementById('banner');
+const rosterListEl= document.getElementById('rosterList');
+const pickCountEl = document.getElementById('pickCount');
+const pickMaxLabel= document.getElementById('pickMaxLabel');
+const initStepsEl = document.getElementById('initSteps');
+const startBtn    = document.getElementById('startBtn');
+const restartBtn  = document.getElementById('restartBtn');
+const endBtn      = document.getElementById('endBtn');
+const configTip   = document.getElementById('configTip');
+
+const stepsEl   = document.getElementById('stepsEl');
+const dmgEl     = document.getElementById('dmgEl');
+const jiuEl     = document.getElementById('jiuEl');
+const jiuStatEl = document.getElementById('jiuStat');
+const killsEl   = document.getElementById('killsEl');
+const nextDmgEl = document.getElementById('nextDmgEl');
+const logEl     = document.getElementById('log');
+
+const effTag      = document.getElementById('effTag');
+const condColEl   = document.getElementById('condCol');
+const condRowEl   = document.getElementById('condRow');
+const condCenterEl= document.getElementById('condCenter');
+
+/* ============================================================
+   工具函数
+   ============================================================ */
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function neighborsOf(i) {
+  const r = Math.floor(i / 3), c = i % 3;
+  const out = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < 3 && nc >= 0 && nc < 3) out.push(nr * 3 + nc);
+    }
+  }
+  return out;
+}
+
+function isAdjacent(a, b) {
+  if (a < 0 || b < 0) return false;
+  const dr = Math.abs(Math.floor(a / 3) - Math.floor(b / 3));
+  const dc = Math.abs((a % 3) - (b % 3));
+  return Math.max(dr, dc) === 1;
+}
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[m]));
+}
+
+/* ============================================================
+   核心伤害公式
+   ============================================================ */
+const BASE_DAMAGE = 0;
+
+function calcDamage() {
+  const sha = state.dmgBonus;
+  const jiuActive = state.jiu && sha > 0;
+  const jiu = jiuActive ? 2 : 0;
+  return { total: sha + jiu, sha, jiu };
+}
+
+function previewNextDamage() {
+  if (!state) return { total: 0, sha: 0, jiu: 0 };
+  const sha = state.dmgBonus;
+  const jiu = (state.jiu && sha > 0) ? 2 : 0;
+  return { total: sha + jiu, sha, jiu };
+}
+
+/* ============================================================
+   踏阵效果判定
+   ============================================================ */
+function getConditions() {
+  if (!state) return { col: false, row: false, center: false, started: false };
+
+  const v = state.visited;
+
+  if (state.phase === 'choose-start' || state.path.length === 0) {
+    return { col: false, row: false, center: false, started: false };
+  }
+
+  let col = false;
+  for (let c = 0; c < 3; c++) {
+    if (!v[c] && !v[c + 3] && !v[c + 6]) { col = true; break; }
+  }
+
+  let row = false;
+  for (let r = 0; r < 3; r++) {
+    if (!v[r * 3] && !v[r * 3 + 1] && !v[r * 3 + 2]) { row = true; break; }
+  }
+
+  const center = !v[4];
+
+  return { col, row, center, started: true };
+}
+
+function setCondClass(el, ok, final) {
+  el.classList.toggle('ok', ok);
+  el.classList.toggle('final', ok && final);
+}
+
+function updateConditions() {
+  const cond = getConditions();
+  const final = state && state.phase === 'won';
+
+  setCondClass(condColEl,    cond.col,    final);
+  setCondClass(condRowEl,    cond.row,    final);
+  setCondClass(condCenterEl, cond.center, final);
+
+  if (final) {
+    effTag.textContent = '已生效';
+    effTag.classList.add('live');
+  } else if (cond.started) {
+    effTag.textContent = '预判中';
+    effTag.classList.remove('live');
+  } else {
+    effTag.textContent = '待判定';
+    effTag.classList.remove('live');
+  }
+}
+
+function updateEndButton() {
+  if (!state) {
+    endBtn.disabled = true;
+    endBtn.classList.remove('end-ready');
+    return;
+  }
+  const canEnd = state.phase === 'playing' && state.enemiesKilled >= 1;
+  endBtn.disabled = !canEnd;
+  endBtn.classList.toggle('end-ready', canEnd);
+}
+
+/* ============================================================
+   求解器（酒必须有杀才生效）
+   ============================================================ */
+function simulatePath(cells, path, initSteps) {
+  let steps = initSteps;
+  let dmgBonus = 0;
+  let jiu = false;
+  const hp = cells.map(c => c.type === 'enemy' ? c.hp : -1);
+  const totalEnemies = hp.filter(h => h > 0).length;
+  let kills = 0;
+
+  for (let i = 0; i < path.length; i++) {
+    if (i > 0) {
+      if (steps < 1) return false;
+      steps -= 1;
+    }
+    const idx = path[i];
+    const c = cells[idx];
+
+    if (c.type === 'sha') {
+      dmgBonus += 1;
+    } else if (c.type === 'jiu') {
+      jiu = true;
+    } else if (c.type === 'ma') {
+      steps += 2;
+    } else if (c.type === 'enemy') {
+      const jiuBonus = (jiu && dmgBonus > 0) ? 2 : 0;
+      const d = dmgBonus + jiuBonus;
+
+      if (hp[idx] > 0 && d > 0) {
+        hp[idx] -= d;
+        if (hp[idx] <= 0) kills++;
+      }
+      if (jiuBonus > 0) jiu = false;
+    }
+  }
+  return kills >= totalEnemies;
+}
+
+function existsWin(cells, initSteps) {
+  const maxLen = initSteps + 3;
+
+  for (let s = 0; s < 9; s++) {
+    if (cells[s].type === 'obstacle') continue;
+    const visited = new Array(9).fill(false);
+    visited[s] = true;
+    if (walk([s], visited, s)) return true;
+  }
+  return false;
+
+  function walk(path, visited, pos) {
+    if (simulatePath(cells, path, initSteps)) return true;
+    if (path.length >= maxLen) return false;
+
+    for (const n of neighborsOf(pos)) {
+      if (visited[n]) continue;
+      if (cells[n].type === 'obstacle') continue;
+      visited[n] = true;
+      path.push(n);
+      if (walk(path, visited, n)) return true;
+      path.pop();
+      visited[n] = false;
+    }
+    return false;
+  }
+}
+
+/* ============================================================
+   棋盘生成
+   ============================================================ */
+function generateBoard(cfg, enemyCount) {
+  const pool = roster.slice();
+  if (pool.length === 0) return null;
+
+  const n = Math.min(enemyCount, pool.length);
+
+  for (let attempt = 0; attempt < 260; attempt++) {
+    const cells = new Array(9).fill(null).map(() => ({ type: 'sha' }));
+    const idxs = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    let p = 0;
+
+    if (Math.random() < OBSTACLE_CHANCE && p < 9) {
+      cells[idxs[p++]] = { type: 'obstacle' };
+    }
+
+    const picked = shuffle(pool.slice()).slice(0, n);
+    for (const e of picked) {
+      if (p >= 9) break;
+      cells[idxs[p++]] = {
+        type: 'enemy',
+        name: e.name,
+        hp: e.hp,
+        maxHp: e.hp
+      };
+    }
+
+    if (Math.random() < 0.6 && p < 9) {
+      cells[idxs[p++]] = { type: 'ma' };
+    }
+
+    let jiuCount = 0;
+    while (p < 9) {
+      if (jiuCount < 2 && Math.random() < 0.28) {
+        cells[idxs[p++]] = { type: 'jiu' };
+        jiuCount++;
+      } else {
+        cells[idxs[p++]] = { type: 'sha' };
+      }
+    }
+
+    if (existsWin(cells, cfg.initSteps)) return cells;
+  }
+  return null;
+}
+
+/* ============================================================
+   渲染
+   ============================================================ */
+function initGrid() {
+  gridEl.innerHTML = '';
+  cellEls.length = 0;
+  for (let i = 0; i < 9; i++) {
+    const el = document.createElement('div');
+    el.className = 'cell';
+    el.addEventListener('click', () => onCellClick(i));
+    gridEl.appendChild(el);
+    cellEls.push(el);
+  }
+}
+
+function canMoveTo(i) {
+  if (!state) return false;
+  if (state.phase === 'choose-start') {
+    return state.cells[i].type !== 'obstacle';
+  }
+  if (state.phase !== 'playing') return false;
+  if (state.visited[i]) return false;
+  if (state.cells[i].type === 'obstacle') return false;
+  if (state.steps < 1) return false;
+  return isAdjacent(state.pos, i);
+}
+
+function render() {
+  if (!state) return;
+
+  for (let i = 0; i < 9; i++) {
+    const el = cellEls[i];
+    const c = state.cells[i];
+
+    el.className = 'cell';
+    if (c.type === 'obstacle') el.classList.add('obstacle');
+    if (state.visited[i]) el.classList.add('visited');
+    if (i === state.pos) el.classList.add('current');
+    if (canMoveTo(i)) el.classList.add('reachable');
+
+    let html = '';
+
+    if (c.type === 'obstacle') {
+      html = '<div class="icon rock">障</div>';
+    } else if (c.type === 'enemy') {
+      if (c.hp <= 0) {
+        html = '<div class="icon defeated">破</div>';
+      } else {
+        const dots = '<i></i>'.repeat(Math.max(0, Math.min(c.hp, 9)));
+        html = `<div class="ename">${escapeHtml(c.name)}</div>
+                <div class="ehp">${dots}</div>`;
+      }
+    } else if (c.type === 'sha') {
+      html = '<div class="icon sha">杀</div>';
+    } else if (c.type === 'jiu') {
+      html = '<div class="icon jiu">酒</div>' +
+             '<div class="elabel jiu">下次伤害 +2</div>';
+    } else if (c.type === 'ma') {
+      html = '<div class="icon ma">马</div>' +
+             '<div class="elabel ma">步数 +2</div>';
+    } else {
+      html = '<div class="icon sha">杀</div>';
+    }
+
+    const order = state.path.indexOf(i);
+    if (order >= 0) html += `<div class="order">${order + 1}</div>`;
+
+    el.innerHTML = html;
+  }
+
+  stepsEl.textContent = state.steps;
+
+  dmgEl.textContent = '+' + state.dmgBonus;
+  dmgEl.className = state.dmgBonus > 0 ? 'hot' : 'zero';
+
+  const pv = previewNextDamage();
+  nextDmgEl.textContent = pv.total;
+  nextDmgEl.className = pv.total > 0 ? 'hot' : 'zero';
+
+  killsEl.textContent = `${state.enemiesKilled}/${state.enemiesTotal}`;
+  killsEl.className = state.enemiesKilled >= 1 ? 'safe' : '';
+
+  if (state.jiu) {
+    if (state.dmgBonus > 0) {
+      jiuEl.innerHTML = '已备 <i>下次伤害 +2</i>';
+      jiuEl.className = 'on';
+      jiuStatEl.classList.add('on');
+    } else {
+      jiuEl.innerHTML = '已备 <i>需配合【杀】才生效</i>';
+      jiuEl.className = 'on-idle';
+      jiuStatEl.classList.add('on');
+    }
+  } else {
+    jiuEl.innerHTML = '— <i>未持有</i>';
+    jiuEl.className = '';
+    jiuStatEl.classList.remove('on');
+  }
+
+  updateConditions();
+  updateEndButton();
+}
+
+function log(msg) {
+  logs.push(msg);
+  if (logs.length > 9) logs.shift();
+  logEl.innerHTML = logs.map(m => `<div class="log-line">${m}</div>`).join('');
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+/* ============================================================
+   结算浮层
+   ============================================================ */
+function hideBanner() {
+  bannerEl.className = 'banner';
+  bannerEl.innerHTML = '';
+}
+
+function getDefeatedNames() {
+  if (!state) return [];
+  return state.cells
+    .filter(c => c.type === 'enemy' && c.hp <= 0)
+    .map(c => c.name);
+}
+
+function showWinBanner(reason) {
+  const names = getDefeatedNames();
+
+  const chips = names.length
+    ? names.map((n, i) =>
+        `<span class="kill-chip" style="animation-delay:${i * 0.08}s">${escapeHtml(n)}</span>`
+      ).join('')
+    : '<span class="kill-chip">无</span>';
+
+  let subText;
+  if (reason === 'manual') {
+    subText = `主动收兵 · 已斩 ${names.length} 名敌将`;
+  } else if (state.enemiesKilled >= state.enemiesTotal) {
+    subText = `敌将尽溃 · 全斩 ${names.length} 名敌将`;
+  } else {
+    subText = `步数已尽 · 已斩 ${names.length} 名敌将`;
+  }
+
+  const cond = getConditions();
+  const effLines = [];
+  if (cond.col)    effLines.push('· 各交给你一张牌');
+  if (cond.row)    effLines.push('· 视为对其使用一张无距离、无次数限制的【杀】');
+  if (cond.center) effLines.push('· 不能对你使用【杀】');
+
+  const detail = effLines.length
+    ? `<span class="green">踏阵效果已生效</span><br>${effLines.join('<br>')}`
+    : '未触发额外踏阵效果';
+
+  bannerEl.className = 'banner show win';
+  bannerEl.innerHTML = `
+    <div class="b-title">踏阵成功</div>
+    <div class="b-sub">${subText}</div>
+    <div class="b-kill-label">已 斩 敌 将</div>
+    <div class="b-kills">${chips}</div>
+    <div class="b-detail">${detail}</div>
+  `;
+}
+
+function showLoseBanner() {
+  bannerEl.className = 'banner show lose';
+  bannerEl.innerHTML = `
+    <div class="b-title">踏阵失败</div>
+    <div class="b-sub">步数已尽 · 未能破敌</div>
+  `;
+}
+
+/* ============================================================
+   游戏流程
+   ============================================================ */
+function startGame() {
+  configTip.textContent = '';
+
+  if (mySeatIdx === null) {
+    configTip.textContent = '请先选择号位';
+    return;
+  }
+  if (roster.length === 0) {
+    configTip.textContent = '敌将已被全部移除，请换位或刷新页面';
+    return;
+  }
+
+  const cfg = {
+    pickCount: clamp(parseInt(pickCountEl.value, 10) || 1, 1, roster.length),
+    initSteps: clamp(parseInt(initStepsEl.value, 10) || 5, 3, 12)
+  };
+
+  pickCountEl.value = cfg.pickCount;
+  initStepsEl.value = cfg.initSteps;
+
+  const cells = generateBoard(cfg, cfg.pickCount);
+  if (!cells) {
+    configTip.textContent = '当前配置下难以生成有解棋盘，请降低敌将血量或增加初始步数';
+    return;
+  }
+
+  const enemiesTotal = cells.filter(c => c.type === 'enemy').length;
+
+  state = {
+    cells,
+    pos: -1,
+    visited: new Array(9).fill(false),
+    path: [],
+    steps: cfg.initSteps,
+    dmgBonus: 0,
+    jiu: false,
+    phase: 'choose-start',
+    enemiesTotal,
+    enemiesKilled: 0
+  };
+
+  logs = [];
+  hideBanner();
+  log(`你的号位：${ALL_SEATS[mySeatIdx]}`);
+  log('点击任意非障碍格作为起点');
+  render();
+}
+
+function applyCell(i) {
+  const c = state.cells[i];
+
+  if (c.type === 'sha') {
+    state.dmgBonus += 1;
+    log(`踏中【杀】 · 杀加成累积至 +${state.dmgBonus}（永久）`);
+  } else if (c.type === 'jiu') {
+    state.jiu = true;
+    log('踏中【酒】 · 下次伤害 +2（需配合【杀】才生效）');
+  } else if (c.type === 'ma') {
+    state.steps += 2;
+    log('踏中【马】 · 步数 +2');
+  } else if (c.type === 'enemy') {
+    const d = calcDamage();
+
+    if (c.hp > 0) {
+      if (d.total <= 0) {
+        if (state.jiu && state.dmgBonus === 0) {
+          log(`斩击 ${escapeHtml(c.name)} · 无【杀】加成，酒力无法生效（0 点）`);
+        } else {
+          log(`斩击 ${escapeHtml(c.name)} · 无伤害加成，此击无效（0 点）`);
+        }
+        return;
+      }
+
+      c.hp -= d.total;
+
+      const parts = [];
+      if (d.sha > 0) parts.push(`杀 ×${d.sha}`);
+      if (d.jiu > 0) parts.push(`酒 ${d.jiu}`);
+
+      log(`斩击 ${escapeHtml(c.name)} · ${parts.join(' + ')} = ${d.total} 点伤害`);
+
+      if (d.jiu > 0) {
+        state.jiu = false;
+        log('　└ 酒力已耗尽，后续伤害不再加成');
+      }
+
+      if (c.hp <= 0) {
+        state.enemiesKilled++;
+        log(`★ ${escapeHtml(c.name)} 败退！可结束踏阵或继续深入`);
+      }
+    }
+  }
+}
+
+function onCellClick(i) {
+  if (!state) return;
+
+  if (state.phase === 'choose-start') {
+    if (state.cells[i].type === 'obstacle') return;
+    state.pos = i;
+    state.visited[i] = true;
+    state.path.push(i);
+    state.phase = 'playing';
+    applyCell(i);
+    checkEnd();
+    return;
+  }
+
+  if (!canMoveTo(i)) return;
+
+  state.steps -= 1;
+  state.pos = i;
+  state.visited[i] = true;
+  state.path.push(i);
+  applyCell(i);
+  checkEnd();
+}
+
+function anyMoveAvailable() {
+  if (!state || state.pos < 0) return false;
+  if (state.steps < 1) return false;
+  for (const n of neighborsOf(state.pos)) {
+    if (state.visited[n]) continue;
+    if (state.cells[n].type === 'obstacle') continue;
+    return true;
+  }
+  return false;
+}
+
+function settleEffectsToLog() {
+  const cond = getConditions();
+  const names = getDefeatedNames();
+  const nameStr = names.length ? names.map(escapeHtml).join('、') : '无';
+
+  log(`✦ 已斩敌将：${nameStr}`);
+
+  const hit = [];
+  if (cond.col)    hit.push('未经过一整列');
+  if (cond.row)    hit.push('未经过一整行');
+  if (cond.center) hit.push('未经过中心格');
+
+  if (hit.length) {
+    log('✦ 踏阵效果生效：' + hit.join('、'));
+  } else {
+    log('踏阵成功，但未触发额外效果');
+  }
+  if (cond.col)    log('　└ 被击败的角色各交给你一张牌');
+  if (cond.row)    log('　└ 视为对被击败的角色使用一张无距离、无次数限制的【杀】');
+  if (cond.center) log('　└ 被击败的角色直到下回合开始不能对你使用【杀】');
+}
+
+function endGame(reason) {
+  if (!state || state.phase !== 'playing') return;
+  if (state.enemiesKilled < 1) return;
+
+  state.phase = 'won';
+  render();
+  showWinBanner(reason);
+
+  if (reason === 'manual') {
+    log(`✦ 踏阵收兵 · 已斩 ${state.enemiesKilled} 名敌将`);
+  } else if (state.enemiesKilled >= state.enemiesTotal) {
+    log('✦ 敌将尽溃 · 踏阵功成');
+  } else {
+    log(`✦ 步数已尽 · 已斩 ${state.enemiesKilled} 名敌将，踏阵成功`);
+  }
+
+  settleEffectsToLog();
+}
+
+function checkEnd() {
+  if (!state) return;
+
+  if (state.enemiesTotal > 0 && state.enemiesKilled >= state.enemiesTotal) {
+    endGame('auto-all');
+    return;
+  }
+
+  if (!anyMoveAvailable()) {
+    if (state.enemiesKilled >= 1) {
+      endGame('auto-steps');
+    } else {
+      state.phase = 'lost';
+      render();
+      showLoseBanner();
+      log('步数已尽 · 未能破敌');
+    }
+    return;
+  }
+
+  render();
+}
+
+/* ============================================================
+   名册 UI —— 含删除敌将功能
+   ============================================================ */
+function hpDotsHtml(hp) {
+  let s = '';
+  for (let k = 1; k <= 9; k++) {
+    s += `<i class="${k <= hp ? 'on' : ''}" data-v="${k}" title="设为 ${k} 点血量"></i>`;
+  }
+  return s;
+}
+
+/* 同步抽取数量上限 */
+function syncPickLimit() {
+  const maxPick = Math.max(1, roster.length);
+  pickCountEl.max = maxPick;
+  pickMaxLabel.textContent = '最多 ' + maxPick;
+
+  let cur = parseInt(pickCountEl.value, 10) || 1;
+  if (cur > maxPick) cur = maxPick;
+  if (cur < 1) cur = 1;
+  pickCountEl.value = cur;
+}
+
+function renderRoster() {
+  if (roster.length === 0) {
+    rosterListEl.innerHTML =
+      '<div class="roster-tip" style="text-align:center;padding:16px 0;">敌将已清空，请换位或刷新页面</div>';
+    return;
+  }
+
+  rosterListEl.innerHTML = roster.map((e, i) => `
+    <div class="rrow">
+      <span class="rname" title="${escapeHtml(e.name)}">${escapeHtml(e.name)}</span>
+      <span class="rhp" data-i="${i}">${hpDotsHtml(e.hp)}</span>
+      <button class="rdel" data-i="${i}" title="移除该敌将">×</button>
+    </div>
+  `).join('');
+}
+
+function changeHp(idx, v) {
+  if (!roster[idx]) return;
+  v = clamp(v, 1, 9);
+  if (roster[idx].hp === v) return;
+
+  roster[idx].hp = v;
+
+  const wrap = rosterListEl.querySelector(`.rhp[data-i="${idx}"]`);
+  if (wrap) {
+    wrap.querySelectorAll('i').forEach((d, k) => {
+      d.classList.toggle('on', (k + 1) <= v);
+    });
+  }
+
+  if (state && state.phase === 'choose-start') {
+    let changed = false;
+    for (const c of state.cells) {
+      if (c.type === 'enemy' && c.name === roster[idx].name) {
+        c.hp = v;
+        c.maxHp = v;
+        changed = true;
+      }
+    }
+    if (changed) render();
+  }
+}
+
+/* 移除敌将 */
+function removeEnemy(idx) {
+  if (!roster[idx]) return;
+
+  const removedName = roster[idx].name;
+  roster.splice(idx, 1);
+
+  syncPickLimit();
+  renderRoster();
+
+  if (roster.length === 0) {
+    configTip.textContent = '敌将已全部移除，请换位或刷新页面';
+    return;
+  }
+
+  configTip.textContent = `已移除 ${removedName}`;
+  setTimeout(() => {
+    if (configTip.textContent === `已移除 ${removedName}`) configTip.textContent = '';
+  }, 1800);
+
+  /* 敌将池变化 → 自动重新布阵 */
+  if (mySeatIdx !== null) startGame();
+}
+
+/* 事件委托：血点点击 + 删除按钮 */
+rosterListEl.addEventListener('click', (e) => {
+  const dot = e.target.closest('.rhp i');
+  if (dot) {
+    const wrap = dot.closest('.rhp');
+    const idx = parseInt(wrap.dataset.i, 10);
+    const v = parseInt(dot.dataset.v, 10);
+    changeHp(idx, v);
+    return;
+  }
+
+  const del = e.target.closest('.rdel');
+  if (del) {
+    const idx = parseInt(del.dataset.i, 10);
+    removeEnemy(idx);
+  }
+});
+
+/* ============================================================
+   选位流程
+   ============================================================ */
+function renderSeatButtons() {
+  seatGrid.innerHTML = ALL_SEATS.map((name, i) => `
+    <button class="seat-btn" data-idx="${i}">
+      <span class="seat-num">${i + 1}</span>
+      <span class="seat-label">号位</span>
+    </button>
+  `).join('');
+}
+
+function openSeatOverlay() {
+  seatOverlay.classList.add('show');
+}
+
+function closeSeatOverlay() {
+  seatOverlay.classList.remove('show');
+}
+
+function pickSeat(idx) {
+  mySeatIdx = idx;
+
+  /* 敌将池 = 除自己外的 7 个号位，默认血量 2 */
+  roster = ALL_SEATS
+    .map((name, i) => ({ name, hp: 2, seat: i }))
+    .filter(e => e.seat !== idx);
+
+  /* 更新“我的座位”显示 */
+  mySeatName.textContent = ALL_SEATS[idx];
+
+  syncPickLimit();
+  renderRoster();
+  closeSeatOverlay();
+
+  /* 选位后立即开局 */
+  startGame();
+}
+
+/* 按钮点击委托 */
+seatGrid.addEventListener('click', (e) => {
+  const btn = e.target.closest('.seat-btn');
+  if (!btn) return;
+  pickSeat(parseInt(btn.dataset.idx, 10));
+});
+
+/* 换位按钮 */
+changeSeatBtn.addEventListener('click', () => {
+  openSeatOverlay();
+});
+
+/* ============================================================
+   事件绑定 & 启动
+   ============================================================ */
+startBtn.addEventListener('click', startGame);
+restartBtn.addEventListener('click', startGame);
+endBtn.addEventListener('click', () => endGame('manual'));
+
+/* 初始化棋盘 DOM */
+initGrid();
+renderSeatButtons();
+
+/* 开局先选位 */
+openSeatOverlay();
+
+/* 首次渲染名册（空态） */
+renderRoster();
+</script>
+
+</body>
+</html>
