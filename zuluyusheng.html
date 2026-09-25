@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>族陆郁生 · 拾昔</title>
+<style>
+  :root{
+    /* 提取自原画的色彩体系：吴国翡翠绿、描金色、星空深色 */
+    --bg: #0a130f;
+    --bg-grad: radial-gradient(circle at 50% -20%, #173425 0%, #0a130f 70%);
+    --panel: #12251c;
+    --line: #2a4a37;
+    --gold: #d4af37;
+    --gold-bright: #ecc45c;
+    --text: #dcebe3;
+    --text-dim: #8fa89a;
+    --card-border: #3b6a4c;
+    --red-suit: #c0392b;
+    --black-suit: #1a1a1a;
+  }
+  *{box-sizing:border-box;}
+  .hide{display:none !important;}
+
+  body{
+    margin:0; padding:28px 20px 48px;
+    background:var(--bg);
+    background-image: var(--bg-grad);
+    color:var(--text); min-height:100vh;
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+  }
+  .app{max-width:1000px;margin:0 auto;}
+
+  /* ---------- 标题 ---------- */
+  header h1{font-size:21px;margin:0 0 8px;font-weight:600;letter-spacing:1px;color:#eaf5ef;}
+  header h1 .skill{color:var(--gold-bright);}
+  header p{
+    font-size:13px;line-height:1.8;color:var(--text-dim);margin:0 0 24px;
+    padding:10px 14px;border-left:3px solid var(--gold);
+    background:rgba(42, 74, 55, 0.2);border-radius:0 6px 6px 0;
+  }
+
+  /* ---------- 四个模块 ---------- */
+  .board{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:16px;margin-bottom:22px;
+  }
+  @media(max-width:880px){.board{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:480px){.board{grid-template-columns:1fr;}}
+
+  .slot{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 12px;display:flex;flex-direction:column;
+    align-items:center;gap:11px;transition:.2s;
+  }
+  /* 已确认的模块边框发光效果 */
+  .slot.confirmed{
+    border-color:var(--gold);
+    background:#162f22;
+    box-shadow:0 0 16px rgba(212,175,55,.15), inset 0 0 20px rgba(212,175,55,.05);
+  }
+
+  .idx{font-size:11px;letter-spacing:2px;color:#5c7a68;align-self:flex-start;}
+  .slot.confirmed .idx{color:var(--gold-bright);}
+
+  /* ---------- 卡牌预览 ---------- */
+  .card{
+    width:100%;max-width:112px;aspect-ratio:5/7;border-radius:8px;
+    background:linear-gradient(160deg,#fdfaf1,#e6dcc4);
+    border:2px solid var(--card-border);position:relative;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 12px rgba(0,0,0,.6);
+  }
+  .card .suit-tl,.card .suit-br{
+    position:absolute;font-size:17px;font-weight:700;line-height:1;
+  }
+  .card .suit-tl{top:8px;left:9px;}
+  .card .suit-br{bottom:8px;right:9px;transform:rotate(180deg);}
+  .card .cname{
+    font-size:15px;font-weight:700;color:#1a2e22;
+    letter-spacing:1px;text-align:center;line-height:1.35;padding:0 8px;
+  }
+  .card.red   .suit-tl,.card.red   .suit-br{color:var(--red-suit);}
+  .card.black .suit-tl,.card.black .suit-br{color:var(--black-suit);}
+
+  /* ---------- 选择器 ---------- */
+  .controls{width:100%;display:flex;flex-direction:column;gap:7px;}
+  select{
+    width:100%;font-family:inherit;font-size:12.5px;
+    padding:7px 8px;border-radius:6px;cursor:pointer;
+    border:1px solid var(--line);background:#0d1a13;color:var(--text);
+    transition:.15s;
+  }
+  select:hover:not(:disabled){border-color:rgba(212,175,55,.55);}
+  select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,175,55,.15);}
+  select:disabled{opacity:.6;cursor:not-allowed;color:var(--text-dim);}
+
+  /* ---------- 按钮 ---------- */
+  button{
+    font-family:inherit;font-size:12.5px;padding:8px 18px;border-radius:6px;
+    border:1px solid var(--gold);
+    background:rgba(42, 74, 55, 0.6);color:var(--gold-bright);
+    cursor:pointer;transition:.15s;white-space:nowrap;
+    font-weight: 600;
+  }
+  button:hover:not(:disabled){
+    background:rgba(212, 175, 55, 0.2);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+  }
+  button:active:not(:disabled){transform:scale(.97);}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+
+  .confirm-btn{width:100%;margin-top:2px;letter-spacing:2px;}
+  .confirm-btn:disabled{
+    border-color:var(--gold);background:rgba(212, 175, 55, 0.15);color:var(--gold-bright);opacity:1;
+  }
+
+  /* ---------- 结果区 ---------- */
+  .result{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:18px 20px;
+  }
+  /* 全部确认后的结果区发光动画 */
+  .result.final{
+    border-color:var(--gold);
+    box-shadow:0 0 34px rgba(212,175,55,.1), 0 0 10px rgba(42, 74, 55, 0.5);
+    animation:pop .4s ease;
+  }
+  @keyframes pop{
+    from{opacity:0;transform:translateY(16px) scale(.98);}
+    to{opacity:1;transform:none;}
+  }
+
+  .result h2{
+    font-size:12px;font-weight:600;color:var(--gold-bright);
+    letter-spacing:2px;margin:0 0 16px;
+  }
+
+  .cards-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+  .mini-card{
+    width:96px;height:134px;border-radius:8px;
+    background:linear-gradient(160deg,#fdfaf1,#e6dcc4);
+    border:2px solid var(--card-border);position:relative;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 12px rgba(0,0,0,.6);
+  }
+  .mini-card .mc-suit{
+    position:absolute;font-size:17px;font-weight:700;line-height:1;
+  }
+  .mini-card .mc-tl{top:8px;left:9px;}
+  .mini-card .mc-br{bottom:8px;right:9px;transform:rotate(180deg);}
+  .mini-card .mc-name{
+    font-size:15px;font-weight:700;color:#1a2e22;
+    text-align:center;line-height:1.35;padding:0 8px;letter-spacing:1px;
+  }
+  .mini-card.red   .mc-suit{color:var(--red-suit);}
+  .mini-card.black .mc-suit{color:var(--black-suit);}
+
+  .line{
+    font-size:13px;color:var(--text);background:rgba(10, 19, 15, 0.6);
+    border:1px dashed var(--line);border-radius:8px;
+    padding:12px 13px;letter-spacing:2px;line-height:1.8;
+    word-break:break-all;margin-bottom:12px;color: var(--gold-bright);
+    font-weight: 600; text-align: center;
+  }
+
+  #btnReset{margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header id="header">
+    <h1>族陆郁生<span class="skill">〖拾昔〗</span></h1>
+  </header>
+
+  <!-- 四个配置模块 -->
+  <div class="board" id="board"></div>
+
+  <!-- 记录结果 -->
+  <div class="result" id="result">
+    <h2 id="resultTitle">记录预览</h2>
+    <div class="cards-row" id="cardsRow"></div>
+    <div class="line" id="line"></div>
+    <button id="btnReset" class="hide">重新配置</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+ *  数据定义
+ * ============================================================ */
+const SUITS = [
+  { key:'spade',   sym:'♠', name:'黑桃', red:false },
+  { key:'heart',   sym:'♥', name:'红桃', red:true  },
+  { key:'club',    sym:'♣', name:'梅花', red:false },
+  { key:'diamond', sym:'♦', name:'方块', red:true  }
+];
+
+/* 所有普通锦囊牌 */
+const TRICKS = [
+  '无中生有', '顺手牵羊', '过河拆桥', '决斗', '火攻', '借刀杀人',
+  '南蛮入侵', '万箭齐发', '五谷丰登', '桃园结义', '铁索连环', '无懈可击'
+];
+
+/* 可被〖拾昔〗记录的单目标普通锦囊（仅用于标注提示） */
+const SINGLE_TARGET = new Set([
+  '无中生有', '顺手牵羊', '过河拆桥', '决斗', '火攻', '借刀杀人'
+]);
+
+/* 默认配置：花色固定，只需默认的锦囊牌名 */
+const DEFAULT_SLOTS = [
+  { name:'顺手牵羊' }, // 黑桃
+  { name:'无中生有' }, // 红桃
+  { name:'过河拆桥' }, // 梅花
+  { name:'决斗'     }  // 方块
+];
+
+/* 当前状态（含确认标记） */
+let slots = DEFAULT_SLOTS.map(s => ({ ...s, confirmed:false }));
+
+/* ============================================================
+ *  DOM
+ * ============================================================ */
+const header      = document.getElementById('header');
+const board       = document.getElementById('board');
+const result      = document.getElementById('result');
+const resultTitle = document.getElementById('resultTitle');
+const cardsRow    = document.getElementById('cardsRow');
+const line        = document.getElementById('line');
+const btnReset    = document.getElementById('btnReset');
+
+/* ============================================================
+ *  工具
+ * ============================================================ */
+function allConfirmed(){
+  return slots.every(s => s.confirmed);
+}
+
+/* ============================================================
+ *  主渲染
+ * ============================================================ */
+function render(){
+  const done = allConfirmed();
+
+  /* 全部确认后：隐藏标题与配置区，只留结果 */
+  header.classList.toggle('hide', done);
+  board.classList.toggle('hide', done);
+
+  if(!done){
+    board.innerHTML = buildSlots();
+    bindBoardEvents();
+  }
+
+  renderResult(done);
+
+  result.classList.toggle('final', done);
+  resultTitle.textContent = done ? '拾昔 · 记录结果' : '记录预览';
+  btnReset.classList.toggle('hide', !done);
+}
+
+/* ---------- 生成四个模块 ---------- */
+function buildSlots(){
+  return slots.map((s, i) => {
+    const suit = SUITS[i]; // 索引0对应黑桃，1对应红桃，2对应梅花，3对应方块
+
+    return `
+      <div class="slot${s.confirmed ? ' confirmed' : ''}">
+        <div class="idx">${suit.name}${s.confirmed ? ' · 已确认' : ''}</div>
+
+        <div class="card ${suit.red ? 'red' : 'black'}">
+          <span class="suit-tl">${suit.sym}</span>
+          <span class="cname">${s.name}</span>
+          <span class="suit-br">${suit.sym}</span>
+        </div>
+
+        <div class="controls">
+          <select data-i="${i}" data-role="name"${s.confirmed ? ' disabled' : ''}>
+            ${TRICKS.map(n =>
+              `<option value="${n}"${n === s.name ? ' selected' : ''}>${n}${SINGLE_TARGET.has(n) ? '' : '（非单目标）'}</option>`
+            ).join('')}
+          </select>
+        </div>
+
+        <button class="confirm-btn" data-i="${i}"${s.confirmed ? ' disabled' : ''}>
+          ${s.confirmed ? '已确认 ✓' : '确 认'}
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------- 事件绑定 ---------- */
+function bindBoardEvents(){
+  board.querySelectorAll('select').forEach(sel => {
+    sel.addEventListener('change', e => {
+      const i = +e.target.dataset.i;
+      slots[i].name = e.target.value;
+      render();
+    });
+  });
+
+  board.querySelectorAll('.confirm-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const i = +e.currentTarget.dataset.i;
+      slots[i].confirmed = true;
+      render();
+    });
+  });
+}
+
+/* ---------- 渲染结果 ---------- */
+function renderResult(done){
+  const items = slots.map((s, i) => ({
+    suit: SUITS[i],
+    name: s.name
+  }));
+
+  cardsRow.innerHTML = items.map(it => `
+    <div class="mini-card ${it.suit.red ? 'red' : 'black'}">
+      <span class="mc-suit mc-tl">${it.suit.sym}</span>
+      <span class="mc-name">${it.name}</span>
+      <span class="mc-suit mc-br">${it.suit.sym}</span>
+    </div>
+  `).join('');
+
+  line.textContent = items
+    .map(it => `${it.suit.sym}${it.name}`)
+    .join('　');
+}
+
+/* ============================================================
+ *  重新配置
+ * ============================================================ */
+btnReset.addEventListener('click', () => {
+  slots = DEFAULT_SLOTS.map(s => ({ ...s, confirmed:false }));
+  render();
+});
+
+/* ============================================================
+ *  启动
+ * ============================================================ */
+render();
+</script>
+</body>
+</html>
