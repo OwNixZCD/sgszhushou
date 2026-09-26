@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>裴秀 · 行图</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 50% 0%, #1b2136 0%, #0b0e16 60%);
+    color: #cfd6e6;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 40px 18px 60px;
+  }
+
+  .app { width: 100%; max-width: 940px; }
+
+  /* ---------- 标题 ---------- */
+  header { text-align: center; margin-bottom: 30px; }
+
+  h1 {
+    font-size: 2rem;
+    letter-spacing: .5em;
+    text-indent: .5em;
+    font-weight: 700;
+    background: linear-gradient(180deg, #ffe9a3, #d9a441);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .sub {
+    margin-top: 8px;
+    font-size: .8rem;
+    letter-spacing: .28em;
+    text-indent: .28em;
+    color: #6a7488;
+  }
+
+  /* ---------- 当前点数面板 ---------- */
+  .panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 22px;
+    padding: 14px 20px;
+    border: 1px solid #262d42;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(38,45,66,.55), rgba(20,24,36,.55));
+  }
+
+  .panel-label { font-size: .82rem; color: #7d879c; letter-spacing: .1em; }
+
+  .current {
+    min-width: 74px;
+    padding: 4px 14px;
+    border-radius: 8px;
+    border: 1px dashed #3a445f;
+    font-size: 1.35rem;
+    font-weight: 700;
+    text-align: center;
+    color: #55607a;
+    transition: all .3s ease;
+  }
+
+  .current.show {
+    border-style: solid;
+    border-color: #ffd54f;
+    color: #ffe9a3;
+    background: rgba(255, 213, 79, .08);
+    box-shadow: 0 0 18px rgba(255, 213, 79, .25);
+  }
+
+  /* ---------- 牌点网格 ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(13, minmax(0, 1fr));
+    gap: 9px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    position: relative;
+    aspect-ratio: 5 / 7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 9px;
+    border: 1.5px solid #333a52;
+    background: #1a1f2f;
+    color: #8b93a8;
+    font-family: inherit;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    outline: none;
+    transition: transform .18s ease, box-shadow .2s ease,
+                border-color .2s ease, background .2s ease, color .2s ease;
+  }
+
+  .card:hover { transform: translateY(-3px); border-color: #5d6b95; color: #b6bfd4; }
+
+  /* 约数：摸一张牌 */
+  .card.divisor {
+    background: linear-gradient(165deg, #10344a, #0c1f2e);
+    border-color: #4fc3f7;
+    color: #a8e4ff;
+    box-shadow: 0 0 0 1px rgba(79,195,247,.3), 0 0 14px rgba(79,195,247,.32);
+  }
+
+  /* 倍数：无次数限制 */
+  .card.multiple {
+    background: linear-gradient(165deg, #4a2412, #2b160a);
+    border-color: #ff8a65;
+    color: #ffc9b3;
+    box-shadow: 0 0 0 1px rgba(255,138,101,.3), 0 0 14px rgba(255,138,101,.32);
+  }
+
+  /* 既是约数又是倍数 */
+  .card.both {
+    background: linear-gradient(165deg, #4a3a0e, #2b2208);
+    border-color: #ffd54f;
+    color: #ffe9a3;
+    box-shadow: 0 0 0 1px rgba(255,213,79,.35), 0 0 16px rgba(255,213,79,.4);
+  }
+
+  /* 当前选中的那张（上一张牌） */
+  .card.active {
+    transform: translateY(-5px) scale(1.06);
+    z-index: 2;
+  }
+
+  .card.active::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-radius: 12px;
+    border: 1.5px dashed currentColor;
+    opacity: .75;
+    animation: spinPulse 6s linear infinite;
+  }
+
+  @keyframes spinPulse {
+    0%, 100% { opacity: .75; }
+    50%      { opacity: .3;  }
+  }
+
+  /* ---------- 图例 ---------- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+    margin-bottom: 22px;
+    font-size: .76rem;
+    color: #8891a6;
+  }
+
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+  .legend i {
+    width: 11px; height: 11px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .dot-div  { background: #4fc3f7; box-shadow: 0 0 8px rgba(79,195,247,.7); }
+  .dot-mul  { background: #ff8a65; box-shadow: 0 0 8px rgba(255,138,101,.7); }
+  .dot-both { background: #ffd54f; box-shadow: 0 0 8px rgba(255,213,79,.7); }
+
+  /* ---------- 结果 ---------- */
+  .result {
+    border: 1px solid #262d42;
+    border-radius: 12px;
+    background: rgba(18,22,34,.7);
+    padding: 18px 20px;
+    min-height: 96px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .hint {
+    text-align: center;
+    font-size: .85rem;
+    color: #5c6478;
+    letter-spacing: .08em;
+  }
+
+  .line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px;
+    animation: fadeUp .3s ease both;
+  }
+
+  .line:nth-child(2) { animation-delay: .06s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .tag {
+    flex: 0 0 auto;
+    font-size: .72rem;
+    padding: 3px 9px;
+    border-radius: 5px;
+    letter-spacing: .08em;
+  }
+
+  .tag.div { background: rgba(79,195,247,.15);  color: #79d4fb; border: 1px solid rgba(79,195,247,.4); }
+  .tag.mul { background: rgba(255,138,101,.15); color: #ffa588; border: 1px solid rgba(255,138,101,.4); }
+
+  .vals {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    color: #dfe5f2;
+  }
+
+  .eff { font-size: .78rem; color: #7d879c; }
+
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    h1 { font-size: 1.6rem; letter-spacing: .35em; }
+    .card { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header>
+    <h1>行图</h1>
+  </header>
+
+  <div class="panel">
+    <span class="panel-label">上一张使用的牌点数</span>
+    <div class="current" id="current">—</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="legend">
+    <span><i class="dot-div"></i>约数 · 使用后摸一张牌</span>
+    <span><i class="dot-mul"></i>倍数 · 无使用次数限制</span>
+    <span><i class="dot-both"></i>两者皆是</span>
+  </div>
+
+  <div class="result" id="result">
+    <p class="hint">点击任意点数，查看它在 13 点以内的约数与倍数</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  // 三国杀点数：只显示 A、2~10、J、Q、K
+  const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+  const gridEl    = document.getElementById('grid');
+  const currentEl = document.getElementById('current');
+  const resultEl  = document.getElementById('result');
+
+  /* 生成 13 张牌点按钮（只显示点数，不显示阿拉伯数字） */
+  RANKS.forEach(function (rank, idx) {
+    const p = idx + 1;                       // 内部数值 1 ~ 13
+    const btn = document.createElement('button');
+    btn.className = 'card';
+    btn.dataset.p = p;
+    btn.textContent = rank;                  // 只显示点数
+    btn.addEventListener('click', function () { select(p); });
+    gridEl.appendChild(btn);
+  });
+
+  /* 核心逻辑：点数为 X 的上一张牌 */
+  function select(x) {
+    const cards = gridEl.querySelectorAll('.card');
+    const divisors = [];
+    const multiples = [];
+
+    cards.forEach(function (card) {
+      const p = Number(card.dataset.p);
+
+      // 行图判定：
+      // 此牌点数 p 是上一张点数 x 的约数 → x 能被 p 整除 → 摸一张牌
+      // 此牌点数 p 是上一张点数 x 的倍数 → p 能被 x 整除 → 无使用次数限制
+      const isDivisor  = (x % p === 0);
+      const isMultiple = (p % x === 0);
+
+      card.classList.remove('divisor', 'multiple', 'both', 'active');
+
+      if (isDivisor && isMultiple) {
+        card.classList.add('both');
+        divisors.push(p);
+        multiples.push(p);
+      } else if (isDivisor) {
+        card.classList.add('divisor');
+        divisors.push(p);
+      } else if (isMultiple) {
+        card.classList.add('multiple');
+        multiples.push(p);
+      }
+
+      if (p === x) card.classList.add('active');
+    });
+
+    // 顶部当前点数：只显示点数
+    currentEl.textContent = RANKS[x - 1];
+    currentEl.classList.add('show');
+
+    // 结果面板
+    resultEl.innerHTML =
+      '<div class="line">' +
+        '<span class="tag div">约数</span>' +
+        '<span class="vals">' + divisors.map(nameOf).join('  ') + '</span>' +
+        '<span class="eff">→ 使用后摸一张牌</span>' +
+      '</div>' +
+      '<div class="line">' +
+        '<span class="tag mul">倍数</span>' +
+        '<span class="vals">' + multiples.map(nameOf).join('  ') + '</span>' +
+        '<span class="eff">→ 无使用次数限制</span>' +
+      '</div>';
+  }
+
+  function nameOf(p) {
+    return RANKS[p - 1];
+  }
+})();
+</script>
+
+</body>
+</html>
