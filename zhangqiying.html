@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>张琪瑛 · 法箓与真仪</title>
     <style>
         :root {
@@ -15,6 +15,14 @@
             --heart-diamond: #d32f2f;
         }
 
+        /* 关键：所有元素宽度都算进 padding/border，避免撑破 */
+        * { box-sizing: border-box; }
+
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden; /* 杜绝横向滚动 */
+        }
+
         body {
             font-family: "Microsoft YaHei", sans-serif;
             background-color: var(--bg);
@@ -24,7 +32,9 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 12px;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container {
@@ -33,29 +43,29 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             width: 100%;
             max-width: 500px;
-            padding: 40px 20px;
+            padding: clamp(20px, 6vw, 40px) clamp(10px, 3vw, 20px);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 40px;
+            gap: clamp(22px, 6vw, 40px);
         }
 
         /* 顶部记录区域 */
         .record-area {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: clamp(12px, 4vw, 20px);
         }
 
         .record-slot {
-            width: 60px;
-            height: 60px;
+            width: clamp(48px, 16vw, 60px);
+            height: clamp(48px, 16vw, 60px);
             border-radius: 50%;
             border: 2px dashed #555;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 26px;
+            font-size: clamp(20px, 7vw, 26px);
             background-color: rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         }
@@ -67,11 +77,11 @@
             transform: scale(1.1);
         }
 
-        /* 按钮及状态区域 */
+        /* 按钮及状态区域：改成 4 等分网格，永远不会超出 */
         .btn-area {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: clamp(6px, 2.5vw, 16px);
             width: 100%;
         }
 
@@ -79,22 +89,25 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            min-width: 0; /* 允许子元素收缩 */
         }
 
         .suit-btn {
-            width: 70px;
-            height: 70px;
+            width: clamp(46px, 15vw, 70px);
+            height: clamp(46px, 15vw, 70px);
             border-radius: 50%;
             border: none;
             background-color: white;
-            font-size: 32px;
+            font-size: clamp(22px, 7vw, 32px);
+            line-height: 1;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             transition: transform 0.1s, box-shadow 0.2s;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 0;
         }
 
         .suit-btn:active {
@@ -112,19 +125,25 @@
         .zhenyi-status {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
             align-items: center;
+            width: 100%;
+            min-width: 0;
         }
 
         .badge {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
+            font-size: clamp(9px, 2.6vw, 11px);
+            line-height: 1.25;
+            padding: 2px 4px;
+            border-radius: 8px;
             border: 1px solid #555;
             color: #666;
             background: #222;
             transition: all 0.3s ease;
-            white-space: nowrap;
+            white-space: normal;   /* 允许换行，不再强行撑宽 */
+            word-break: break-word;
+            text-align: center;
+            max-width: 100%;
         }
 
         /* 均相同触发状态 */
@@ -147,7 +166,7 @@
 
         /* 重置按钮 */
         .reset-btn {
-            margin-top: 10px;
+            margin-top: 4px;
             padding: 8px 24px;
             background-color: #4a4a5a;
             color: white;
@@ -164,24 +183,28 @@
         /* 法箓触发提示 (Toast) */
         #toast-container {
             position: fixed;
-            top: 20%;
+            top: 15%;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
-            pointer-events: none; /* 不阻挡鼠标点击 */
+            pointer-events: none;
             z-index: 1000;
+            width: 100%;
+            padding: 0 16px;
         }
 
         .toast {
             background: rgba(0, 0, 0, 0.85);
             color: white;
-            padding: 12px 28px;
+            padding: 12px 22px;
             border-radius: 30px;
-            font-size: 18px;
+            font-size: clamp(14px, 4.4vw, 18px);
             font-weight: bold;
+            text-align: center;
+            max-width: 90vw;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             animation: toastFadeInOut 2s ease forwards;
         }
@@ -203,6 +226,12 @@
             15% { opacity: 1; transform: translateY(0) scale(1); }
             85% { opacity: 1; transform: translateY(0) scale(1); }
             100% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+        }
+
+        /* 超窄屏再压缩一点间距 */
+        @media (max-width: 360px) {
+            .container { padding: 18px 8px; gap: 20px; }
+            .btn-area { gap: 4px; }
         }
     </style>
 </head>
@@ -261,7 +290,7 @@
 <script>
     // 记录最近三次的花色
     let records = [];
-    
+
     // 真仪状态
     let unlimitedSuits = []; // 触发过“均相同”的花色集合
     let dianhuaLevel = 1;    // “点化”等级，初始为1
@@ -354,7 +383,7 @@
 
             if (isAllSame) {
                 const triggerSuit = records[0]; // 保存触发的花色
-                
+
                 // 移除记录并更新UI
                 records = [];
                 updateSlotsUI();
@@ -392,7 +421,7 @@
         dianhuaLevel = 1;
         updateSlotsUI();
         updateZhenyiUI();
-        
+
         // 清理提示
         toastContainer.innerHTML = '';
         if (toastTimeoutId) {
