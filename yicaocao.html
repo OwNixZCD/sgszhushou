@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>似故 · 技能对照表</title>
+<style>
+:root{
+  --gold:#d4b06a;
+  --ink:#e8dcc8;
+  --dim:#8a7a60;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;
+  font-family:"Songti SC","STSong","SimSun",serif;
+  background:radial-gradient(ellipse at 50% -10%,#3a2d1e 0%,#1a1410 45%,#0a0806 100%);
+  color:var(--ink);
+  padding:34px 18px 60px;
+  display:flex;flex-direction:column;align-items:center;
+}
+
+/* ---------- 标题 ---------- */
+h1{
+  font-size:36px;letter-spacing:.5em;text-indent:.5em;
+  margin:0 0 10px;color:var(--gold);font-weight:normal;
+  text-shadow:0 0 22px rgba(212,176,106,.5);
+}
+.sub{
+  font-size:13px;color:var(--dim);letter-spacing:.24em;
+  text-indent:.24em;margin-bottom:14px;
+}
+.tip{
+  font-size:15px;color:#c5b494;letter-spacing:.06em;
+  text-align:center;line-height:2;max-width:780px;
+  border-top:1px solid rgba(212,176,106,.16);
+  border-bottom:1px solid rgba(212,176,106,.16);
+  padding:14px 20px;margin-bottom:34px;
+}
+.tip b{color:var(--gold)}
+
+/* ---------- 网格 ---------- */
+.grid{
+  width:100%;max-width:1200px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+  gap:18px;
+}
+
+/* ---------- 技能卡 ---------- */
+.skill{
+  position:relative;
+  background:linear-gradient(158deg,rgba(62,50,35,.58),rgba(24,19,14,.88));
+  border:1px solid rgba(212,176,106,.26);
+  border-radius:10px;
+  padding:18px 20px 20px 86px;
+  box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 0 40px rgba(0,0,0,.35);
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+  overflow:hidden;
+}
+.skill::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(158deg,rgba(212,176,106,.09),transparent 55%);
+  opacity:0;transition:opacity .25s ease;pointer-events:none;
+}
+.skill:hover{
+  transform:translateY(-4px);
+  border-color:rgba(212,176,106,.6);
+  box-shadow:0 16px 40px rgba(0,0,0,.65),0 0 26px rgba(212,176,106,.16),inset 0 0 40px rgba(0,0,0,.3);
+}
+.skill:hover::before{opacity:1}
+
+/* 扑克牌点数徽标 */
+.num{
+  position:absolute;left:18px;top:18px;
+  width:52px;height:68px;border-radius:7px;
+  background:linear-gradient(155deg,#f7efdc,#ddcba6);
+  color:#2b2118;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 16px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.55);
+  font-family:"Times New Roman",Georgia,serif;
+  font-weight:700;
+  font-size:33px;
+  line-height:1;
+  letter-spacing:-1px;
+}
+.num.two{font-size:28px;letter-spacing:-2px}
+
+/* 头部 */
+.head{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:10px}
+.name{
+  font-size:25px;color:var(--gold);letter-spacing:.14em;
+  text-shadow:0 0 14px rgba(212,176,106,.28);
+}
+.kind{
+  font-size:12px;color:var(--dim);letter-spacing:.12em;
+  border:1px solid rgba(212,176,106,.34);border-radius:3px;
+  padding:2px 8px;white-space:nowrap;
+}
+.kind.lock{color:#b39ce0;border-color:rgba(169,143,217,.5)}
+
+/* 描述 —— 加大、提亮 */
+.desc{
+  font-size:16px;
+  line-height:1.95;
+  color:#e4dac4;
+  text-align:justify;
+  letter-spacing:.03em;
+  font-weight:400;
+  text-shadow:0 1px 2px rgba(0,0,0,.6);
+}
+.desc b{color:#f0dca8;font-weight:normal}
+
+/* 序号角标 */
+.idx{
+  position:absolute;right:14px;bottom:10px;
+  font-size:11px;color:rgba(212,176,106,.28);
+  font-family:Consolas,monospace;letter-spacing:.1em;
+}
+
+/* =========================================================
+   移动端适配（重点修复错位）
+   —— 点数徽标固定左上角，内容整体右移，垂直方向与点数顶部对齐
+   ========================================================= */
+@media(max-width:520px){
+  .grid{
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+  body{padding:26px 12px 50px}
+  h1{font-size:28px;letter-spacing:.34em}
+
+  .skill{
+    /* 上=与点数顶部对齐；左=点数宽度+间距 */
+    padding:16px 16px 18px 80px;
+  }
+  .num{
+    width:46px;height:60px;
+    font-size:28px;
+    left:16px;top:16px;
+    border-radius:6px;
+  }
+  .num.two{font-size:24px;letter-spacing:-2px}
+
+  .name{font-size:22px}
+  .desc{font-size:15px;line-height:1.9}
+}
+</style>
+</head>
+<body>
+
+<h1>似故</h1>
+<div class="sub">判 定 点 数 · 技 能 对 照</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+/* =========================================================
+   13 个技能数据（顺序即判定点数 A ~ K）
+   ========================================================= */
+const SKILLS = [
+  {
+    name: '智迟',
+    kind: '锁定技',
+    lock: true,
+    desc: '锁定技，当你于回合外受到伤害后，本回合【杀】和普通锦囊牌对你无效。'
+  },
+  {
+    name: '刚烈',
+    kind: '被动技',
+    desc: '当你受到1点伤害后，你可以进行判定，若结果为：红色，你对伤害来源造成1点伤害；黑色，你弃置其一张牌。'
+  },
+  {
+    name: '反馈',
+    kind: '被动技',
+    desc: '当你受到伤害后，你可以获得伤害来源的一张牌。'
+  },
+  {
+    name: '遗计',
+    kind: '被动技',
+    desc: '当你受到1点伤害后，你可以观看牌堆顶的两张牌，然后将这些牌交给任意角色。'
+  },
+  {
+    name: '节命',
+    kind: '被动技',
+    desc: '当你受到1点伤害后或死亡时，你可以令一名角色摸X张牌，然后将手牌弃置至X张（X为其体力上限且至多为5）。'
+  },
+  {
+    name: '放逐',
+    kind: '被动技',
+    desc: '当你受到伤害后，你可以令一名其他角色翻面并摸X张牌（X为你已损失的体力值）。'
+  },
+  {
+    name: '矢北',
+    kind: '锁定技',
+    lock: true,
+    desc: '锁定技，当你受到伤害后，若：是你本回合第一次受到伤害，你回复1点体力；不是你本回合第一次受到伤害，你失去1点体力。'
+  },
+  {
+    name: '称象',
+    kind: '被动技',
+    desc: '当你受到伤害后，你可以亮出牌堆顶的四张牌，然后获得其中任意张点数之和不大于13的牌。'
+  },
+  {
+    name: '智愚',
+    kind: '被动技',
+    desc: '当你受到伤害后，你可以摸一张牌，然后展示所有手牌，若颜色均相同，伤害来源弃置一张手牌。'
+  },
+  {
+    name: '鸡肋',
+    kind: '被动技',
+    desc: '当你受到伤害后，你可以声明一种牌的类别，本回合伤害来源不能使用、打出或弃置你声明的此类手牌。'
+  },
+  {
+    name: '贲育',
+    kind: '被动技',
+    desc: '当你受到伤害后，你可以选择一项：1.将手牌摸至与伤害来源手牌数相同（至多摸至五张）；2.弃置大于伤害来源手牌数张牌，然后对其造成1点伤害。'
+  },
+  {
+    name: '筹策',
+    kind: '被动技',
+    desc: '当你受到1点伤害后，你可以进行判定，若结果为：黑色，你弃置一名角色区域里的一张牌；红色，你令一名角色摸一张牌，若其为〖先辅〗选择的角色，改为摸两张牌。'
+  },
+  {
+    name: '武魂',
+    kind: '锁定技',
+    lock: true,
+    desc: '锁定技，当你受到1点伤害后，你令伤害来源获得1枚“梦魇”；当你死亡时，你令拥有最多“梦魇”的一名其他角色进行判定：若结果不为【桃】或【桃园结义】，其死亡。'
+  }
+];
+
+/* =========================================================
+   扑克牌点数换算：1→A，11→J，12→Q，13→K
+   ========================================================= */
+const POKER_RANK = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+/* =========================================================
+   渲染
+   ========================================================= */
+const grid = document.getElementById('grid');
+
+grid.innerHTML = SKILLS.map((s, i) => {
+  const r = POKER_RANK[i];
+  const isTwoChar = r.length > 1;   // "10" 需要更小字号
+  return `
+  <div class="skill">
+    <div class="num${isTwoChar ? ' two' : ''}">${r}</div>
+    <div class="head">
+      <span class="name">${s.name}</span>
+      <span class="kind${s.lock ? ' lock' : ''}">${s.kind}</span>
+    </div>
+    <div class="desc">${s.desc}</div>
+    <span class="idx">NO.${String(i + 1).padStart(2, '0')}</span>
+  </div>`;
+}).join('');
+</script>
+</body>
+</html>

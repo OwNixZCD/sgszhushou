@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>张琪瑛 · 法箓与真仪</title>
+    <style>
+        :root {
+            --bg: #1e1e24;
+            --panel: #2b2b36;
+            --text: #e0e0e0;
+            --gold: #f1c40f;
+            --purple: #9b59b6;
+            --spade-club: #000000;
+            --heart-diamond: #d32f2f;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        .container {
+            background-color: var(--panel);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* 顶部记录区域 */
+        .record-area {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .record-slot {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px dashed #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            background-color: rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .record-slot.active {
+            border-style: solid;
+            border-color: var(--gold);
+            background-color: rgba(249, 249, 249, 0.849);
+            transform: scale(1.1);
+        }
+
+        /* 按钮及状态区域 */
+        .btn-area {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .btn-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .suit-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            background-color: white;
+            font-size: 32px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: transform 0.1s, box-shadow 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .suit-btn:active {
+            transform: scale(0.9);
+        }
+
+        .suit-btn.spade, .suit-btn.club { color: var(--spade-club); }
+        .suit-btn.heart, .suit-btn.diamond { color: var(--heart-diamond); }
+
+        .suit-btn.active-btn {
+            box-shadow: 0 0 15px 3px rgba(241, 196, 15, 0.5);
+        }
+
+        /* 真仪状态徽章 */
+        .zhenyi-status {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid #555;
+            color: #666;
+            background: #222;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        /* 均相同触发状态 */
+        .badge.badge-same.active {
+            border-color: var(--gold);
+            color: #111;
+            background: var(--gold);
+            box-shadow: 0 0 8px var(--gold);
+            font-weight: bold;
+        }
+
+        /* 均不同触发状态 */
+        .badge.badge-diff.active {
+            border-color: var(--purple);
+            color: white;
+            background: var(--purple);
+            box-shadow: 0 0 8px var(--purple);
+            font-weight: bold;
+        }
+
+        /* 重置按钮 */
+        .reset-btn {
+            margin-top: 10px;
+            padding: 8px 24px;
+            background-color: #4a4a5a;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .reset-btn:hover {
+            background-color: #5b5b6e;
+        }
+
+        /* 法箓触发提示 (Toast) */
+        #toast-container {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none; /* 不阻挡鼠标点击 */
+            z-index: 1000;
+        }
+
+        .toast {
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            animation: toastFadeInOut 2s ease forwards;
+        }
+
+        .toast.same {
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 20px var(--gold);
+            color: var(--gold);
+        }
+
+        .toast.diff {
+            border: 2px solid var(--purple);
+            box-shadow: 0 0 20px var(--purple);
+            color: #d9b3ff;
+        }
+
+        @keyframes toastFadeInOut {
+            0% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+            15% { opacity: 1; transform: translateY(0) scale(1); }
+            85% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 法箓触发提示容器 -->
+<div id="toast-container"></div>
+
+<div class="container">
+    <!-- 记录槽 -->
+    <div class="record-area">
+        <div class="record-slot" id="slot-0"></div>
+        <div class="record-slot" id="slot-1"></div>
+        <div class="record-slot" id="slot-2"></div>
+    </div>
+
+    <!-- 按钮组 -->
+    <div class="btn-area">
+        <!-- 黑桃 -->
+        <div class="btn-wrapper">
+            <button class="suit-btn spade" onclick="clickSuit('♠')">♠</button>
+            <div class="zhenyi-status">
+                <span class="badge badge-same" id="same-♠">无距离限制/不能响应</span>
+                <span class="badge badge-diff" id="diff-♠">点化 摸1</span>
+            </div>
+        </div>
+        <!-- 红桃 -->
+        <div class="btn-wrapper">
+            <button class="suit-btn heart" onclick="clickSuit('♥')">♥</button>
+            <div class="zhenyi-status">
+                <span class="badge badge-same" id="same-♥">无距离限制/不能响应</span>
+                <span class="badge badge-diff" id="diff-♥">点化 摸1</span>
+            </div>
+        </div>
+        <!-- 梅花 -->
+        <div class="btn-wrapper">
+            <button class="suit-btn club" onclick="clickSuit('♣')">♣</button>
+            <div class="zhenyi-status">
+                <span class="badge badge-same" id="same-♣">无距离限制/不能响应</span>
+                <span class="badge badge-diff" id="diff-♣">点化 摸1</span>
+            </div>
+        </div>
+        <!-- 方块 -->
+        <div class="btn-wrapper">
+            <button class="suit-btn diamond" onclick="clickSuit('♦')">♦</button>
+            <div class="zhenyi-status">
+                <span class="badge badge-same" id="same-♦">无距离限制/不能响应</span>
+                <span class="badge badge-diff" id="diff-♦">点化 摸1</span>
+            </div>
+        </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetGame()">重置状态</button>
+</div>
+
+<script>
+    // 记录最近三次的花色
+    let records = [];
+    
+    // 真仪状态
+    let unlimitedSuits = []; // 触发过“均相同”的花色集合
+    let dianhuaLevel = 1;    // “点化”等级，初始为1
+
+    const slots = [
+        document.getElementById('slot-0'),
+        document.getElementById('slot-1'),
+        document.getElementById('slot-2')
+    ];
+    const suits = ['♠', '♥', '♣', '♦'];
+    const toastContainer = document.getElementById('toast-container');
+    let toastTimeoutId = null; // 保存定时器ID，防止多个定时器冲突
+
+    // 更新顶部圆形记录槽
+    function updateSlotsUI() {
+        for (let i = 0; i < 3; i++) {
+            if (i < records.length) {
+                slots[i].textContent = records[i];
+                slots[i].classList.add('active');
+                slots[i].style.color = (records[i] === '♠' || records[i] === '♣') ? '#000' : '#d32f2f';
+            } else {
+                slots[i].textContent = '';
+                slots[i].classList.remove('active');
+            }
+        }
+    }
+
+    // 更新真仪状态徽章UI
+    function updateZhenyiUI() {
+        suits.forEach(suit => {
+            // 更新“免距/免应”徽章
+            const sameBadge = document.getElementById(`same-${suit}`);
+            if (unlimitedSuits.includes(suit)) {
+                sameBadge.classList.add('active');
+            } else {
+                sameBadge.classList.remove('active');
+            }
+
+            // 更新“点化”徽章（全局效果，文字更新）
+            const diffBadge = document.getElementById(`diff-${suit}`);
+            if (dianhuaLevel > 1) {
+                diffBadge.textContent = `点化 摸${dianhuaLevel}`;
+                diffBadge.classList.add('active');
+            } else {
+                diffBadge.textContent = `点化 摸1`;
+                diffBadge.classList.remove('active');
+            }
+        });
+    }
+
+    // 显示法箓触发提示（只显示最新的一次）
+    function showToast(message, type) {
+        // 1. 清空之前的提示（DOM 和 定时器）
+        toastContainer.innerHTML = '';
+        if (toastTimeoutId) {
+            clearTimeout(toastTimeoutId);
+            toastTimeoutId = null;
+        }
+
+        // 2. 创建并显示最新提示
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+
+        // 3. 设定新的自动移除定时器
+        toastTimeoutId = setTimeout(() => {
+            toast.remove();
+            toastTimeoutId = null;
+        }, 5000);
+    }
+
+    // 点击花色按钮
+    function clickSuit(suit) {
+        // 1. 记录当前花色
+        records.push(suit);
+
+        // 2. 若超过3次未触发，顶掉最早的记录
+        if (records.length > 3) {
+            records.shift();
+        }
+
+        // 3. 更新记录槽UI
+        updateSlotsUI();
+
+        // 4. 判断触发条件（刚好记录满3次）
+        if (records.length === 3) {
+            const isAllSame = records[0] === records[1] && records[1] === records[2];
+            const isAllDiff = records[0] !== records[1] && records[1] !== records[2] && records[0] !== records[2];
+
+            if (isAllSame) {
+                const triggerSuit = records[0]; // 保存触发的花色
+                
+                // 移除记录并更新UI
+                records = [];
+                updateSlotsUI();
+
+                // 触发网页提示
+                showToast(`【法箓】触发！花色均相同 [${triggerSuit}]`, 'same');
+
+                // 真仪效果1：均相同
+                if (!unlimitedSuits.includes(triggerSuit)) {
+                    unlimitedSuits.push(triggerSuit);
+                }
+                updateZhenyiUI();
+
+            } else if (isAllDiff) {
+                // 移除记录并更新UI
+                records = [];
+                updateSlotsUI();
+
+                // 触发网页提示
+                showToast(`【法箓】触发！花色均不同`, 'diff');
+
+                // 真仪效果2：均不同
+                if (dianhuaLevel < 5) {
+                    dianhuaLevel++;
+                }
+                updateZhenyiUI();
+            }
+        }
+    }
+
+    // 重置游戏状态
+    function resetGame() {
+        records = [];
+        unlimitedSuits = [];
+        dianhuaLevel = 1;
+        updateSlotsUI();
+        updateZhenyiUI();
+        
+        // 清理提示
+        toastContainer.innerHTML = '';
+        if (toastTimeoutId) {
+            clearTimeout(toastTimeoutId);
+            toastTimeoutId = null;
+        }
+    }
+
+    // 初始化
+    updateSlotsUI();
+    updateZhenyiUI();
+</script>
+
+</body>
+</html>
